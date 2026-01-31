@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SNT Institute - Secure Login</title>
+    
     <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="./SNT.jpg">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -14,20 +18,22 @@
         .hidden { display: none !important; }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
         .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div id="auth-container" class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
         <div class="text-center mb-8">
-            <img src="https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
+            <img src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
             <h2 id="auth-title" class="text-2xl font-bold text-sky-400">Welcome Back</h2>
             <p id="auth-subtitle" class="text-slate-400 text-sm">Please login to continue</p>
         </div>
 
         <div class="space-y-4">
-            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500">
-            <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500">
+            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+            <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
             <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-900/20">Login</button>
         </div>
 
@@ -41,7 +47,7 @@
         <header class="text-center mb-10">
             <div class="flex justify-between items-center mb-6">
                 <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img src="https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg" class="w-12 h-12 rounded-full border border-sky-500">
+                <img src="./SNT.jpg" class="w-12 h-12 rounded-full border border-sky-500">
             </div>
             <h1 class="text-3xl font-bold text-sky-400">SNT DASHBOARD</h1>
             <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
@@ -66,7 +72,7 @@
                 const grid = document.currentScript.parentElement;
                 files.forEach(f => {
                     grid.innerHTML += `
-                        <a href="https://harshitkaushal9129-bit.github.io/snt-institute/${f.url}" class="app-card p-6 rounded-3xl text-center">
+                        <a href="./${f.url}" class="app-card p-6 rounded-3xl text-center">
                             <i class="fas ${f.icon} text-3xl mb-3 ${f.color}"></i>
                             <p class="text-[10px] font-black uppercase tracking-widest">${f.name}</p>
                         </a>
@@ -76,9 +82,19 @@
         </div>
 
         <button id="installBtn" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-500 text-white font-bold py-3 px-8 rounded-full shadow-2xl animate-bounce">
-            INSTALL APP
+            INSTALL SNT APP
         </button>
     </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SNT Service Worker Registered!'))
+                    .catch(err => console.log('Service Worker Error:', err));
+            });
+        }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -109,6 +125,8 @@
         window.handleAuth = () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
+            if(!email || !pass) { alert("Please fill all fields"); return; }
+            
             if(isLoginMode) {
                 signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Login Failed: " + err.message));
             } else {
@@ -121,6 +139,7 @@
         onAuthStateChanged(auth, (user) => {
             const authUi = document.getElementById('auth-container');
             const dashUi = document.getElementById('dashboard');
+            
             if (user) {
                 authUi.classList.add('hidden');
                 dashUi.classList.remove('hidden');
@@ -133,22 +152,23 @@
             }
         });
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js');
-            });
-        }
-
+        // PWA Install Prompt Logic
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('installBtn').classList.remove('hidden');
+            // Button tab dikhega jab browser ready ho
+            const btn = document.getElementById('installBtn');
+            if(btn) btn.classList.remove('hidden');
         });
 
-        document.getElementById('installBtn').onclick = () => {
+        document.getElementById('installBtn').onclick = async () => {
             if(deferredPrompt) {
                 deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if(outcome === 'accepted') {
+                    document.getElementById('installBtn').classList.add('hidden');
+                }
                 deferredPrompt = null;
             }
         };
