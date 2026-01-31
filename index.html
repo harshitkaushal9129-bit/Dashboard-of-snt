@@ -16,10 +16,15 @@
         body { background-color: #0f172a; color: white; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
-        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
+        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
         .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+        .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; }
+        .calc-btn:active { background: #38bdf8; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -33,6 +38,7 @@
 
         <div class="space-y-4">
             <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+            <input type="number" id="mobile" placeholder="Mobile Number" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
             <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
             <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-900/20">Login</button>
         </div>
@@ -47,62 +53,59 @@
         <header class="text-center mb-10">
             <div class="flex justify-between items-center mb-6">
                 <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img src="./SNT.jpg" class="w-12 h-12 rounded-full border border-sky-500">
+                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer hover:scale-110 transition-transform object-cover">
             </div>
-            <h1 class="text-3xl font-bold text-sky-400">SNT DASHBOARD</h1>
+            <h1 class="text-3xl font-bold text-sky-400 uppercase tracking-tighter">SNT Dashboard</h1>
             <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
         </header>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
-            <script>
-                const files = [
-                    { name: 'Dashboard', url: 'dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
-                    { name: 'Attendance', url: 'attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-                    { name: 'Admin', url: 'admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
-                    { name: 'ID Card', url: 'id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-                    { name: 'ID Verify', url: 'id-verify.html', icon: 'fa-user-check', color: 'text-emerald-400' },
-                    { name: 'Receipt', url: 'receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
-                    { name: 'V-Receipt', url: 'v-receipt.html', icon: 'fa-receipt', color: 'text-indigo-400' },
-                    { name: 'Calendar', url: 'calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
-                    { name: 'Display', url: 'display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-                    { name: 'Verify', url: 'verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' },
-                    { name: 'Basic Info', url: 'basic.html', icon: 'fa-database', color: 'text-gray-400' }
-                ];
-                
-                const grid = document.currentScript.parentElement;
-                files.forEach(f => {
-                    grid.innerHTML += `
-                        <a href="./${f.url}" class="app-card p-6 rounded-3xl text-center">
-                            <i class="fas ${f.icon} text-3xl mb-3 ${f.color}"></i>
-                            <p class="text-[10px] font-black uppercase tracking-widest">${f.name}</p>
-                        </a>
-                    `;
-                });
-            </script>
-        </div>
+        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
 
         <button id="installBtn" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-500 text-white font-bold py-3 px-8 rounded-full shadow-2xl animate-bounce">
             INSTALL SNT APP
         </button>
     </div>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SNT Service Worker Registered!'))
-                    .catch(err => console.log('Service Worker Error:', err));
-            });
-        }
-    </script>
+    <div id="user-modal" class="modal-overlay">
+        <div class="glass p-8 rounded-3xl w-80 text-center relative">
+            <button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <img id="modal-profile-img" src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4 object-cover">
+            <h3 class="text-xl font-bold text-sky-400 mb-2">My Profile</h3>
+            <div class="text-left space-y-3 text-sm border-t border-slate-700 pt-4 mt-2 mb-6">
+                <p><span class="text-slate-400">Name:</span> <br><span id="modal-name" class="font-bold">Loading...</span></p>
+                <p><span class="text-slate-400">Email:</span> <br><span id="modal-email" class="font-bold"></span></p>
+                <p><span class="text-slate-400">Mobile:</span> <br><span id="modal-mobile" class="font-bold"></span></p>
+            </div>
+            <button onclick="deleteAccount()" class="w-full py-2 text-xs text-red-500 border border-red-900/30 rounded-lg font-bold">DELETE ACCOUNT</button>
+        </div>
+    </div>
+
+    <div id="calc-modal" class="modal-overlay">
+        <div class="glass p-6 rounded-3xl w-72 shadow-2xl border border-sky-500/30">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs text-sky-400 font-bold uppercase tracking-widest">Admin Verify</span>
+                <button onclick="closeCalc()"><i class="fas fa-times text-slate-400"></i></button>
+            </div>
+            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end">0</div>
+            <div class="calc-grid">
+                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-orange-900/20 text-orange-400" onclick="clearCalc()">C</button>
+                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
+                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
+                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
+            </div>
+            <p id="calc-error" class="text-[10px] text-red-500 mt-4 text-center hidden font-bold">NOT FOR ANY STUDENTS</p>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com/",
             projectId: "snt-computer-institute",
             storageBucket: "snt-computer-institute.firebasestorage.app",
             messagingSenderId: "117580784781",
@@ -111,67 +114,108 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
+        const files = [
+            { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+            { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
+            { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
+            { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
+            { name: 'ID Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-verify.html', icon: 'fa-user-check', color: 'text-emerald-400' },
+            { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+            { name: 'V-Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/v-receipt.html', icon: 'fa-receipt', color: 'text-indigo-400' },
+            { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
+            { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/display.html', icon: 'fa-desktop', color: 'text-pink-400', locked: true },
+            { name: 'Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' },
+            { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
+        ];
+
+        const grid = document.getElementById('app-grid');
+        files.forEach(f => {
+            const card = document.createElement('div');
+            card.className = "app-card p-6 rounded-3xl text-center";
+            card.innerHTML = `<i class="fas ${f.icon} text-3xl mb-3 ${f.color}"></i><p class="text-[10px] font-black uppercase tracking-widest">${f.name}</p>`;
+            card.onclick = () => { if(f.locked) openCalc(f.url); else window.location.href = f.url; };
+            grid.appendChild(card);
+        });
+
+        // --- AUTH LOGIC ---
         let isLoginMode = true;
-
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Create Account";
             document.getElementById('mainBtn').innerText = isLoginMode ? "Login" : "Register";
             document.getElementById('toggleBtn').innerText = isLoginMode ? "Register" : "Login";
-            document.getElementById('toggleText').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
-        }
+        };
 
         window.handleAuth = () => {
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
-            if(!email || !pass) { alert("Please fill all fields"); return; }
             
+            if(!email || pass.length < 6) { alert("Please enter valid email and password (min 6 chars)"); return; }
+
             if(isLoginMode) {
-                signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Login Failed: " + err.message));
+                signInWithEmailAndPassword(auth, email, pass)
+                    .then((userCredential) => {
+                        if(!userCredential.user.emailVerified) {
+                            alert("Please verify your email! Check your inbox/spam.");
+                            signOut(auth);
+                        }
+                    })
+                    .catch(err => alert("Login Failed: " + err.message));
             } else {
-                createUserWithEmailAndPassword(auth, email, pass).then(() => alert("Registered Successfully!")).catch(err => alert(err.message));
+                createUserWithEmailAndPassword(auth, email, pass)
+                    .then((userCredential) => {
+                        sendEmailVerification(userCredential.user);
+                        alert("Verification link sent to " + email + ". Please verify and then login.");
+                        signOut(auth);
+                        toggleAuthMode();
+                    })
+                    .catch(err => alert("Registration Failed: " + err.message));
             }
         };
 
         window.logout = () => signOut(auth);
 
-        onAuthStateChanged(auth, (user) => {
+        // --- CALCULATOR ---
+        let calcInput = ""; let targetUrl = ""; const CORRECT_PASS = "1234";
+        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
+        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
+        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
+        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; document.getElementById('calc-error').classList.add('hidden'); };
+        window.verifyPass = () => {
+            if(calcInput === CORRECT_PASS) window.location.href = targetUrl;
+            else { document.getElementById('calc-error').classList.remove('hidden'); clearCalc(); document.getElementById('calc-display').innerText = "ERROR"; }
+        };
+
+        // --- PROFILE & MONITOR ---
+        window.toggleUserModal = () => { const m = document.getElementById('user-modal'); m.style.display = (m.style.display === "flex") ? "none" : "flex"; };
+        
+        onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-container');
             const dashUi = document.getElementById('dashboard');
-            
-            if (user) {
+            if (user && user.emailVerified) {
                 authUi.classList.add('hidden');
                 dashUi.classList.remove('hidden');
-                document.body.classList.remove('items-center', 'justify-center');
-                document.getElementById('user-display').innerText = `Logged in as: ${user.email}`;
+                document.getElementById('user-display').innerText = user.email;
+                const snapshot = await get(child(ref(db), `students`));
+                if (snapshot.exists()) {
+                    for (let id in snapshot.val()) {
+                        const s = snapshot.val()[id];
+                        if (s.email?.toLowerCase() === user.email.toLowerCase()) {
+                            document.getElementById('user-profile-icon').src = s.profilePicture || "./SNT.jpg";
+                            document.getElementById('modal-profile-img').src = s.profilePicture || "./SNT.jpg";
+                            document.getElementById('modal-name').innerText = s.name || "N/A";
+                            document.getElementById('modal-email').innerText = s.email;
+                            document.getElementById('modal-mobile').innerText = s.mobile || "N/A";
+                        }
+                    }
+                }
             } else {
                 authUi.classList.remove('hidden');
                 dashUi.classList.add('hidden');
-                document.body.classList.add('items-center', 'justify-center');
             }
         });
-
-        // PWA Install Prompt Logic
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Button tab dikhega jab browser ready ho
-            const btn = document.getElementById('installBtn');
-            if(btn) btn.classList.remove('hidden');
-        });
-
-        document.getElementById('installBtn').onclick = async () => {
-            if(deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if(outcome === 'accepted') {
-                    document.getElementById('installBtn').classList.add('hidden');
-                }
-                deferredPrompt = null;
-            }
-        };
     </script>
 </body>
 </html>
