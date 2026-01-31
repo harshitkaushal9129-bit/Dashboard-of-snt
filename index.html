@@ -38,9 +38,9 @@
 
         <div class="space-y-4">
             <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
-            <input type="number" id="mobile" placeholder="Mobile Number" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+            <input type="number" id="mobile-input" placeholder="Mobile Number" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
             <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
-            <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-900/20">Login</button>
+            <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg">Login</button>
         </div>
 
         <p class="mt-6 text-center text-sm text-slate-400">
@@ -53,53 +53,46 @@
         <header class="text-center mb-10">
             <div class="flex justify-between items-center mb-6">
                 <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer hover:scale-110 transition-transform object-cover">
+                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer object-cover">
             </div>
-            <h1 class="text-3xl font-bold text-sky-400 uppercase tracking-tighter">SNT Dashboard</h1>
+            <h1 class="text-3xl font-bold text-sky-400 uppercase">SNT Dashboard</h1>
             <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
         </header>
 
         <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
-
-        <button id="installBtn" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-500 text-white font-bold py-3 px-8 rounded-full shadow-2xl animate-bounce">
-            INSTALL SNT APP
-        </button>
     </div>
 
     <div id="user-modal" class="modal-overlay">
         <div class="glass p-8 rounded-3xl w-80 text-center relative">
-            <button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400"><i class="fas fa-times"></i></button>
             <img id="modal-profile-img" src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4 object-cover">
-            <h3 class="text-xl font-bold text-sky-400 mb-2">My Profile</h3>
-            <div class="text-left space-y-3 text-sm border-t border-slate-700 pt-4 mt-2 mb-6">
-                <p><span class="text-slate-400">Name:</span> <br><span id="modal-name" class="font-bold">Loading...</span></p>
-                <p><span class="text-slate-400">Email:</span> <br><span id="modal-email" class="font-bold"></span></p>
-                <p><span class="text-slate-400">Mobile:</span> <br><span id="modal-mobile" class="font-bold"></span></p>
+            <h3 class="text-xl font-bold text-sky-400">My Profile</h3>
+            <div class="text-left space-y-2 mt-4 text-sm text-slate-300">
+                <p>Name: <span id="modal-name" class="text-white font-bold"></span></p>
+                <p>Email: <span id="modal-email" class="text-white font-bold"></span></p>
+                <p>Mobile: <span id="modal-mobile" class="text-white font-bold"></span></p>
             </div>
-            <button onclick="deleteAccount()" class="w-full py-2 text-xs text-red-500 border border-red-900/30 rounded-lg font-bold">DELETE ACCOUNT</button>
+            <button onclick="deleteAccount()" class="w-full mt-6 py-2 text-xs text-red-500 border border-red-900/30 rounded-lg">DELETE ACCOUNT</button>
         </div>
     </div>
 
     <div id="calc-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-3xl w-72 shadow-2xl border border-sky-500/30">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-xs text-sky-400 font-bold uppercase tracking-widest">Admin Verify</span>
-                <button onclick="closeCalc()"><i class="fas fa-times text-slate-400"></i></button>
-            </div>
+        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30">
+            <div class="flex justify-between items-center mb-4 text-sky-400 text-[10px] font-bold">ADMIN VERIFICATION</div>
             <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end">0</div>
             <div class="calc-grid">
-                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-orange-900/20 text-orange-400" onclick="clearCalc()">C</button>
+                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-orange-900/20" onclick="clearCalc()">C</button>
                 <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
                 <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
                 <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
             </div>
-            <p id="calc-error" class="text-[10px] text-red-500 mt-4 text-center hidden font-bold">NOT FOR ANY STUDENTS</p>
+            <p id="calc-error" class="text-red-500 text-[10px] text-center mt-3 hidden font-bold">NOT FOR ANY STUDENTS</p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -139,7 +132,7 @@
             grid.appendChild(card);
         });
 
-        // --- AUTH LOGIC ---
+        // AUTH
         let isLoginMode = true;
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
@@ -151,50 +144,31 @@
         window.handleAuth = () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
-            
-            if(!email || pass.length < 6) { alert("Please enter valid email and password (min 6 chars)"); return; }
-
-            if(isLoginMode) {
-                signInWithEmailAndPassword(auth, email, pass)
-                    .then((userCredential) => {
-                        if(!userCredential.user.emailVerified) {
-                            alert("Please verify your email! Check your inbox/spam.");
-                            signOut(auth);
-                        }
-                    })
-                    .catch(err => alert("Login Failed: " + err.message));
-            } else {
-                createUserWithEmailAndPassword(auth, email, pass)
-                    .then((userCredential) => {
-                        sendEmailVerification(userCredential.user);
-                        alert("Verification link sent to " + email + ". Please verify and then login.");
-                        signOut(auth);
-                        toggleAuthMode();
-                    })
-                    .catch(err => alert("Registration Failed: " + err.message));
-            }
+            if(!email.includes('@') || pass.length < 6) { alert("Enter valid Email & Password (min 6 chars)"); return; }
+            if(isLoginMode) signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+            else createUserWithEmailAndPassword(auth, email, pass).then(() => alert("Success!")).catch(err => alert(err.message));
         };
 
         window.logout = () => signOut(auth);
 
-        // --- CALCULATOR ---
-        let calcInput = ""; let targetUrl = ""; const CORRECT_PASS = "1234";
+        // CALCULATOR
+        let calcInput = ""; let targetUrl = ""; const ADMIN_PASS = "1234";
         window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
         window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
         window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
         window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; document.getElementById('calc-error').classList.add('hidden'); };
         window.verifyPass = () => {
-            if(calcInput === CORRECT_PASS) window.location.href = targetUrl;
+            if(calcInput === ADMIN_PASS) window.location.href = targetUrl;
             else { document.getElementById('calc-error').classList.remove('hidden'); clearCalc(); document.getElementById('calc-display').innerText = "ERROR"; }
         };
 
-        // --- PROFILE & MONITOR ---
+        // PROFILE MODAL
         window.toggleUserModal = () => { const m = document.getElementById('user-modal'); m.style.display = (m.style.display === "flex") ? "none" : "flex"; };
-        
+
         onAuthStateChanged(auth, async (user) => {
             const authUi = document.getElementById('auth-container');
             const dashUi = document.getElementById('dashboard');
-            if (user && user.emailVerified) {
+            if (user) {
                 authUi.classList.add('hidden');
                 dashUi.classList.remove('hidden');
                 document.getElementById('user-display').innerText = user.email;
@@ -212,8 +186,7 @@
                     }
                 }
             } else {
-                authUi.classList.remove('hidden');
-                dashUi.classList.add('hidden');
+                authUi.classList.remove('hidden'); dashUi.classList.add('hidden');
             }
         });
     </script>
