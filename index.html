@@ -13,18 +13,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #0f172a; color: white; overflow-x: hidden; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; user-select: none; -webkit-user-select: none; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
         .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; }
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; }
-        .calc-btn:active { background: #38bdf8; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -33,7 +32,7 @@
         <div class="text-center mb-8">
             <img src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
             <h2 id="auth-title" class="text-2xl font-bold text-sky-400">Welcome Back</h2>
-            <p id="auth-subtitle" class="text-slate-400 text-sm">Please login to continue</p>
+            <p id="auth-subtitle" class="text-slate-400 text-sm">Login to access SNT Dashboard</p>
         </div>
 
         <div class="space-y-4">
@@ -52,47 +51,28 @@
     <div id="dashboard" class="hidden w-full max-w-5xl animate-fade-in">
         <header class="text-center mb-10">
             <div class="flex justify-between items-center mb-6">
-                <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer object-cover">
+                <button onclick="logout()" class="text-red-400 text-xs font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
+                <div class="flex gap-3">
+                    <button onclick="shareApp()" class="text-sky-400 text-xs font-bold bg-sky-900/20 px-4 py-2 rounded-lg border border-sky-900/50">
+                        <i class="fas fa-share-alt mr-2"></i>Share
+                    </button>
+                    <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer object-cover">
+                </div>
             </div>
-            <h1 class="text-3xl font-bold text-sky-400 uppercase">SNT Dashboard</h1>
-            <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
+            <h1 class="text-3xl font-bold text-sky-400 uppercase tracking-tighter">SNT Dashboard</h1>
+            <p id="user-display" class="text-slate-500 text-xs italic mt-1"></p>
         </header>
 
         <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
     </div>
 
-    <div id="user-modal" class="modal-overlay">
-        <div class="glass p-8 rounded-3xl w-80 text-center relative">
-            <button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400"><i class="fas fa-times"></i></button>
-            <img id="modal-profile-img" src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4 object-cover">
-            <h3 class="text-xl font-bold text-sky-400">My Profile</h3>
-            <div class="text-left space-y-2 mt-4 text-sm text-slate-300">
-                <p>Name: <span id="modal-name" class="text-white font-bold"></span></p>
-                <p>Email: <span id="modal-email" class="text-white font-bold"></span></p>
-                <p>Mobile: <span id="modal-mobile" class="text-white font-bold"></span></p>
-            </div>
-            <button onclick="deleteAccount()" class="w-full mt-6 py-2 text-xs text-red-500 border border-red-900/30 rounded-lg">DELETE ACCOUNT</button>
-        </div>
-    </div>
+    <div id="user-modal" class="modal-overlay"><div class="glass p-8 rounded-3xl w-80 text-center relative"><button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400"><i class="fas fa-times"></i></button><img id="modal-profile-img" src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4 object-cover"><h3 class="text-xl font-bold text-sky-400">Profile</h3><div id="modal-info" class="text-left space-y-2 mt-4 text-xs text-slate-300"><p>Name: <span id="modal-name" class="text-white"></span></p><p>Email: <span id="modal-email" class="text-white"></span></p><p>Mobile: <span id="modal-mobile" class="text-white"></span></p></div><button onclick="deleteAccount()" class="w-full mt-6 py-2 text-[10px] text-red-500 border border-red-900/30 rounded-lg">DELETE ACCOUNT</button></div></div>
 
-    <div id="calc-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30">
-            <div class="flex justify-between items-center mb-4 text-sky-400 text-[10px] font-bold">ADMIN VERIFICATION</div>
-            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end">0</div>
-            <div class="calc-grid">
-                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-orange-900/20" onclick="clearCalc()">C</button>
-                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
-                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
-                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
-            </div>
-            <p id="calc-error" class="text-red-500 text-[10px] text-center mt-3 hidden font-bold">NOT FOR ANY STUDENTS</p>
-        </div>
-    </div>
+    <div id="calc-modal" class="modal-overlay"><div class="glass p-6 rounded-3xl w-72"><div class="text-sky-400 text-[10px] font-bold mb-4">ADMIN LOCK</div><div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl mb-4 border border-slate-700 h-16 flex items-center justify-end">0</div><div class="calc-grid"><button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-red-900/20" onclick="clearCalc()">C</button><button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button><button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button><button class="calc-btn bg-sky-600" onclick="verifyPass()">=</button></div></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -109,6 +89,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // Files Configuration
         const files = [
             { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
             { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
@@ -132,50 +113,45 @@
             grid.appendChild(card);
         });
 
-        // AUTH
-        let isLoginMode = true;
+        // Functions
         window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Create Account";
-            document.getElementById('mainBtn').innerText = isLoginMode ? "Login" : "Register";
-            document.getElementById('toggleBtn').innerText = isLoginMode ? "Register" : "Login";
+            const isLogin = document.getElementById('mainBtn').innerText === "Login";
+            document.getElementById('auth-title').innerText = isLogin ? "Create Account" : "Welcome Back";
+            document.getElementById('mainBtn').innerText = isLogin ? "Register" : "Login";
+            document.getElementById('toggleBtn').innerText = isLogin ? "Login" : "Register";
         };
 
         window.handleAuth = () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
-            if(!email.includes('@') || pass.length < 6) { alert("Enter valid Email & Password (min 6 chars)"); return; }
-            if(isLoginMode) signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
-            else createUserWithEmailAndPassword(auth, email, pass).then(() => alert("Success!")).catch(err => alert(err.message));
+            const isLogin = document.getElementById('mainBtn').innerText === "Login";
+            if(isLogin) signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+            else createUserWithEmailAndPassword(auth, email, pass).then(() => alert("Registered!")).catch(e => alert(e.message));
         };
 
         window.logout = () => signOut(auth);
-
-        // CALCULATOR
-        let calcInput = ""; let targetUrl = ""; const ADMIN_PASS = "1234";
-        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
-        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
-        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
-        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; document.getElementById('calc-error').classList.add('hidden'); };
-        window.verifyPass = () => {
-            if(calcInput === ADMIN_PASS) window.location.href = targetUrl;
-            else { document.getElementById('calc-error').classList.remove('hidden'); clearCalc(); document.getElementById('calc-display').innerText = "ERROR"; }
+        window.shareApp = async () => {
+            if (navigator.share) await navigator.share({ title: 'SNT Institute', url: window.location.href });
+            else alert("Link: " + window.location.href);
         };
 
-        // PROFILE MODAL
+        // Calculator Logic
+        let calcInput = ""; let targetUrl = "";
+        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
+        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
+        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
+        window.verifyPass = () => { if(calcInput === "1234") window.location.href = targetUrl; else clearCalc(); };
         window.toggleUserModal = () => { const m = document.getElementById('user-modal'); m.style.display = (m.style.display === "flex") ? "none" : "flex"; };
 
+        // State Check
         onAuthStateChanged(auth, async (user) => {
-            const authUi = document.getElementById('auth-container');
-            const dashUi = document.getElementById('dashboard');
+            document.getElementById('auth-container').classList.toggle('hidden', !!user);
+            document.getElementById('dashboard').classList.toggle('hidden', !user);
             if (user) {
-                authUi.classList.add('hidden');
-                dashUi.classList.remove('hidden');
                 document.getElementById('user-display').innerText = user.email;
                 const snapshot = await get(child(ref(db), `students`));
                 if (snapshot.exists()) {
-                    for (let id in snapshot.val()) {
-                        const s = snapshot.val()[id];
+                    Object.values(snapshot.val()).forEach(s => {
                         if (s.email?.toLowerCase() === user.email.toLowerCase()) {
                             document.getElementById('user-profile-icon').src = s.profilePicture || "./SNT.jpg";
                             document.getElementById('modal-profile-img').src = s.profilePicture || "./SNT.jpg";
@@ -183,12 +159,24 @@
                             document.getElementById('modal-email').innerText = s.email;
                             document.getElementById('modal-mobile').innerText = s.mobile || "N/A";
                         }
-                    }
+                    });
                 }
-            } else {
-                authUi.classList.remove('hidden'); dashUi.classList.add('hidden');
             }
         });
+
+        // Register Service Worker (PWA FIX)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(() => console.log("PWA Active"));
+        }
+    </script>
+
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+        // Infinite Debugger Loop (Only works when DevTools starts)
+        setInterval(() => { (function() { debugger; })(); }, 1000);
     </script>
 </body>
 </html>
