@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #0f172a; color: white; overflow-x: hidden; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
@@ -25,6 +25,9 @@
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; }
         .calc-btn:active { background: #38bdf8; }
+        
+        /* Anti-Inspect Overlay */
+        #safety-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -53,7 +56,13 @@
         <header class="text-center mb-10">
             <div class="flex justify-between items-center mb-6">
                 <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer object-cover">
+                
+                <div class="flex gap-4">
+                    <button onclick="shareApp()" class="text-sky-400 text-sm font-bold bg-sky-900/20 px-4 py-2 rounded-lg border border-sky-900/50">
+                        <i class="fas fa-share-alt mr-2"></i>Share
+                    </button>
+                    <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border border-sky-500 cursor-pointer object-cover">
+                </div>
             </div>
             <h1 class="text-3xl font-bold text-sky-400 uppercase">SNT Dashboard</h1>
             <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
@@ -162,6 +171,23 @@
             else { document.getElementById('calc-error').classList.remove('hidden'); clearCalc(); document.getElementById('calc-display').innerText = "ERROR"; }
         };
 
+        // SHARE FUNCTION
+        window.shareApp = async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'SNT Institute',
+                        text: 'Hey! Join SNT Computer Institute Dashboard.',
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log("Share failed:", err);
+                }
+            } else {
+                alert("Sharing not supported on this browser. Copy link: " + window.location.href);
+            }
+        };
+
         // PROFILE MODAL
         window.toggleUserModal = () => { const m = document.getElementById('user-modal'); m.style.display = (m.style.display === "flex") ? "none" : "flex"; };
 
@@ -191,44 +217,54 @@
         });
     </script>
 
+    <script>
+        // 1. Disable Right Click
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
 
+        // 2. Disable Key Shortcuts
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false;
+            }
+        };
+
+        // 3. Infinite Debugger Loop (Blocks Inspecting)
+        (function() {
+            const block = function() {
+                setInterval(function() {
+                    debugger;
+                }, 100);
+            };
+            try { block(); } catch(e) {}
+        })();
+
+        // 4. Console Clean
+        setInterval(() => {
+            console.clear();
+            console.log("%cSecurity Active", "color:red; font-size:30px; font-weight:bold;");
+        }, 1000);
+    </script>
 <script>
-    // 1. Disable Right Click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    // Register Service Worker for Permanent Protection
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+    }
 
-    // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I, etc.)
-    document.onkeydown = function(e) {
-        if (
-            e.keyCode == 123 || // F12
-            (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) || // Ctrl+Shift+I/J/C
-            (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) // Ctrl+U (View Source)
-        ) {
-            return false;
-        }
+    // Keyboard & Mouse Blockers
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = e => {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode == 85)) return false;
     };
 
-    // 3. Ultimate "Debugger" Loop (Isse DevTools hang ho jayega)
-    (function() {
-        const blocker = function() {
-            setInterval(function() {
-                debugger;
-            }, 50);
-        };
-        try {
-            blocker();
-        } catch (err) {}
-    })();
-
-    // 4. Console Clearing (Taki agar khul bhi jaye toh kuch dikhe nahi)
-    setInterval(() => {
-        console.clear();
-        console.log("%cSTOP!", "color:red;font-family:system-ui;font-size:3rem;-webkit-text-stroke: 1px black;font-weight:bold");
-        console.log("Admin access is required to view this area.");
-    }, 1000);
+    // Advanced Debugger Loop
+    setInterval(() => { (function() { debugger; })(); }, 100);
 </script>
 
+    <script>
 
 
-    
+
+        
+    </script>
 </body>
 </html>
