@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #0f172a; color: white; overflow-x: hidden; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
@@ -89,43 +89,6 @@
             <p id="calc-error" class="text-red-500 text-[10px] text-center mt-3 hidden font-bold">NOT FOR ANY STUDENTS</p>
         </div>
     </div>
-
-    <script>
-        // Security Script: Block Inspect, F-keys, and Right Click
-        document.addEventListener('contextmenu', event => event.preventDefault()); // Block Right Click
-
-        document.onkeydown = function (e) {
-            // Block F1 to F12 except F5 (keyCode 116)
-            if (e.keyCode >= 112 && e.keyCode <= 123 && e.keyCode !== 116) {
-                return false;
-            }
-            // Block Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Inspect Elements)
-            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
-                return false;
-            }
-            // Block Ctrl+U (View Source)
-            if (e.ctrlKey && e.keyCode === 85) {
-                return false;
-            }
-            // Block Ctrl+S (Save Page)
-            if (e.ctrlKey && e.keyCode === 83) {
-                return false;
-            }
-        };
-    </script>
-        <script>
-        // Anti-Debugger (Pauses execution if DevTools are opened)
-        setInterval(() => {
-            (function() {
-                const before = new Date().getTime();
-                debugger;
-                const after = new Date().getTime();
-                if (after - before > 100) {
-                    window.location.reload();
-                }
-            })();
-        }, 1000);
-    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
