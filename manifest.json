@@ -1,0 +1,20 @@
+{
+  "name": "SNT Institute Management",
+  "short_name": "SNT App",
+  "start_url": "https://harshitkaushal9129-bit.github.io/snt-institute/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#38bdf8",
+  "icons": [
+    {
+      "src": "https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

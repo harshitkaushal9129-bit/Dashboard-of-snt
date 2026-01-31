@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT Institute - Secure Login</title>
+    <link rel="manifest" href="https://harshitkaushal9129-bit.github.io/snt-institute/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #0f172a; color: white; overflow-x: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .hidden { display: none !important; }
+        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
+        .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="auth-container" class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
+        <div class="text-center mb-8">
+            <img src="https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
+            <h2 id="auth-title" class="text-2xl font-bold text-sky-400">Welcome Back</h2>
+            <p id="auth-subtitle" class="text-slate-400 text-sm">Please login to continue</p>
+        </div>
+
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500">
+            <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500">
+            <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg shadow-sky-900/20">Login</button>
+        </div>
+
+        <p class="mt-6 text-center text-sm text-slate-400">
+            <span id="toggleText">Don't have an account?</span>
+            <button onclick="toggleAuthMode()" id="toggleBtn" class="text-sky-400 font-bold ml-1">Register</button>
+        </p>
+    </div>
+
+    <div id="dashboard" class="hidden w-full max-w-5xl animate-fade-in">
+        <header class="text-center mb-10">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
+                <img src="https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg" class="w-12 h-12 rounded-full border border-sky-500">
+            </div>
+            <h1 class="text-3xl font-bold text-sky-400">SNT DASHBOARD</h1>
+            <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
+        </header>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
+            <script>
+                const files = [
+                    { name: 'Dashboard', url: 'dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+                    { name: 'Attendance', url: 'attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
+                    { name: 'Admin', url: 'admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
+                    { name: 'ID Card', url: 'id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
+                    { name: 'ID Verify', url: 'id-verify.html', icon: 'fa-user-check', color: 'text-emerald-400' },
+                    { name: 'Receipt', url: 'receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+                    { name: 'V-Receipt', url: 'v-receipt.html', icon: 'fa-receipt', color: 'text-indigo-400' },
+                    { name: 'Calendar', url: 'calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
+                    { name: 'Display', url: 'display.html', icon: 'fa-desktop', color: 'text-pink-400' },
+                    { name: 'Verify', url: 'verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' },
+                    { name: 'Basic Info', url: 'basic.html', icon: 'fa-database', color: 'text-gray-400' }
+                ];
+                
+                const grid = document.currentScript.parentElement;
+                files.forEach(f => {
+                    grid.innerHTML += `
+                        <a href="https://harshitkaushal9129-bit.github.io/snt-institute/${f.url}" class="app-card p-6 rounded-3xl text-center">
+                            <i class="fas ${f.icon} text-3xl mb-3 ${f.color}"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest">${f.name}</p>
+                        </a>
+                    `;
+                });
+            </script>
+        </div>
+
+        <button id="installBtn" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-500 text-white font-bold py-3 px-8 rounded-full shadow-2xl animate-bounce">
+            INSTALL APP
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            projectId: "snt-computer-institute",
+            storageBucket: "snt-computer-institute.firebasestorage.app",
+            messagingSenderId: "117580784781",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let isLoginMode = true;
+
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Create Account";
+            document.getElementById('mainBtn').innerText = isLoginMode ? "Login" : "Register";
+            document.getElementById('toggleBtn').innerText = isLoginMode ? "Register" : "Login";
+            document.getElementById('toggleText').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+        }
+
+        window.handleAuth = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            if(isLoginMode) {
+                signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Login Failed: " + err.message));
+            } else {
+                createUserWithEmailAndPassword(auth, email, pass).then(() => alert("Registered Successfully!")).catch(err => alert(err.message));
+            }
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            const authUi = document.getElementById('auth-container');
+            const dashUi = document.getElementById('dashboard');
+            
+            if (user) {
+                authUi.classList.add('hidden');
+                dashUi.classList.remove('hidden');
+                document.body.classList.remove('items-center', 'justify-center');
+                document.getElementById('user-display').innerText = `Logged in as: ${user.email}`;
+            } else {
+                authUi.classList.remove('hidden');
+                dashUi.classList.add('hidden');
+                document.body.classList.add('items-center', 'justify-center');
+            }
+        });
+
+        // PWA Install Logic
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').classList.remove('hidden');
+        });
+
+        document.getElementById('installBtn').onclick = () => {
+            if(deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+            }
+        };
+    </script>
+</body>
+</html>
