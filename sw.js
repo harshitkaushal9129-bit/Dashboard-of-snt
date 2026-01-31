@@ -1,9 +1,9 @@
 const CACHE_NAME = 'snt-institute-v1';
 const ASSETS = [
-  'https://harshitkaushal9129-bit.github.io/snt-institute/',
-  'https://harshitkaushal9129-bit.github.io/snt-institute/index.html',
-  'https://harshitkaushal9129-bit.github.io/snt-institute/manifest.json',
-  'https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg',
+  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/',
+  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/index.html',
+  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/manifest.json',
+  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.jpg',
   'https://cdn.tailwindcss.com'
 ];
 
