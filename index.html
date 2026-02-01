@@ -26,7 +26,6 @@
         .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; }
         .calc-btn:active { background: #38bdf8; }
         
-        /* Chrome, Safari, Edge, Opera - Remove arrows from number input */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
@@ -34,16 +33,31 @@
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div id="auth-container" class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
-        <div class="text-center mb-8">
+        <div class="text-center mb-6">
             <img src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
             <h2 id="auth-title" class="text-2xl font-bold text-sky-400">Welcome Back</h2>
             <p id="auth-subtitle" class="text-slate-400 text-sm">Please login to continue</p>
         </div>
 
+        <div id="reg-methods" class="hidden flex bg-slate-800 p-1 rounded-xl mb-6">
+            <button onclick="setMethod('email')" id="m-email" class="flex-1 py-2 rounded-lg text-xs font-bold bg-sky-600">EMAIL</button>
+            <button onclick="setMethod('phone')" id="m-phone" class="flex-1 py-2 rounded-lg text-xs font-bold">MOBILE</button>
+        </div>
+
         <div class="space-y-4">
-            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
-            <input type="number" id="mobile-input" placeholder="Mobile Number" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
-            <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+            <div id="email-group">
+                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white mb-4">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+            </div>
+
+            <div id="phone-group" class="hidden">
+                <input type="tel" id="mobile-input" placeholder="+91 XXXXXXXXXX" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white mb-2">
+                <div id="recaptcha-container" class="mb-2"></div>
+                <div id="otp-area" class="hidden">
+                    <input type="number" id="otp-input" placeholder="Enter 6-digit OTP" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
+                </div>
+            </div>
+
             <button id="mainBtn" onclick="handleAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg">Login</button>
         </div>
 
@@ -63,8 +77,7 @@
             <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
         </header>
 
-        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
-            </div>
+        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
     </div>
 
     <div id="user-modal" class="modal-overlay">
@@ -74,8 +87,7 @@
             <h3 class="text-xl font-bold text-sky-400">My Profile</h3>
             <div class="text-left space-y-2 mt-4 text-sm text-slate-300">
                 <p>Name: <span id="modal-name" class="text-white font-bold">Loading...</span></p>
-                <p>Email: <span id="modal-email" class="text-white font-bold"></span></p>
-                <p>Mobile: <span id="modal-mobile" class="text-white font-bold"></span></p>
+                <p>Contact: <span id="modal-contact" class="text-white font-bold"></span></p>
             </div>
             <button onclick="deleteAccount()" class="w-full mt-6 py-2 text-xs text-red-500 border border-red-900/30 rounded-lg uppercase font-bold">Delete Account</button>
         </div>
@@ -91,17 +103,26 @@
                 <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
                 <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
             </div>
-            <p id="calc-error" class="text-red-500 text-[10px] text-center mt-3 hidden font-bold">NOT FOR STUDENTS</p>
+            <p id="calc-error" class="text-red-500 text-[10px] text-center mt-3 hidden">INVALID PIN</p>
             <button onclick="closeCalc()" class="w-full mt-2 text-[10px] text-slate-500 uppercase">Cancel</button>
         </div>
     </div>
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW Registered'))
+                .catch(err => console.log('SW Failed', err));
+            });
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -116,22 +137,15 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // App Grid Data
+        // Grid Data
         const files = [
             { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
             { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
             { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
-            { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-            { name: 'ID Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-verify.html', icon: 'fa-user-check', color: 'text-emerald-400' },
-            { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
-            { name: 'V-Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/v-receipt.html', icon: 'fa-receipt', color: 'text-indigo-400' },
-            { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
             { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/display.html', icon: 'fa-desktop', color: 'text-pink-400', locked: true },
-            { name: 'Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' },
-            { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
+            { name: 'Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' }
         ];
 
-        // Render Cards
         const grid = document.getElementById('app-grid');
         files.forEach(f => {
             const card = document.createElement('div');
@@ -141,109 +155,98 @@
             grid.appendChild(card);
         });
 
-        // --- AUTH LOGIC ---
+        // --- AUTH SYSTEM ---
         let isLoginMode = true;
+        let regMethod = 'email';
+        let confirmationResult = null;
+
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Create Account";
             document.getElementById('mainBtn').innerText = isLoginMode ? "Login" : "Register";
             document.getElementById('toggleBtn').innerText = isLoginMode ? "Register" : "Login";
-            document.getElementById('toggleText').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+            document.getElementById('reg-methods').classList.toggle('hidden', isLoginMode);
+            if(isLoginMode) setMethod('email');
         };
 
-        window.handleAuth = () => {
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
-            if(!email || pass.length < 6) { alert("Please enter valid email & password (min 6 chars)"); return; }
-            
+        window.setMethod = (m) => {
+            regMethod = m;
+            document.getElementById('email-group').classList.toggle('hidden', m === 'phone');
+            document.getElementById('phone-group').classList.toggle('hidden', m === 'email');
+            document.getElementById('m-email').classList.toggle('bg-sky-600', m === 'email');
+            document.getElementById('m-phone').classList.toggle('bg-sky-600', m === 'phone');
+        };
+
+        window.handleAuth = async () => {
             if(isLoginMode) {
+                const email = document.getElementById('email').value.trim();
+                const pass = document.getElementById('password').value;
                 signInWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
             } else {
-                createUserWithEmailAndPassword(auth, email, pass)
-                .then(() => alert("Registration Successful!"))
-                .catch(err => alert(err.message));
+                if(regMethod === 'email') {
+                    const email = document.getElementById('email').value.trim();
+                    const pass = document.getElementById('password').value;
+                    createUserWithEmailAndPassword(auth, email, pass).catch(err => alert(err.message));
+                } else {
+                    const phone = document.getElementById('mobile-input').value.trim();
+                    if(!confirmationResult) {
+                        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
+                        signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+                        .then(res => {
+                            confirmationResult = res;
+                            document.getElementById('otp-area').classList.remove('hidden');
+                            alert("OTP Sent!");
+                        }).catch(e => alert(e.message));
+                    } else {
+                        const otp = document.getElementById('otp-input').value;
+                        confirmationResult.confirm(otp).catch(e => alert("Invalid OTP"));
+                    }
+                }
             }
         };
 
-        window.logout = () => signOut(auth);
-
-        window.deleteAccount = () => {
-            if(confirm("Are you sure? This will permanently delete your login!")) {
-                deleteUser(auth.currentUser).then(() => alert("Account Deleted")).catch(err => alert(err.message));
-            }
-        };
-
-        // --- CALCULATOR LOGIC ---
-        let calcInput = ""; let targetUrl = ""; const ADMIN_PASS = "1234";
-        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
-        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
-        window.pressNum = (n) => { 
-            calcInput += n; 
-            document.getElementById('calc-display').innerText = calcInput; 
-            document.getElementById('calc-error').classList.add('hidden');
-        };
-        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
-        window.verifyPass = () => {
-            if(calcInput === ADMIN_PASS) window.location.href = targetUrl;
-            else { 
-                document.getElementById('calc-error').classList.remove('hidden'); 
-                clearCalc(); 
-                document.getElementById('calc-display').innerText = "ERR";
-            }
-        };
-
-        // --- PROFILE MODAL ---
-        window.toggleUserModal = () => { 
-            const m = document.getElementById('user-modal'); 
-            m.style.display = (m.style.display === "flex") ? "none" : "flex"; 
-        };
-
-        // --- AUTH STATE OBSERVER ---
+        // Profile Logic
         onAuthStateChanged(auth, async (user) => {
-            const authUi = document.getElementById('auth-container');
-            const dashUi = document.getElementById('dashboard');
-            
+            document.getElementById('auth-container').classList.toggle('hidden', !!user);
+            document.getElementById('dashboard').classList.toggle('hidden', !user);
             if (user) {
-                authUi.classList.add('hidden');
-                dashUi.classList.remove('hidden');
-                document.getElementById('user-display').innerText = user.email;
-                
-                // Fetch student details from Realtime Database
+                const contact = user.email || user.phoneNumber;
+                document.getElementById('user-display').innerText = contact;
                 try {
-                    const snapshot = await get(child(ref(db), `students`));
-                    if (snapshot.exists()) {
-                        const students = snapshot.val();
-                        let found = false;
+                    const snap = await get(child(ref(db), 'students'));
+                    if (snap.exists()) {
+                        const students = snap.val();
                         for (let id in students) {
-                            if (students[id].email?.toLowerCase() === user.email.toLowerCase()) {
-                                const s = students[id];
-                                document.getElementById('user-profile-icon').src = s.profilePicture || "./SNT.jpg";
-                                document.getElementById('modal-profile-img').src = s.profilePicture || "./SNT.jpg";
-                                document.getElementById('modal-name').innerText = s.name || "Unknown";
-                                document.getElementById('modal-email').innerText = s.email;
-                                document.getElementById('modal-mobile').innerText = s.mobile || "N/A";
-                                found = true;
+                            if (students[id].email === user.email || students[id].mobile === user.phoneNumber) {
+                                document.getElementById('user-profile-icon').src = students[id].profilePicture || "./SNT.jpg";
+                                document.getElementById('modal-profile-img').src = students[id].profilePicture || "./SNT.jpg";
+                                document.getElementById('modal-name').innerText = students[id].name;
+                                document.getElementById('modal-contact').innerText = contact;
                                 break;
                             }
                         }
-                        if(!found) document.getElementById('modal-name').innerText = "Guest User";
                     }
-                } catch (e) { console.error("Data fetch error", e); }
-
-            } else {
-                authUi.classList.remove('hidden');
-                dashUi.classList.add('hidden');
+                } catch (e) { console.error(e); }
             }
         });
 
-        // --- SERVICE WORKER REGISTRATION ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SNT Service Worker Active!'))
-                    .catch(err => console.error('SW Registration Failed', err));
-            });
-        }
+        window.logout = () => signOut(auth);
+        
+        // Calculator PIN
+        let calcInput = ""; let targetUrl = "";
+        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
+        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
+        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
+        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
+        window.verifyPass = () => {
+            if(calcInput === "1234") window.location.href = targetUrl;
+            else { document.getElementById('calc-error').classList.remove('hidden'); clearCalc(); }
+        };
+
+        window.toggleUserModal = () => {
+            const m = document.getElementById('user-modal');
+            m.style.display = (m.style.display === "flex") ? "none" : "flex";
+        };
     </script>
 </body>
 </html>
