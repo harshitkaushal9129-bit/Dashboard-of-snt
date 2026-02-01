@@ -1,42 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT - Registered Users</title>
+    <title>SNT - Registered Users List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .user-row:hover { background: rgba(56, 189, 248, 0.05); }
+        :root { --primary: #e65100; --bg: #fffbf5; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #333; }
+        .header-snt { background: var(--primary); color: white; padding: 15px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(230, 81, 0, 0.2); }
+        .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        tr:nth-child(even) { background: #fafafa; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-2 md:p-6">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="flex justify-between items-center mb-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="header-snt flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter text-white">SNT <span class="text-sky-500">DATABASE</span></h1>
-                <p id="count" class="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Loading Users...</p>
+                <h1 class="text-xl font-bold tracking-tight">SNT USER DATABASE</h1>
+                <p id="total-count" class="text-[10px] opacity-80 font-bold uppercase tracking-widest">Loading Records...</p>
             </div>
-            <button onclick="history.back()" class="bg-slate-800 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase border border-white/10">Back</button>
+            <button onclick="history.back()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                <i class="fas fa-arrow-left mr-1"></i> वापस जाएँ
+            </button>
         </header>
 
-        <div class="glass rounded-3xl overflow-hidden shadow-2xl border border-white/5">
+        <div class="mb-4">
+            <input type="text" id="search-users" onkeyup="filterUsers()" placeholder="नाम या ईमेल से खोजें..." class="w-full p-4 rounded-2xl border-2 border-orange-100 focus:border-orange-500 outline-none shadow-sm transition-all">
+        </div>
+
+        <div class="glass-card overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-sky-500/10 text-sky-400 border-b border-white/10">
-                            <th class="p-4 text-[10px] font-black uppercase tracking-widest">Student / Gmail Name</th>
-                            <th class="p-4 text-[10px] font-black uppercase tracking-widest">Email Address</th>
-                            <th class="p-4 text-[10px] font-black uppercase tracking-widest">Student ID</th>
-                            <th class="p-4 text-[10px] font-black uppercase tracking-widest">Status</th>
+                        <tr class="bg-gray-50 text-gray-600 border-b border-gray-100">
+                            <th class="p-4 text-xs font-black uppercase tracking-wider text-center">प्रोफाइल</th>
+                            <th class="p-4 text-xs font-black uppercase tracking-wider">विद्यार्थी का नाम</th>
+                            <th class="p-4 text-xs font-black uppercase tracking-wider">ईमेल एड्रेस</th>
+                            <th class="p-4 text-xs font-black uppercase tracking-wider">रजिस्ट्रेशन स्टेटस</th>
                         </tr>
                     </thead>
-                    <tbody id="user-table-body">
+                    <tbody id="user-table-body" class="divide-y divide-gray-50">
                         </tbody>
                 </table>
+            </div>
+            <div id="loader" class="p-20 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
+                <p class="mt-4 text-gray-400 font-bold text-xs uppercase tracking-widest">Data Fetching...</p>
             </div>
         </div>
     </div>
@@ -45,7 +57,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Aapka existing config
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -57,34 +68,38 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Seedha 'students' node ko read karna
+        // Fetching Data
         const studentsRef = ref(db, 'students');
-
         onValue(studentsRef, (snapshot) => {
             const tbody = document.getElementById('user-table-body');
-            const countEl = document.getElementById('count');
+            const loader = document.getElementById('loader');
+            const countEl = document.getElementById('total-count');
+            
             tbody.innerHTML = "";
+            loader.classList.add('hidden');
 
             if (snapshot.exists()) {
-                const students = snapshot.val();
-                const studentList = Object.values(students);
-                
-                countEl.innerText = `${studentList.length} Registered Users Found`;
+                const data = snapshot.val();
+                const studentList = Object.values(data);
+                countEl.innerText = studentList.length + " कुल पंजीकृत विद्यार्थी";
 
                 studentList.forEach(student => {
+                    const statusClass = student.registrationStatus === "Pending" 
+                        ? "bg-red-100 text-red-600 border-red-200" 
+                        : "bg-green-100 text-green-600 border-green-200";
+
                     const row = `
-                        <tr class="user-row border-b border-white/5 transition-all">
-                            <td class="p-4 flex items-center gap-3">
-                                <img src="${student.profilePicture || student.profilePic || 'https://via.placeholder.com/40'}" class="w-9 h-9 rounded-full border border-sky-500/30 object-cover">
-                                <div>
-                                    <div class="text-sm font-bold text-white">${student.name || 'No Name'}</div>
-                                    <div class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">${student.mobile || 'No Phone'}</div>
-                                </div>
+                        <tr class="hover:bg-orange-50/30 transition-all">
+                            <td class="p-4 text-center">
+                                <img src="${student.profilePicture || student.profilePic || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full border-2 border-orange-200 inline-block object-cover">
                             </td>
-                            <td class="p-4 text-xs font-mono text-slate-400">${student.email}</td>
-                            <td class="p-4 text-xs font-black text-sky-400">${student.studentId || 'N/A'}</td>
-                            <td class="p-4 text-[10px]">
-                                <span class="${student.registrationStatus === 'Pending' ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-green-400 bg-green-400/10 border-green-400/20'} px-2 py-1 rounded border font-black uppercase">
+                            <td class="p-4">
+                                <div class="font-bold text-gray-800">${student.name || 'N/A'}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">${student.studentId || 'No-ID'}</div>
+                            </td>
+                            <td class="p-4 text-sm text-gray-500 font-medium">${student.email || 'Email Not Linked'}</td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black border uppercase ${statusClass}">
                                     ${student.registrationStatus || 'Active'}
                                 </span>
                             </td>
@@ -93,9 +108,18 @@
                     tbody.innerHTML += row;
                 });
             } else {
-                tbody.innerHTML = "<tr><td colspan='4' class='p-10 text-center text-slate-500'>No users found in database.</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='4' class='p-10 text-center text-gray-400'>कोई डेटा नहीं मिला</td></tr>";
             }
         });
+
+        // Search Function
+        window.filterUsers = () => {
+            let input = document.getElementById('search-users').value.toLowerCase();
+            let rows = document.querySelectorAll('#user-table-body tr');
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
+            });
+        }
     </script>
 </body>
 </html>
