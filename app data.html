@@ -7,86 +7,81 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .neon-border { border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; }
-        .neon-border:hover { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.1); }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); }
-        .stats-card { background: linear-gradient(145deg, #0f172a, #1e293b); }
+        body { background: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .stats-card { background: linear-gradient(145deg, #0f172a, #1e293b); border: 1px solid rgba(56, 189, 248, 0.1); }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .live-dot { height: 8px; width: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-soft 2s infinite; }
+        /* Profile Image Neon Effect */
+        .avatar-container { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 14px; object-fit: cover; border: 2px solid #334155; transition: 0.3s; }
+        tr:hover .avatar-img { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        
+        /* Status Badges */
+        .status-pill { font-size: 9px; font-weight: 900; letter-spacing: 1px; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; }
+        .status-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .status-pending { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div id="pin-gate" class="fixed inset-0 z-[2000] glass flex items-center justify-center">
-        <div class="text-center p-8 bg-slate-900 rounded-3xl border border-sky-500/30 shadow-2xl">
-            <i class="fas fa-user-shield text-4xl text-sky-500 mb-4"></i>
-            <h2 class="text-xl font-bold mb-6">SECURE SYSTEM ACCESS</h2>
-            <input type="password" id="gate-pin" maxlength="6" placeholder="ENTER PIN" class="bg-slate-950 border border-slate-700 p-4 rounded-xl text-center text-2xl tracking-[0.5em] w-48 focus:outline-none focus:border-sky-500 transition-all">
-            <button onclick="checkGate()" class="block w-full mt-4 bg-sky-600 hover:bg-sky-500 p-3 rounded-xl font-bold transition-all">UNLOACK DATABASE</button>
+        <div class="text-center p-8 bg-slate-900 rounded-[2rem] border border-sky-500/30 shadow-2xl w-full max-w-xs">
+            <div class="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-sky-500/20">
+                <i class="fas fa-fingerprint text-3xl text-sky-500"></i>
+            </div>
+            <h2 class="text-lg font-black mb-6 tracking-tighter">ADMIN AUTH</h2>
+            <input type="password" id="gate-pin" maxlength="6" placeholder="••••••" class="bg-slate-950 border border-slate-700 p-4 rounded-xl text-center text-2xl tracking-[0.3em] w-full focus:outline-none focus:border-sky-500 transition-all text-white mb-4">
+            <button onclick="checkGate()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-black text-xs tracking-widest transition-all shadow-lg shadow-sky-900/20">VERIFY IDENTITY</button>
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+    <div id="main-content" class="hidden animate-fade-in">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
             <div>
-                <h1 class="text-4xl font-black tracking-tighter text-white italic">SNT <span class="text-sky-500">NEURAL</span></h1>
-                <p class="text-slate-500 text-xs font-bold tracking-[0.3em] uppercase"><span class="live-dot mr-2"></span> System Live Activity</p>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="location.href='admin.html'" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold border border-slate-700 transition-all">ADMIN DASHBOARD</button>
-                <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center bg-sky-500/10 text-sky-500 rounded-xl border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="stats-card p-6 rounded-3xl border border-slate-800">
-                <p class="text-slate-400 text-xs font-bold uppercase mb-1">Total Users</p>
-                <h3 id="stat-total" class="text-3xl font-black text-white">0</h3>
-            </div>
-            <div class="stats-card p-6 rounded-3xl border border-slate-800">
-                <p class="text-emerald-400 text-xs font-bold uppercase mb-1">Active Now</p>
-                <h3 id="stat-active" class="text-3xl font-black text-white">0</h3>
-            </div>
-            <div class="stats-card p-6 rounded-3xl border border-slate-800">
-                <p class="text-amber-400 text-xs font-bold uppercase mb-1">Pending Sync</p>
-                <h3 id="stat-pending" class="text-3xl font-black text-white">0</h3>
-            </div>
-            <div class="stats-card p-6 rounded-3xl border border-slate-800">
-                <p class="text-sky-400 text-xs font-bold uppercase mb-1">System Health</p>
-                <h3 class="text-3xl font-black text-white">99%</h3>
-            </div>
-        </div>
-
-        <div class="glass rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row gap-4">
-                <div class="relative flex-1">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                    <input type="text" id="db-search" onkeyup="searchTable()" placeholder="Search by name, email or student ID..." class="w-full bg-slate-950/50 border border-slate-800 p-4 pl-12 rounded-2xl focus:outline-none focus:border-sky-500/50 transition-all">
+                <h1 class="text-3xl font-black tracking-tighter italic">SNT <span class="text-sky-500">DATABASE</span></h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Neural Link Established</p>
                 </div>
             </div>
+            <button onclick="location.href='admin.html'" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-[10px] font-black tracking-widest border border-slate-700 transition-all">DASHBOARD</button>
+        </header>
 
-            <div class="overflow-x-auto scroll-smooth">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="stats-card p-5 rounded-3xl">
+                <p class="text-slate-500 text-[9px] font-black uppercase mb-1">Total Entires</p>
+                <h3 id="stat-total" class="text-2xl font-black">0</h3>
+            </div>
+            <div class="stats-card p-5 rounded-3xl">
+                <p class="text-emerald-500 text-[9px] font-black uppercase mb-1">Active Users</p>
+                <h3 id="stat-active" class="text-2xl font-black text-emerald-400">0</h3>
+            </div>
+            <div class="stats-card p-5 rounded-3xl">
+                <p class="text-rose-500 text-[9px] font-black uppercase mb-1">Pending List</p>
+                <h3 id="stat-pending" class="text-2xl font-black text-rose-400">0</h3>
+            </div>
+            <div class="stats-card p-5 rounded-3xl border-sky-500/20">
+                <p class="text-sky-500 text-[9px] font-black uppercase mb-1">Server Status</p>
+                <h3 class="text-2xl font-black text-sky-400 font-mono text-[16px]">STABLE</h3>
+            </div>
+        </div>
+
+        <div class="glass rounded-[2rem] overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="p-4 bg-slate-900/50 border-b border-slate-800">
+                <input type="text" id="db-search" onkeyup="searchTable()" placeholder="Search by name, email, ID..." class="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl focus:outline-none focus:border-sky-500/50 text-sm">
+            </div>
+
+            <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-900/50 text-slate-400">
+                    <thead class="bg-slate-950/50 text-slate-500">
                         <tr>
-                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Student Profile</th>
-                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Authentication</th>
-                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-center">Identity</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Student Information</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Access Credentials</th>
                             <th class="p-5 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
-                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-right">Actions</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-right">Operation</th>
                         </tr>
                     </thead>
-                    <tbody id="db-body" class="divide-y divide-slate-800/50">
+                    <tbody id="db-body" class="divide-y divide-slate-800/40">
                         </tbody>
                 </table>
             </div>
@@ -108,92 +103,74 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Security Gate
         window.checkGate = () => {
-            const pin = document.getElementById('gate-pin').value;
-            if(pin === "912919") {
-                document.getElementById('pin-gate').classList.add('hidden');
+            if(document.getElementById('gate-pin').value === "912919") {
+                document.getElementById('pin-gate').style.display = 'none';
                 document.getElementById('main-content').classList.remove('hidden');
-                loadDatabase();
-            } else {
-                alert("ACCESS DENIED: INVALID NEURAL PIN");
-            }
+                loadData();
+            } else { alert("Invalid Admin PIN"); }
         };
 
-        function loadDatabase() {
-            const studentsRef = ref(db, 'students');
-            onValue(studentsRef, (snapshot) => {
+        function loadData() {
+            onValue(ref(db, 'students'), (snapshot) => {
                 const tbody = document.getElementById('db-body');
                 tbody.innerHTML = "";
+                if (!snapshot.exists()) return;
+
+                const data = Object.entries(snapshot.val());
                 
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const list = Object.entries(data);
+                // Stats
+                document.getElementById('stat-total').innerText = data.length;
+                document.getElementById('stat-pending').innerText = data.filter(s => s[1].registrationStatus === "Pending").length;
+                document.getElementById('stat-active').innerText = data.filter(s => s[1].registrationStatus !== "Pending").length;
 
-                    // Update Stats
-                    document.getElementById('stat-total').innerText = list.length;
-                    document.getElementById('stat-pending').innerText = list.filter(s => s[1].registrationStatus === "Pending").length;
-                    document.getElementById('stat-active').innerText = list.filter(s => s[1].registrationStatus !== "Pending").length;
-
-                    list.reverse().forEach(([key, s]) => {
-                        const row = document.createElement('tr');
-                        row.className = "hover:bg-sky-500/[0.02] transition-all group";
-                        row.innerHTML = `
+                data.reverse().forEach(([key, s]) => {
+                    // Profile Picture Logic (Smart Check)
+                    const imgSource = s.profilePicture || s.profilePic || s.photo || s.photoURL;
+                    const nameInitial = s.name ? s.name.charAt(0) : '?';
+                    
+                    const row = `
+                        <tr class="hover:bg-sky-500/[0.02] transition-all group">
                             <td class="p-5">
                                 <div class="flex items-center gap-4">
-                                    <div class="relative">
-                                        <img src="${s.profilePicture || s.profilePic || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-2xl border border-slate-700 object-cover shadow-lg group-hover:border-sky-500/50 transition-all">
-                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-[#020617] rounded-full"></div>
+                                    <div class="avatar-container">
+                                        ${imgSource ? 
+                                            `<img src="${imgSource}" class="avatar-img" onerror="this.parentElement.innerHTML='<div class=\'avatar-img bg-slate-800 flex items-center justify-center text-sky-500 font-black\'>${nameInitial}</div>'">` : 
+                                            `<div class="avatar-img bg-slate-800 flex items-center justify-center text-sky-500 font-black">${nameInitial}</div>`
+                                        }
                                     </div>
                                     <div>
-                                        <div class="font-black text-white tracking-tight">${s.name || 'Anonymous'}</div>
-                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${s.mobile || 'No Mobile'}</div>
+                                        <div class="text-sm font-black text-white leading-tight">${s.name || 'Unknown'}</div>
+                                        <div class="text-[10px] text-slate-500 font-bold font-mono tracking-tighter">${s.studentId || 'ID_PENDING'}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="p-5">
-                                <div class="text-xs font-mono text-slate-400">${s.email}</div>
-                                <div class="text-[9px] text-sky-500 font-black mt-1 uppercase tracking-tighter italic">Verified Google Account</div>
-                            </td>
-                            <td class="p-5 text-center font-mono font-bold text-sky-400 text-sm">
-                                ${s.studentId || 'NOT_SET'}
+                                <div class="text-[11px] font-medium text-slate-400">${s.email}</div>
+                                <div class="text-[9px] text-sky-600 font-bold uppercase mt-1 tracking-widest italic">${s.mobile || s.phone || 'No Mobile Linked'}</div>
                             </td>
                             <td class="p-5 text-center">
-                                <button onclick="toggleStatus('${key}', '${s.registrationStatus}')" class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${s.registrationStatus === 'Pending' ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white'}">
+                                <span class="status-pill ${s.registrationStatus === 'Pending' ? 'status-pending' : 'status-active'}">
                                     ${s.registrationStatus || 'Active'}
-                                </button>
+                                </span>
                             </td>
                             <td class="p-5 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <button onclick="window.open('basic.html?search=${s.name}', '_blank')" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-sky-500 hover:text-white transition-all"><i class="fas fa-print text-xs"></i></button>
-                                    <button onclick="deleteUser('${key}')" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white transition-all"><i class="fas fa-trash text-xs"></i></button>
+                                    <button onclick="window.open('basic.html?search=${s.name}', '_blank')" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-all border border-slate-700"><i class="fas fa-print text-xs"></i></button>
+                                    <button onclick="deleteUser('${key}')" class="w-9 h-9 bg-slate-800/50 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-500 hover:text-white transition-all border border-slate-700"><i class="fas fa-trash-alt text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>
                     `;
-                        tbody.appendChild(row);
-                    });
-                }
+                    tbody.innerHTML += row;
+                });
             });
         }
 
-        window.toggleStatus = (key, current) => {
-            const next = current === "Pending" ? "Active" : "Pending";
-            if(confirm(`Change status to ${next}?`)) {
-                update(ref(db, `students/${key}`), { registrationStatus: next });
-            }
-        };
-
-        window.deleteUser = (key) => {
-            if(confirm("DANGER: This will permanently erase this student from the neural database. Continue?")) {
-                remove(ref(db, `students/${key}`));
-            }
-        };
-
+        window.deleteUser = (key) => { if(confirm("Permanently remove this student?")) remove(ref(db, `students/${key}`)); };
         window.searchTable = () => {
-            const q = document.getElementById('db-search').value.toLowerCase();
-            const rows = document.querySelectorAll('#db-body tr');
-            rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
+            let q = document.getElementById('db-search').value.toLowerCase();
+            document.querySelectorAll('#db-body tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
         };
     </script>
 </body>
