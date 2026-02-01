@@ -4,53 +4,46 @@
 <meta charset="UTF-8">
 <title>SNT Portal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">
 
-<!-- LOGIN BOX -->
+<!-- LOGIN -->
 <div id="loginBox" class="text-center">
-  <h1 class="text-3xl mb-4 font-bold">SNT INSTITUTE</h1>
-  <button onclick="login()" 
-  class="bg-white text-black px-6 py-3 rounded-lg">
-  Login with Google
+  <h1 class="text-3xl font-bold mb-4">SNT INSTITUTE</h1>
+  <button onclick="login()" class="bg-white text-black px-6 py-3 rounded">
+    Login with Google
   </button>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" style="display:none" class="text-center w-full max-w-md">
-
   <h2 id="name" class="text-xl font-bold"></h2>
-  <p id="email" class="text-sm text-gray-400"></p>
+  <p id="email" class="text-gray-400"></p>
 
   <div id="apps" class="grid grid-cols-2 gap-4 mt-6"></div>
 
-  <button onclick="logout()" 
-  class="mt-6 text-red-400">
-  Logout
+  <button onclick="logout()" class="mt-6 text-red-400">
+    Logout
   </button>
-
 </div>
 
 <!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } 
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, query, orderByChild, equalTo, onValue } 
+import { getDatabase, ref, query, orderByChild, equalTo, onValue }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-
-// 🔥 YOUR FIREBASE CONFIG
-knownst firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT"
+const firebaseConfig = {
+  apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+  authDomain: "snt-computer-institute.firebaseapp.com",
+  projectId: "snt-computer-institute",
+  databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+  appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -60,36 +53,29 @@ const provider = new GoogleAuthProvider();
 
 let currentRole = "student";
 
-// ✅ BASE URL
 const BASE_URL = "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/";
 
-// ✅ MENU
 const menu = [
  { name:"Dashboard", url: BASE_URL + "dashboard.html" },
  { name:"Attendance", url: BASE_URL + "attendance.html" },
  { name:"ID Card", url: BASE_URL + "id-card.html" },
  { name:"Receipt", url: BASE_URL + "receipt.html" },
  { name:"Verify", url: BASE_URL + "verify.html" },
-
  { name:"Admin Panel", url: BASE_URL + "admin.html", adminOnly:true }
 ];
 
 // LOGIN
-window.login = () => {
-  signInWithPopup(auth, provider);
-}
+window.login = () => signInWithPopup(auth, provider);
 
 // LOGOUT
-window.logout = () => {
-  signOut(auth);
-}
+window.logout = () => signOut(auth);
 
 // AUTH CHECK
 onAuthStateChanged(auth, user=>{
   if(user){
 
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("dashboard").style.display="block";
+    loginBox.style.display="none";
+    dashboard.style.display="block";
 
     const q = query(
       ref(db,"students"),
@@ -100,42 +86,38 @@ onAuthStateChanged(auth, user=>{
     onValue(q, snap=>{
       if(snap.exists()){
         const data = Object.values(snap.val())[0];
-        document.getElementById("name").innerText = data.name;
-        document.getElementById("email").innerText = data.email;
+        name.innerText = data.name;
+        email.innerText = data.email;
         currentRole = data.role || "student";
       }else{
-        document.getElementById("name").innerText = user.displayName;
-        document.getElementById("email").innerText = user.email;
+        name.innerText = user.displayName;
+        email.innerText = user.email;
       }
       renderMenu();
     });
 
   }else{
-    document.getElementById("loginBox").style.display="block";
-    document.getElementById("dashboard").style.display="none";
+    loginBox.style.display="block";
+    dashboard.style.display="none";
   }
 });
 
-// SHOW MENU
+// RENDER MENU
 function renderMenu(){
   let html="";
   menu.forEach(item=>{
     if(item.adminOnly && currentRole!=="admin") return;
-
     html += `
-    <button onclick="openPage('${item.url}')" 
-    class="bg-slate-700 p-4 rounded-lg">
-    ${item.name}
-    </button>
+      <button onclick="openPage('${item.url}')" 
+      class="bg-slate-700 p-4 rounded">
+      ${item.name}
+      </button>
     `;
   });
-  document.getElementById("apps").innerHTML = html;
+  apps.innerHTML = html;
 }
 
-// OPEN PAGE
-window.openPage = (url)=>{
-  location.href = url;
-}
+window.openPage = (url)=> location.href=url;
 
 </script>
 
