@@ -3,228 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT Institute - Secure Auth</title>
+    <title>SNT Institute - Google Login</title>
     
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="./SNT.jpg">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: sans-serif; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
         .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; }
-        .calc-btn:active { background: #38bdf8; }
-        
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div id="auth-container" class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl">
-        <div class="text-center mb-8">
-            <img src="./SNT.jpg" class="w-20 h-20 mx-auto rounded-full border-2 border-sky-500 mb-4">
-            <h2 class="text-2xl font-bold text-sky-400">Secure Access</h2>
-            <p class="text-slate-400 text-sm">Verify your identity</p>
-        </div>
+    <div id="auth-container" class="glass p-10 rounded-3xl w-full max-w-md shadow-2xl text-center">
+        <img src="./SNT.jpg" class="w-24 h-24 mx-auto rounded-full border-2 border-sky-500 mb-6">
+        <h2 class="text-3xl font-bold text-sky-400 mb-2">SNT Portal</h2>
+        <p class="text-slate-400 text-sm mb-8">Login with your verified Gmail account</p>
 
-        <div class="space-y-4">
-            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-slate-200 transition-all shadow-lg">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5">
-                Continue with Gmail
-            </button>
-
-            <div class="flex items-center my-6">
-                <div class="flex-grow border-t border-slate-700"></div>
-                <span class="px-3 text-slate-500 text-xs uppercase font-bold">OR MOBILE OTP</span>
-                <div class="flex-grow border-t border-slate-700"></div>
-            </div>
-
-            <div id="phone-auth-box">
-                <div id="recaptcha-container" class="mb-4"></div>
-                <input type="tel" id="mobile-number" placeholder="+91 00000 00000" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white mb-3">
-                
-                <div id="otp-group" class="hidden mb-3">
-                    <input type="number" id="otp-input" placeholder="Enter 6-digit OTP" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-sky-500 text-white">
-                </div>
-
-                <button id="otpBtn" onclick="handlePhoneAuth()" class="w-full bg-sky-600 hover:bg-sky-500 p-4 rounded-xl font-bold transition-all shadow-lg">Send OTP</button>
-            </div>
-        </div>
+        <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-slate-200 transition-all shadow-lg">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
+            Sign in with Google
+        </button>
     </div>
 
     <div id="dashboard" class="hidden w-full max-w-5xl animate-fade-in">
-        <header class="text-center mb-10">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="logout()" class="text-red-400 text-sm font-bold bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/50">Logout</button>
-                <img id="user-profile-icon" src="./SNT.jpg" onclick="toggleUserModal()" class="w-12 h-12 rounded-full border-2 border-sky-500 cursor-pointer object-cover">
+        <header class="flex justify-between items-center mb-10">
+            <button onclick="logout()" class="text-red-400 font-bold bg-red-900/20 px-6 py-2 rounded-xl border border-red-900/50">Logout</button>
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-sky-400 uppercase tracking-widest">SNT Institute</h1>
+                <p id="user-info" class="text-sm text-slate-400 mt-1"></p>
             </div>
-            <h1 class="text-3xl font-bold text-sky-400 uppercase tracking-tighter">SNT Dashboard</h1>
-            <p id="user-display" class="text-slate-400 text-sm italic mt-1"></p>
+            <img id="user-img" src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
         </header>
-
-        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
+        <div id="app-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
     </div>
-
-    <div id="user-modal" class="modal-overlay">
-        <div class="glass p-8 rounded-3xl w-80 text-center relative">
-            <button onclick="toggleUserModal()" class="absolute top-4 right-4 text-slate-400"><i class="fas fa-times"></i></button>
-            <img id="modal-profile-img" src="./SNT.jpg" class="w-24 h-24 mx-auto rounded-full border-2 border-sky-500 mb-4 object-cover">
-            <h3 class="text-xl font-bold text-sky-400">Student Profile</h3>
-            <div class="text-left space-y-2 mt-4 text-sm text-slate-300">
-                <p>Name: <span id="modal-name" class="text-white font-bold">Guest</span></p>
-                <p>Contact: <span id="modal-contact" class="text-white font-bold"></span></p>
-            </div>
-        </div>
-    </div>
-
-    <div id="calc-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30">
-            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end">0</div>
-            <div class="calc-grid">
-                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-orange-900/20 text-orange-400" onclick="clearCalc()">C</button>
-                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
-                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
-                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
-            </div>
-            <button onclick="closeCalc()" class="w-full mt-4 text-[10px] text-slate-500 uppercase">Cancel</button>
-        </div>
-    </div>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW Registered'))
-                .catch(err => console.log('SW Failed', err));
-            });
-        }
-    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
-            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com/",
             projectId: "snt-computer-institute",
-            storageBucket: "snt-computer-institute.firebasestorage.app",
-            messagingSenderId: "117580784781",
             appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        let confirmationResult = null;
-
-        // --- GMAIL LOGIN ---
+        // --- GOOGLE LOGIN ---
         window.loginWithGoogle = () => {
-            signInWithPopup(auth, provider).catch(e => alert(e.message));
+            signInWithPopup(auth, provider)
+            .then(() => console.log("Success!"))
+            .catch(e => alert("Error: " + e.message));
         };
 
-        // --- MOBILE OTP LOGIN ---
-        window.handlePhoneAuth = () => {
-            const phone = document.getElementById('mobile-number').value.trim();
-            if(!phone.startsWith('+')) { alert("Please use country code (e.g., +91)"); return; }
-
-            if (!confirmationResult) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
-                signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
-                .then(res => {
-                    confirmationResult = res;
-                    document.getElementById('otp-group').classList.remove('hidden');
-                    document.getElementById('otpBtn').innerText = "Verify OTP";
-                    alert("OTP Sent!");
-                }).catch(e => alert(e.message));
-            } else {
-                const otp = document.getElementById('otp-input').value;
-                confirmationResult.confirm(otp).catch(e => alert("Wrong OTP!"));
-            }
-        };
-
-        // --- DASHBOARD GRID ---
-        const files = [
-            { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
-            { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-            { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/display.html', icon: 'fa-desktop', color: 'text-pink-400', locked: true }
-        ];
-
-        const grid = document.getElementById('app-grid');
-        files.forEach(f => {
-            const card = document.createElement('div');
-            card.className = "app-card p-6 rounded-3xl text-center animate-fade-in";
-            card.innerHTML = `<i class="fas ${f.icon} text-3xl mb-3 ${f.color}"></i><p class="text-[10px] font-black uppercase tracking-widest">${f.name}</p>`;
-            card.onclick = () => { if(f.locked) openCalc(f.url); else window.location.href = f.url; };
-            grid.appendChild(card);
-        });
-
-        // --- AUTH STATE & DATA FETCH ---
-        onAuthStateChanged(auth, async (user) => {
+        // --- AUTH OBSERVER ---
+        onAuthStateChanged(auth, (user) => {
             const authUi = document.getElementById('auth-container');
             const dashUi = document.getElementById('dashboard');
             
             if (user) {
                 authUi.classList.add('hidden');
                 dashUi.classList.remove('hidden');
-                const userKey = user.email || user.phoneNumber;
-                document.getElementById('user-display').innerText = userKey;
-                document.getElementById('modal-contact').innerText = userKey;
-
-                // Sync with Database
-                try {
-                    const snap = await get(child(ref(db), 'students'));
-                    if (snap.exists()) {
-                        const data = snap.val();
-                        for (let id in data) {
-                            if (data[id].email?.toLowerCase() === user.email?.toLowerCase() || data[id].mobile === user.phoneNumber) {
-                                document.getElementById('user-profile-icon').src = data[id].profilePicture || "./SNT.jpg";
-                                document.getElementById('modal-profile-img').src = data[id].profilePicture || "./SNT.jpg";
-                                document.getElementById('modal-name').innerText = data[id].name;
-                                break;
-                            }
-                        }
-                    }
-                } catch (e) { console.error(e); }
+                document.getElementById('user-info').innerText = user.displayName + " (" + user.email + ")";
+                document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
+                renderApps();
             } else {
                 authUi.classList.remove('hidden');
                 dashUi.classList.add('hidden');
             }
         });
 
+        function renderApps() {
+            const grid = document.getElementById('app-grid');
+            const apps = [
+                { name: 'Dashboard', icon: 'fa-chart-line', color: 'text-sky-400' },
+                { name: 'Attendance', icon: 'fa-user-check', color: 'text-green-400' },
+                { name: 'Profile', icon: 'fa-id-badge', color: 'text-pink-400' },
+                { name: 'Admin', icon: 'fa-user-shield', color: 'text-red-400' }
+            ];
+            grid.innerHTML = apps.map(a => `
+                <div class="app-card p-8 rounded-3xl text-center">
+                    <i class="fas ${a.icon} text-4xl mb-4 ${a.color}"></i>
+                    <p class="text-xs font-bold uppercase tracking-widest">${a.name}</p>
+                </div>
+            `).join('');
+        }
+
         window.logout = () => signOut(auth);
-
-        // --- ADMIN LOCK ---
-        let calcInput = ""; let targetUrl = "";
-        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; calcInput = ""; };
-        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
-        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
-        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
-        window.verifyPass = () => {
-            if(calcInput === "1234") window.location.href = targetUrl;
-            else { alert("Access Denied"); clearCalc(); }
-        };
-
-        window.toggleUserModal = () => {
-            const m = document.getElementById('user-modal');
-            m.style.display = (m.style.display === "flex") ? "none" : "flex";
-        };
     </script>
 </body>
 </html>
