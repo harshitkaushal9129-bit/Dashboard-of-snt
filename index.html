@@ -1,4 +1,4 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -75,6 +75,31 @@
             </div>
         </div>
 
+        <div id="app-info-section" class="glass p-5 rounded-[28px] mb-8 border border-white/5 bg-gradient-to-br from-slate-800/40 to-transparent">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-sky-500">App Information</h4>
+                <span class="bg-sky-500 text-[8px] font-black px-2 py-0.5 rounded-full text-slate-900 animate-pulse">LIVE</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-900/50 p-3 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Version</p>
+                    <p class="text-xs font-mono font-bold text-white">v2.1.0 (Stable)</p>
+                </div>
+                <div class="bg-slate-900/50 p-3 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Database</p>
+                    <p class="text-xs font-mono font-bold text-green-400">Connected</p>
+                </div>
+                <div class="bg-slate-900/50 p-3 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Developer </p>
+                    <p class="text-xs font-bold text-white">HarshitKaushal</p>
+                </div>
+                <div class="bg-slate-900/50 p-3 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Sync Status</p>
+                    <p class="text-xs font-bold text-sky-400" id="current-time-sync">--:--</p>
+                </div>
+            </div>
+        </div>
+
         <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-24"></div>
     </div>
 
@@ -111,7 +136,7 @@
         const provider = new GoogleAuthProvider();
 
         const menuItems = [
-            { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+            { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
             { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
             { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400', locked: true },
             { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
@@ -124,27 +149,19 @@
             { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
         ];
 
-        // Global functions
         window.loginWithGoogle = () => signInWithPopup(auth, provider);
         window.logout = () => signOut(auth).then(() => location.reload());
-        window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
+        window.shareApp = () => navigator.share ? navigator.share({ title: 'SNT Portal', url: window.location.href }) : alert(window.location.href);
 
-        // Authentication State Listener
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Fetch student data using Admin-synced logic
-                const studentsRef = ref(db, 'students');
-                const emailQuery = query(studentsRef, orderByChild('email'), equalTo(user.email));
-
-                onValue(emailQuery, (snapshot) => {
+                // Fetch student data
+                onValue(query(ref(db, 'students'), orderByChild('email'), equalTo(user.email)), (snapshot) => {
                     if (snapshot.exists()) {
-                        const rawData = snapshot.val();
-                        const sData = Object.values(rawData)[0];
-
-                        // Mapping data to UI (Matches your Admin Dashboard keys)
+                        const sData = Object.values(snapshot.val())[0];
                         document.getElementById('user-name').innerText = sData.name || user.displayName;
                         document.getElementById('user-email').innerText = user.email;
                         document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
@@ -160,12 +177,10 @@
                             statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
                         }
                     } else {
-                        // For Google users not in the database
                         document.getElementById('user-name').innerText = user.displayName;
                         document.getElementById('user-email').innerText = user.email;
-                        document.getElementById('user-img').src = user.photoURL;
-                        document.getElementById('user-roll').innerText = "UNREGISTERED";
-                        document.getElementById('mobile-val').innerText = "Update Info";
+                        document.getElementById('user-roll').innerText = "GUEST";
+                        document.getElementById('mobile-val').innerText = "Update Profile";
                     }
                 });
                 renderMenu();
@@ -186,28 +201,30 @@
             `).join('');
         }
 
-        // Calculator Logic
+        // Calculator PIN logic
         let calcValue = ""; let target = "";
         window.openCalc = (url) => { target = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
         window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
         window.pressNum = (n) => { if(calcValue.length < 6) calcValue += n; document.getElementById('calc-display').innerText = calcValue; };
         window.clearCalc = () => { calcValue = ""; document.getElementById('calc-display').innerText = "0"; };
         window.verifyPass = () => {
-            if(calcValue === "912919") location.href = target; // Your Master PIN
+            if(calcValue === "912919") location.href = target;
             else { alert("PIN Incorrect!"); clearCalc(); }
         };
 
-        // Security: Block Inspect & Context Menu
-        document.onkeydown = e => { 
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
-        };
+        // Time Update
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('current-time-sync').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
 
+        // Block Inspect
+        document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; };
     </script>
-        <script>// Service Worker Registration for PWA Support
+    <script>
+        // Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail'));
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail')); });
         }
     </script>
 </body>
