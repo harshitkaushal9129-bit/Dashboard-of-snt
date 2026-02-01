@@ -21,6 +21,8 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; }
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
     </style>
 </head>
 <body>
@@ -42,20 +44,25 @@
         <header class="flex justify-between items-center mb-6 mt-4">
             <button onclick="logout()" class="text-red-400 text-[10px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest">Logout</button>
             <h1 class="text-xl font-black text-sky-400 uppercase tracking-tighter">SNT PORTAL</h1>
-            <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes"></i></button>
+            <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 shadow-lg shadow-sky-500/10">
+                <i class="fas fa-share-nodes"></i>
+            </button>
         </header>
 
         <div id="profile-section" class="glass p-6 rounded-3xl mb-8 flex items-center gap-5 border-l-4 border-sky-500 animate-fade-in shadow-xl">
             <div class="relative">
-                <img id="user-img" src="./SNT.jpg" class="w-16 h-16 rounded-full border-2 border-sky-500 object-cover">
-                <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full"></div>
+                <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover shadow-lg shadow-sky-500/20">
+                <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full shadow-sm"></div>
             </div>
             <div class="flex-1">
-                <h3 id="user-name" class="text-lg font-black text-white leading-tight">Loading...</h3>
-                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-1 italic"></p>
+                <h3 id="user-name" class="text-lg font-black text-white leading-tight mb-0.5">Loading...</h3>
+                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-1 italic opacity-80"></p>
+                <p id="user-mobile" class="text-sky-300 text-[11px] font-bold mb-2 flex items-center gap-1.5">
+                    <i class="fas fa-phone-alt text-[9px] text-sky-500"></i> <span id="mobile-val">Fetching...</span>
+                </p>
                 <div class="flex gap-2">
-                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded border border-sky-500/20 font-bold uppercase">Roll:Fetching...</span>
-                    <span class="text-[9px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-bold uppercase tracking-widest">Active Member</span>
+                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded border border-sky-500/20 font-bold uppercase tracking-wider">Roll: ...</span>
+                    <span class="text-[9px] bg-green-500/10 text-green-400 px-2.5 py-1 rounded border border-green-500/20 font-bold uppercase tracking-widest">Active Member</span>
                 </div>
             </div>
         </div>
@@ -64,23 +71,33 @@
     </div>
 
     <div id="calc-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30">
+        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30 shadow-2xl">
             <div class="text-[9px] text-center font-black text-sky-500 uppercase tracking-[0.3em] mb-3">Admin Security</div>
-            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end text-sky-400">0</div>
+            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end text-sky-400 shadow-inner">0</div>
             <div class="calc-grid">
-                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-red-900/20 text-red-400" onclick="clearCalc()">C</button>
-                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
-                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
-                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">=</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('7')">7</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('8')">8</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('9')">9</button>
+                <button class="calc-btn bg-red-900/20 text-red-400 border-red-900/30 hover:bg-red-900/40" onclick="clearCalc()">C</button>
+                
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('4')">4</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('5')">5</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('6')">6</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('0')">0</button>
+                
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('1')">1</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('2')">2</button>
+                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('3')">3</button>
+                <button class="calc-btn bg-sky-600 text-white border-sky-400 hover:bg-sky-500 shadow-lg shadow-sky-600/30" onclick="verifyPass()">=</button>
             </div>
-            <button onclick="closeCalc()" class="w-full mt-4 text-[10px] text-slate-500 uppercase font-bold text-center">Access Denied? Cancel</button>
+            <button onclick="closeCalc()" class="w-full mt-4 text-[10px] text-slate-500 uppercase font-bold text-center hover:text-slate-300 transition-colors">Access Denied? Cancel</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -109,24 +126,44 @@
             { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
         ];
 
+        // Attached to window for HTML accessibility
         window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
-        window.logout = () => signOut(auth);
+        window.logout = () => signOut(auth).then(() => location.reload());
+        
+        window.shareApp = () => {
+            if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href });
+        };
 
+        // Auth Observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Fetch Student Data from Realtime DB
-                const studentRef = ref(db, 'students/' + user.uid);
-                onValue(studentRef, (snapshot) => {
-                    const data = snapshot.val();
-                    document.getElementById('user-name').innerText = user.displayName;
-                    document.getElementById('user-email').innerText = user.email;
-                    document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
-                    document.getElementById('user-roll').innerText = "Roll: " + (data ? data.rollNo : "Not Assigned");
+                // Fetch student by EMAIL
+                const studentsRef = ref(db, 'students');
+                const emailQuery = query(studentsRef, orderByChild('email'), equalTo(user.email));
+
+                onValue(emailQuery, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        const key = Object.keys(data)[0];
+                        const sData = data[key];
+
+                        document.getElementById('user-name').innerText = sData.name || user.displayName;
+                        document.getElementById('user-email').innerText = user.email;
+                        document.getElementById('user-img').src = sData.profilePic || sData.image || user.photoURL || "./SNT.jpg";
+                        document.getElementById('user-roll').innerText = "Roll: " + (sData.rollNo || "N/A");
+                        document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
+                    } else {
+                        // Default Google Info if not in DB
+                        document.getElementById('user-name').innerText = user.displayName;
+                        document.getElementById('user-email').innerText = user.email;
+                        document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
+                        document.getElementById('user-roll').innerText = "Guest User";
+                        document.getElementById('mobile-val').innerText = "Contact Admin";
+                    }
                 });
-                
                 renderGrid();
             } else {
                 document.getElementById('auth-container').classList.remove('hidden');
@@ -137,34 +174,40 @@
         function renderGrid() {
             const grid = document.getElementById('app-grid');
             grid.innerHTML = files.map(f => `
-                <div class="app-card p-6 rounded-3xl text-center" onclick="${f.locked ? `openCalc('${f.url}')` : `window.location.href='${f.url}'`}">
+                <div class="app-card p-6 rounded-3xl text-center flex flex-col items-center justify-center shadow-lg" 
+                     onclick="${f.locked ? `openCalc('${f.url}')` : `location.href='${f.url}'`}">
                     <i class="fas ${f.icon} text-2xl mb-3 ${f.color}"></i>
-                    <p class="text-[9px] font-black uppercase tracking-widest">${f.name}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-200">${f.name}</p>
                 </div>
             `).join('');
         }
 
-        // Calculator & Security Logic
+        // Calculator Logic
         let calcInput = ""; let targetUrl = "";
-        window.openCalc = (url) => { targetUrl = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
-        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
+        window.openCalc = (url) => { 
+            targetUrl = url; 
+            document.getElementById('calc-modal').style.display = "flex"; 
+            window.clearCalc(); 
+        };
+        window.closeCalc = () => { document.getElementById('calc-modal').style.display = "none"; };
         window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
         window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
         window.verifyPass = () => {
-            if(calcInput === "1234") window.location.href = targetUrl;
-            else { alert("PIN Wrong!"); clearCalc(); }
+            if(calcInput === "1234") location.href = targetUrl;
+            else { alert("PIN Wrong!"); window.clearCalc(); }
         };
 
-        window.shareApp = () => {
-            if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href });
-        };
-
-        // Security
+        // Security Features
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; };
+        document.onkeydown = e => { 
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; 
+        };
     </script>
-    <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+        <script>
+        // PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Error:", e));
+        }
     </script>
 </body>
 </html>
