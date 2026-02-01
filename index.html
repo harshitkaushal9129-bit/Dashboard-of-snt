@@ -25,6 +25,11 @@
         .calc-btn:active { background: #334155; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Info Modal Specific */
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -49,9 +54,14 @@
             <div class="text-center">
                 <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
             </div>
-            <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
-                <i class="fas fa-share-nodes"></i>
-            </button>
+            <div class="flex gap-2">
+                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
+                    <i class="fas fa-circle-info"></i>
+                </button>
+                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
+                    <i class="fas fa-share-nodes"></i>
+                </button>
+            </div>
         </header>
 
         <div id="profile-section" class="glass p-6 rounded-3xl mb-8 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
@@ -75,6 +85,27 @@
         </div>
 
         <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-24"></div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="glass p-8 rounded-3xl w-80 border border-sky-500/30 shadow-2xl relative">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-sky-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-microchip text-sky-400 text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-black tracking-tighter">SYSTEM INFO</h2>
+            </div>
+            
+            <div class="space-y-1">
+                <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">Detecting...</span></div>
+                <div class="info-row"><span class="info-label">Time</span><span id="info-time" class="info-value">00:00</span></div>
+                <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.0.4 Premium</span></div>
+                <div class="info-row"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
+                <div class="info-row border-none"><span class="info-label">Status</span><span class="info-value text-green-400">Stable</span></div>
+            </div>
+
+            <button onclick="closeInfo()" class="w-full mt-8 bg-sky-500 text-white p-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-sky-500/20 active:scale-95 transition-all">Close Info</button>
+        </div>
     </div>
 
     <div id="calc-modal" class="modal-overlay">
@@ -128,13 +159,26 @@
         window.logout = () => signOut(auth).then(() => location.reload());
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
 
+        // App Info Logic
+        window.openInfo = async () => {
+            document.getElementById('info-modal').style.display = "flex";
+            // Get Battery
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "% " + (b.charging ? "⚡" : "🔋");
+            }
+            // Get Time
+            const now = new Date();
+            document.getElementById('info-time').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
+        };
+        window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
+
         // Authentication State
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Fetch student data from Realtime Database
                 const studentsRef = ref(db, 'students');
                 const emailQuery = query(studentsRef, orderByChild('email'), equalTo(user.email));
 
@@ -142,15 +186,12 @@
                     if (snapshot.exists()) {
                         const rawData = snapshot.val();
                         const sData = Object.values(rawData)[0];
-
-                        // Set Profile Data (Matching your Admin Keys)
                         document.getElementById('user-name').innerText = sData.name || user.displayName;
                         document.getElementById('user-email').innerText = user.email;
                         document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
                         document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "N/A");
                         document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
                         
-                        // Set Status Badge
                         const statusEl = document.getElementById('user-status-badge');
                         if(sData.registrationStatus === "Pending") {
                             statusEl.innerText = "Pending";
@@ -160,7 +201,6 @@
                             statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
                         }
                     } else {
-                        // Fallback for unregistered Google users
                         document.getElementById('user-name').innerText = user.displayName;
                         document.getElementById('user-email').innerText = user.email;
                         document.getElementById('user-roll').innerText = "GUEST";
@@ -192,7 +232,7 @@
         window.pressNum = (n) => { if(calcValue.length < 6) calcValue += n; document.getElementById('calc-display').innerText = calcValue; };
         window.clearCalc = () => { calcValue = ""; document.getElementById('calc-display').innerText = "0"; };
         window.verifyPass = () => {
-            if(calcValue === "912919") location.href = target; // Your Master PIN
+            if(calcValue === "912919") location.href = target;
             else { alert("PIN Incorrect!"); clearCalc(); }
         };
 
@@ -201,7 +241,8 @@
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
         };
     </script>
-        <script>// Register Service Worker
+
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail'));
