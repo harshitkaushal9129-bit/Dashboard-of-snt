@@ -2,95 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT Institute - Official Portal</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="./SNT.jpg">
+    <link rel="icon" type="image/jpeg" href="SNT.jpg">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: sans-serif; user-select: none; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
-        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
-        .app-card:hover { border-color: #38bdf8; transform: translateY(-3px); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; }
+        .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .calc-btn { background: #1e293b; padding: 15px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; }
+        .calc-btn { background: #1e293b; padding: 20px 10px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; font-size: 1.2rem; text-align: center; }
+        .calc-btn:active { background: #334155; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="glass p-10 rounded-3xl w-full max-w-md shadow-2xl text-center">
-            <img src="./SNT.jpg" class="w-24 h-24 mx-auto rounded-full border-2 border-sky-500 mb-6 shadow-lg">
-            <h2 class="text-3xl font-bold text-sky-400 mb-2 font-black tracking-tighter">SNT INSTITUTE</h2>
-            <p class="text-slate-400 text-sm mb-8 italic text-xs uppercase tracking-widest">Digital Learning Portal</p>
+        <div class="glass p-10 rounded-3xl w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
+            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl">
+            <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
+            <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Digital Student Portal</p>
 
-            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-slate-200 transition-all shadow-xl active:scale-95">
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all shadow-xl active:scale-95">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
-                Login with Google
+                LOGIN WITH GOOGLE
             </button>
+            <p class="mt-8 text-[9px] text-slate-500 uppercase tracking-widest font-bold">Secure Access Only</p>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-6">
-        <header class="flex justify-between items-center mb-6 mt-4">
-            <button onclick="logout()" class="text-red-400 text-[10px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest">Logout</button>
-            <h1 class="text-xl font-black text-sky-400 uppercase tracking-tighter">SNT PORTAL</h1>
-            <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 shadow-lg shadow-sky-500/10">
+    <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
+        <header class="flex justify-between items-center mb-8">
+            <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
+            <div class="text-center">
+                <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
+            </div>
+            <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
                 <i class="fas fa-share-nodes"></i>
             </button>
         </header>
 
-        <div id="profile-section" class="glass p-6 rounded-3xl mb-8 flex items-center gap-5 border-l-4 border-sky-500 animate-fade-in shadow-xl">
+        <div id="profile-section" class="glass p-6 rounded-3xl mb-8 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
             <div class="relative">
-                <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover shadow-lg shadow-sky-500/20">
-                <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full shadow-sm"></div>
+                <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800">
+                <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full"></div>
             </div>
             <div class="flex-1">
                 <h3 id="user-name" class="text-lg font-black text-white leading-tight mb-0.5">Loading...</h3>
-                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-1 italic opacity-80"></p>
-                <p id="user-mobile" class="text-sky-300 text-[11px] font-bold mb-2 flex items-center gap-1.5">
-                    <i class="fas fa-phone-alt text-[9px] text-sky-500"></i> <span id="mobile-val">Fetching...</span>
+                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-2 italic opacity-60"></p>
+                
+                <p class="text-sky-300 text-[11px] font-bold flex items-center gap-2 mb-3">
+                    <i class="fas fa-phone-alt text-[9px]"></i> <span id="mobile-val">Fetching...</span>
                 </p>
+
                 <div class="flex gap-2">
-                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded border border-sky-500/20 font-bold uppercase tracking-wider">Roll: ...</span>
-                    <span class="text-[9px] bg-green-500/10 text-green-400 px-2.5 py-1 rounded border border-green-500/20 font-bold uppercase tracking-widest">Active Member</span>
+                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded border border-sky-500/20 font-black uppercase">ID: ...</span>
+                    <span id="user-status-badge" class="text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase">Member</span>
                 </div>
             </div>
         </div>
 
-        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20"></div>
+        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-24"></div>
     </div>
 
     <div id="calc-modal" class="modal-overlay">
         <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30 shadow-2xl">
-            <div class="text-[9px] text-center font-black text-sky-500 uppercase tracking-[0.3em] mb-3">Admin Security</div>
-            <div id="calc-display" class="bg-slate-900 p-4 rounded-xl text-right text-2xl font-mono mb-4 border border-slate-700 h-16 flex items-center justify-end text-sky-400 shadow-inner">0</div>
+            <div class="text-[10px] text-center font-black text-sky-500 uppercase tracking-[0.3em] mb-4">Security Access</div>
+            <div id="calc-display" class="bg-slate-950 p-4 rounded-xl text-right text-2xl font-mono mb-5 border border-slate-800 h-16 flex items-center justify-end text-sky-400 shadow-inner">0</div>
             <div class="calc-grid">
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('7')">7</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('8')">8</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('9')">9</button>
-                <button class="calc-btn bg-red-900/20 text-red-400 border-red-900/30 hover:bg-red-900/40" onclick="clearCalc()">C</button>
-                
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('4')">4</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('5')">5</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('6')">6</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('0')">0</button>
-                
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('1')">1</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('2')">2</button>
-                <button class="calc-btn hover:bg-slate-800" onclick="pressNum('3')">3</button>
-                <button class="calc-btn bg-sky-600 text-white border-sky-400 hover:bg-sky-500 shadow-lg shadow-sky-600/30" onclick="verifyPass()">=</button>
+                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-red-900/20 text-red-500" onclick="clearCalc()">C</button>
+                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
+                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
+                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">OK</button>
             </div>
-            <button onclick="closeCalc()" class="w-full mt-4 text-[10px] text-slate-500 uppercase font-bold text-center hover:text-slate-300 transition-colors">Access Denied? Cancel</button>
+            <button onclick="closeCalc()" class="w-full mt-6 text-[10px] text-slate-500 uppercase font-bold text-center">Cancel</button>
         </div>
     </div>
 
@@ -112,7 +109,7 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        const files = [
+        const menuItems = [
             { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/dashboard.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
             { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
             { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400', locked: true },
@@ -126,87 +123,89 @@
             { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
         ];
 
-        // Attached to window for HTML accessibility
-        window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+        // Global functions
+        window.loginWithGoogle = () => signInWithPopup(auth, provider);
         window.logout = () => signOut(auth).then(() => location.reload());
-        
-        window.shareApp = () => {
-            if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href });
-        };
+        window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
 
-        // Auth Observer
+        // Authentication State
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Fetch student by EMAIL
+                // Fetch student data from Realtime Database
                 const studentsRef = ref(db, 'students');
                 const emailQuery = query(studentsRef, orderByChild('email'), equalTo(user.email));
 
                 onValue(emailQuery, (snapshot) => {
                     if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        const key = Object.keys(data)[0];
-                        const sData = data[key];
+                        const rawData = snapshot.val();
+                        const sData = Object.values(rawData)[0];
 
+                        // Set Profile Data (Matching your Admin Keys)
                         document.getElementById('user-name').innerText = sData.name || user.displayName;
                         document.getElementById('user-email').innerText = user.email;
-                        document.getElementById('user-img').src = sData.profilePic || sData.image || user.photoURL || "./SNT.jpg";
-                        document.getElementById('user-roll').innerText = "Roll: " + (sData.rollNo || "N/A");
+                        document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
+                        document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "N/A");
                         document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
+                        
+                        // Set Status Badge
+                        const statusEl = document.getElementById('user-status-badge');
+                        if(sData.registrationStatus === "Pending") {
+                            statusEl.innerText = "Pending";
+                            statusEl.className = "text-[9px] bg-red-500/10 text-red-400 px-3 py-1 rounded border border-red-500/20 font-black uppercase";
+                        } else {
+                            statusEl.innerText = "Active";
+                            statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
+                        }
                     } else {
-                        // Default Google Info if not in DB
+                        // Fallback for unregistered Google users
                         document.getElementById('user-name').innerText = user.displayName;
                         document.getElementById('user-email').innerText = user.email;
-                        document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
-                        document.getElementById('user-roll').innerText = "Guest User";
-                        document.getElementById('mobile-val').innerText = "Contact Admin";
+                        document.getElementById('user-roll').innerText = "GUEST";
+                        document.getElementById('mobile-val').innerText = "Update Profile";
                     }
                 });
-                renderGrid();
+                renderMenu();
             } else {
                 document.getElementById('auth-container').classList.remove('hidden');
                 document.getElementById('dashboard').classList.add('hidden');
             }
         });
 
-        function renderGrid() {
+        function renderMenu() {
             const grid = document.getElementById('app-grid');
-            grid.innerHTML = files.map(f => `
-                <div class="app-card p-6 rounded-3xl text-center flex flex-col items-center justify-center shadow-lg" 
-                     onclick="${f.locked ? `openCalc('${f.url}')` : `location.href='${f.url}'`}">
-                    <i class="fas ${f.icon} text-2xl mb-3 ${f.color}"></i>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-200">${f.name}</p>
+            grid.innerHTML = menuItems.map(item => `
+                <div class="app-card p-4 rounded-3xl text-center shadow-lg" 
+                     onclick="${item.locked ? `openCalc('${item.url}')` : `location.href='${item.url}'`}">
+                    <i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">${item.name}</p>
                 </div>
             `).join('');
         }
 
         // Calculator Logic
-        let calcInput = ""; let targetUrl = "";
-        window.openCalc = (url) => { 
-            targetUrl = url; 
-            document.getElementById('calc-modal').style.display = "flex"; 
-            window.clearCalc(); 
-        };
-        window.closeCalc = () => { document.getElementById('calc-modal').style.display = "none"; };
-        window.pressNum = (n) => { calcInput += n; document.getElementById('calc-display').innerText = calcInput; };
-        window.clearCalc = () => { calcInput = ""; document.getElementById('calc-display').innerText = "0"; };
+        let calcValue = ""; let target = "";
+        window.openCalc = (url) => { target = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
+        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
+        window.pressNum = (n) => { if(calcValue.length < 6) calcValue += n; document.getElementById('calc-display').innerText = calcValue; };
+        window.clearCalc = () => { calcValue = ""; document.getElementById('calc-display').innerText = "0"; };
         window.verifyPass = () => {
-            if(calcInput === "1234") location.href = targetUrl;
-            else { alert("PIN Wrong!"); window.clearCalc(); }
+            if(calcValue === "912919") location.href = target; // Your Master PIN
+            else { alert("PIN Incorrect!"); clearCalc(); }
         };
 
-        // Security Features
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // Anti-Inspect Security
         document.onkeydown = e => { 
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; 
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
         };
     </script>
-        <script>
-        // PWA Service Worker
+        <script>// Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Error:", e));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail'));
+            });
         }
     </script>
 </body>
