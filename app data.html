@@ -1,61 +1,101 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT - Registered Users List</title>
+    <title>SNT | Neural Admin Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #e65100; --bg: #fffbf5; }
-        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #333; }
-        .header-snt { background: var(--primary); color: white; padding: 15px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(230, 81, 0, 0.2); }
-        .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        tr:nth-child(even) { background: #fafafa; }
+        body { background: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .neon-border { border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; }
+        .neon-border:hover { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.1); }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); }
+        .stats-card { background: linear-gradient(145deg, #0f172a, #1e293b); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .live-dot { height: 8px; width: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-soft 2s infinite; }
     </style>
 </head>
-<body class="p-2 md:p-6">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="header-snt flex justify-between items-center mb-6">
+    <div id="pin-gate" class="fixed inset-0 z-[2000] glass flex items-center justify-center">
+        <div class="text-center p-8 bg-slate-900 rounded-3xl border border-sky-500/30 shadow-2xl">
+            <i class="fas fa-user-shield text-4xl text-sky-500 mb-4"></i>
+            <h2 class="text-xl font-bold mb-6">SECURE SYSTEM ACCESS</h2>
+            <input type="password" id="gate-pin" maxlength="6" placeholder="ENTER PIN" class="bg-slate-950 border border-slate-700 p-4 rounded-xl text-center text-2xl tracking-[0.5em] w-48 focus:outline-none focus:border-sky-500 transition-all">
+            <button onclick="checkGate()" class="block w-full mt-4 bg-sky-600 hover:bg-sky-500 p-3 rounded-xl font-bold transition-all">UNLOACK DATABASE</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
             <div>
-                <h1 class="text-xl font-bold tracking-tight">SNT USER DATABASE</h1>
-                <p id="total-count" class="text-[10px] opacity-80 font-bold uppercase tracking-widest">Loading Records...</p>
+                <h1 class="text-4xl font-black tracking-tighter text-white italic">SNT <span class="text-sky-500">NEURAL</span></h1>
+                <p class="text-slate-500 text-xs font-bold tracking-[0.3em] uppercase"><span class="live-dot mr-2"></span> System Live Activity</p>
             </div>
-            <button onclick="history.back()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-xs font-bold transition-all">
-                <i class="fas fa-arrow-left mr-1"></i> वापस जाएँ
-            </button>
-        </header>
-
-        <div class="mb-4">
-            <input type="text" id="search-users" onkeyup="filterUsers()" placeholder="नाम या ईमेल से खोजें..." class="w-full p-4 rounded-2xl border-2 border-orange-100 focus:border-orange-500 outline-none shadow-sm transition-all">
+            <div class="flex gap-3">
+                <button onclick="location.href='admin.html'" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold border border-slate-700 transition-all">ADMIN DASHBOARD</button>
+                <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center bg-sky-500/10 text-sky-500 rounded-xl border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="glass-card overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 border-b border-gray-100">
-                            <th class="p-4 text-xs font-black uppercase tracking-wider text-center">प्रोफाइल</th>
-                            <th class="p-4 text-xs font-black uppercase tracking-wider">विद्यार्थी का नाम</th>
-                            <th class="p-4 text-xs font-black uppercase tracking-wider">ईमेल एड्रेस</th>
-                            <th class="p-4 text-xs font-black uppercase tracking-wider">रजिस्ट्रेशन स्टेटस</th>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="stats-card p-6 rounded-3xl border border-slate-800">
+                <p class="text-slate-400 text-xs font-bold uppercase mb-1">Total Users</p>
+                <h3 id="stat-total" class="text-3xl font-black text-white">0</h3>
+            </div>
+            <div class="stats-card p-6 rounded-3xl border border-slate-800">
+                <p class="text-emerald-400 text-xs font-bold uppercase mb-1">Active Now</p>
+                <h3 id="stat-active" class="text-3xl font-black text-white">0</h3>
+            </div>
+            <div class="stats-card p-6 rounded-3xl border border-slate-800">
+                <p class="text-amber-400 text-xs font-bold uppercase mb-1">Pending Sync</p>
+                <h3 id="stat-pending" class="text-3xl font-black text-white">0</h3>
+            </div>
+            <div class="stats-card p-6 rounded-3xl border border-slate-800">
+                <p class="text-sky-400 text-xs font-bold uppercase mb-1">System Health</p>
+                <h3 class="text-3xl font-black text-white">99%</h3>
+            </div>
+        </div>
+
+        <div class="glass rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row gap-4">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="db-search" onkeyup="searchTable()" placeholder="Search by name, email or student ID..." class="w-full bg-slate-950/50 border border-slate-800 p-4 pl-12 rounded-2xl focus:outline-none focus:border-sky-500/50 transition-all">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto scroll-smooth">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-900/50 text-slate-400">
+                        <tr>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Student Profile</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest">Authentication</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-center">Identity</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
+                            <th class="p-5 text-[10px] font-black uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="user-table-body" class="divide-y divide-gray-50">
+                    <tbody id="db-body" class="divide-y divide-slate-800/50">
                         </tbody>
                 </table>
-            </div>
-            <div id="loader" class="p-20 text-center">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-                <p class="mt-4 text-gray-400 font-bold text-xs uppercase tracking-widest">Data Fetching...</p>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -68,58 +108,93 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Fetching Data
-        const studentsRef = ref(db, 'students');
-        onValue(studentsRef, (snapshot) => {
-            const tbody = document.getElementById('user-table-body');
-            const loader = document.getElementById('loader');
-            const countEl = document.getElementById('total-count');
-            
-            tbody.innerHTML = "";
-            loader.classList.add('hidden');
+        // Security Gate
+        window.checkGate = () => {
+            const pin = document.getElementById('gate-pin').value;
+            if(pin === "912919") {
+                document.getElementById('pin-gate').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                loadDatabase();
+            } else {
+                alert("ACCESS DENIED: INVALID NEURAL PIN");
+            }
+        };
 
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const studentList = Object.values(data);
-                countEl.innerText = studentList.length + " कुल पंजीकृत विद्यार्थी";
+        function loadDatabase() {
+            const studentsRef = ref(db, 'students');
+            onValue(studentsRef, (snapshot) => {
+                const tbody = document.getElementById('db-body');
+                tbody.innerHTML = "";
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const list = Object.entries(data);
 
-                studentList.forEach(student => {
-                    const statusClass = student.registrationStatus === "Pending" 
-                        ? "bg-red-100 text-red-600 border-red-200" 
-                        : "bg-green-100 text-green-600 border-green-200";
+                    // Update Stats
+                    document.getElementById('stat-total').innerText = list.length;
+                    document.getElementById('stat-pending').innerText = list.filter(s => s[1].registrationStatus === "Pending").length;
+                    document.getElementById('stat-active').innerText = list.filter(s => s[1].registrationStatus !== "Pending").length;
 
-                    const row = `
-                        <tr class="hover:bg-orange-50/30 transition-all">
-                            <td class="p-4 text-center">
-                                <img src="${student.profilePicture || student.profilePic || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full border-2 border-orange-200 inline-block object-cover">
+                    list.reverse().forEach(([key, s]) => {
+                        const row = document.createElement('tr');
+                        row.className = "hover:bg-sky-500/[0.02] transition-all group";
+                        row.innerHTML = `
+                            <td class="p-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        <img src="${s.profilePicture || s.profilePic || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-2xl border border-slate-700 object-cover shadow-lg group-hover:border-sky-500/50 transition-all">
+                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-4 border-[#020617] rounded-full"></div>
+                                    </div>
+                                    <div>
+                                        <div class="font-black text-white tracking-tight">${s.name || 'Anonymous'}</div>
+                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${s.mobile || 'No Mobile'}</div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="p-4">
-                                <div class="font-bold text-gray-800">${student.name || 'N/A'}</div>
-                                <div class="text-[10px] text-gray-400 font-mono">${student.studentId || 'No-ID'}</div>
+                            <td class="p-5">
+                                <div class="text-xs font-mono text-slate-400">${s.email}</div>
+                                <div class="text-[9px] text-sky-500 font-black mt-1 uppercase tracking-tighter italic">Verified Google Account</div>
                             </td>
-                            <td class="p-4 text-sm text-gray-500 font-medium">${student.email || 'Email Not Linked'}</td>
-                            <td class="p-4">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-black border uppercase ${statusClass}">
-                                    ${student.registrationStatus || 'Active'}
-                                </span>
+                            <td class="p-5 text-center font-mono font-bold text-sky-400 text-sm">
+                                ${s.studentId || 'NOT_SET'}
+                            </td>
+                            <td class="p-5 text-center">
+                                <button onclick="toggleStatus('${key}', '${s.registrationStatus}')" class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${s.registrationStatus === 'Pending' ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white'}">
+                                    ${s.registrationStatus || 'Active'}
+                                </button>
+                            </td>
+                            <td class="p-5 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button onclick="window.open('basic.html?search=${s.name}', '_blank')" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-sky-500 hover:text-white transition-all"><i class="fas fa-print text-xs"></i></button>
+                                    <button onclick="deleteUser('${key}')" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white transition-all"><i class="fas fa-trash text-xs"></i></button>
+                                </div>
                             </td>
                         </tr>
                     `;
-                    tbody.innerHTML += row;
-                });
-            } else {
-                tbody.innerHTML = "<tr><td colspan='4' class='p-10 text-center text-gray-400'>कोई डेटा नहीं मिला</td></tr>";
-            }
-        });
-
-        // Search Function
-        window.filterUsers = () => {
-            let input = document.getElementById('search-users').value.toLowerCase();
-            let rows = document.querySelectorAll('#user-table-body tr');
-            rows.forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
+                        tbody.appendChild(row);
+                    });
+                }
             });
         }
+
+        window.toggleStatus = (key, current) => {
+            const next = current === "Pending" ? "Active" : "Pending";
+            if(confirm(`Change status to ${next}?`)) {
+                update(ref(db, `students/${key}`), { registrationStatus: next });
+            }
+        };
+
+        window.deleteUser = (key) => {
+            if(confirm("DANGER: This will permanently erase this student from the neural database. Continue?")) {
+                remove(ref(db, `students/${key}`));
+            }
+        };
+
+        window.searchTable = () => {
+            const q = document.getElementById('db-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#db-body tr');
+            rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
+        };
     </script>
 </body>
 </html>
