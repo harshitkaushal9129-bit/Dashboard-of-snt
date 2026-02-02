@@ -3,77 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT Institute - Student Attendance</title>
+    <title>SNT Attendance - Official</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    
     <style>
-        :root { --primary: #0f172a; --accent: #38bdf8; --success: #1b5e20; --danger: #b71c1c; --holiday: #f57c00; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .card { max-width: 500px; margin: 10px auto; background: white; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; }
-        header { background: var(--primary); color: white; padding: 25px; text-align: center; border-bottom: 5px solid var(--accent); }
-        .date-picker { padding: 20px; display: flex; justify-content: center; gap: 10px; background: #f1f5f9; }
-        select, input { padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        :root { --primary: #0f172a; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; --holiday: #f59e0b; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; padding: 10px; user-select: none; }
+        .card { max-width: 500px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); }
+        .date-picker { padding: 15px; display: flex; justify-content: center; gap: 8px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        select { padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; }
         
-        .holiday-banner { 
-            display: none; background: #fff3e0; padding: 40px 20px; text-align: center; 
-            border: 2px dashed var(--holiday); margin: 20px; border-radius: 20px;
-        }
-        .st-list { padding: 10px 20px; min-height: 100px; }
-        .st-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; background: #fff; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn-group { display: flex; gap: 8px; }
-        .btn { border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; background: #eee; }
+        .holiday-banner { display: none; padding: 30px 20px; text-align: center; background: #fffbeb; border: 2px dashed var(--holiday); margin: 15px; border-radius: 15px; }
+        .st-list { padding: 15px; min-height: 100px; }
+        .st-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .btn-group { display: flex; gap: 5px; }
+        .btn { border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; cursor: pointer; background: #e2e8f0; transition: 0.2s; }
         .p-btn.active { background: var(--success) !important; color: white; }
         .a-btn.active { background: var(--danger) !important; color: white; }
         
-        .footer { padding: 20px; text-align: center; }
-        .save-btn { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; }
+        .save-btn { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 12px; width: 90%; font-weight: bold; cursor: pointer; margin: 10px auto; display: block; }
         .hidden { display: none !important; }
-        #user-info-bar { background: #e2e8f0; padding: 10px; font-size: 12px; text-align: center; font-weight: bold; }
+        #user-bar { background: #334155; color: #94a3b8; font-size: 10px; padding: 5px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="user-info-bar">Verifying Access...</div>
+<div id="user-bar">Checking Auth...</div>
 
 <div class="card">
     <header>
-        <h2>SNT COMPUTER INSTITUTE</h2>
-        <p id="panel-title">Attendance Portal</p>
+        <h2 style="margin:0; font-size: 1.2rem;">SNT COMPUTER INSTITUTE</h2>
+        <p id="panel-tag" style="font-size: 12px; opacity: 0.8; margin-top: 5px;">Student Portal</p>
     </header>
     
     <div class="date-picker">
         <select id="day" onchange="checkCloudHoliday()"></select>
-        <select id="month" onchange="checkCloudHoliday()">
-            <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
-            <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
-            <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
-            <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-        </select>
+        <select id="month" onchange="checkCloudHoliday()"></select>
         <select id="year" onchange="checkCloudHoliday()"></select>
     </div>
 
     <div id="holiday-banner" class="holiday-banner">
-        <div id="holiday-icon" style="font-size: 50px;">🏖️</div>
-        <h2 id="holiday-title">आज छुट्टी है!</h2>
-        <p id="holiday-name-text"></p>
-        <small id="override-msg"></small>
+        <div style="font-size: 40px;">🎊</div>
+        <h2 id="holiday-title" style="color:var(--holiday); margin:10px 0;">आज छुट्टी है!</h2>
+        <p id="holiday-name-text" style="font-weight:bold; color:#475569;"></p>
+        <button id="admin-unholiday" class="hidden" onclick="forceLoadAttendance()" style="font-size: 10px; color: blue; border: none; background: none; text-decoration: underline; cursor: pointer;">Mark Attendance Anyway (Admin)</button>
     </div>
 
     <div id="main-content">
-        <div class="st-list" id="st-list">
-            <p style="text-align:center; padding:20px;">Loading your record...</p>
+        <div id="st-list" class="st-list"></div>
+        <div id="admin-tools" class="hidden" style="padding: 15px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="h-input" placeholder="Holiday name..." style="flex:1; padding:8px; border-radius:6px; border:1px solid #ddd;">
+                <button onclick="setAsHoliday()" style="background:var(--holiday); color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold;">Set Holiday</button>
+            </div>
+            <button class="save-btn" onclick="saveToCloud()">डेटा क्लाउड पर सेव करें</button>
         </div>
-        
-        <div id="admin-controls" class="hidden" style="padding: 10px 20px; background: #fafafa; display: flex; gap: 5px;">
-            <input type="text" id="h-input" placeholder="छुट्टी का नाम लिखें..." style="flex-grow: 1;">
-            <button onclick="setAsHoliday()" style="background:var(--holiday); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Set Holiday</button>
-        </div>
-    </div>
-
-    <div class="footer" id="footer-area">
-        <button class="save-btn hidden" id="save-btn" onclick="saveToCloud()">डेटा क्लाउड पर सेव करें</button>
     </div>
 </div>
 
@@ -90,112 +76,98 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
-    let currentUserEmail = null;
-    let dailyRecords = {}, holidayMode = false;
-
-    // Date Setup
-    const d = new Date(), dayS = document.getElementById('day'), monS = document.getElementById('month'), yerS = document.getElementById('year');
-    for(let i=2025; i<=2030; i++) yerS.innerHTML += `<option value="${i}">${i}</option>`;
+    const dayS = document.getElementById('day'), monS = document.getElementById('month'), yerS = document.getElementById('year');
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    
+    // Init Date Selects
     for(let i=1; i<=31; i++) dayS.innerHTML += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+    months.forEach((m, i) => monS.innerHTML += `<option value="${(i+1)<10?'0'+(i+1):(i+1)}">${m}</option>`);
+    for(let i=2025; i<=2027; i++) yerS.innerHTML += `<option value="${i}">${i}</option>`;
+
+    const d = new Date();
     dayS.value = String(d.getDate()).padStart(2,'0');
     monS.value = String(d.getMonth()+1).padStart(2,'0');
     yerS.value = d.getFullYear();
 
-    // Check Login State
+    let currentUser = null;
+    let dailyRecords = {};
+    const ADMIN_EMAIL = "harshitkaushal9129@gmail.com";
+
     auth.onAuthStateChanged(user => {
         if (user) {
-            currentUserEmail = user.email;
-            document.getElementById('user-info-bar').innerText = "Logged in as: " + currentUserEmail;
+            currentUser = user;
+            document.getElementById('user-bar').innerText = "Account: " + user.email;
             checkCloudHoliday();
         } else {
-            // If not logged in, send back to index
             window.location.href = "index.html";
         }
     });
 
     function checkCloudHoliday() {
-        if(!currentUserEmail) return;
         const dateKey = `${dayS.value}-${monS.value}-${yerS.value}`;
-        
-        db.ref('attendance/' + dateKey).once('value', snap => {
+        db.ref('attendance/' + dateKey).on('value', snap => {
             const data = snap.val();
             if(data && data.type === 'HOLIDAY') {
-                showHolidayUI(data.name, "OFFICIAL");
+                showHolidayUI(data.name);
             } else {
                 hideHolidayUI();
-                loadStudents(data);
+                loadData(data);
             }
         });
     }
 
-    function loadStudents(existingData = null) {
+    function loadData(existingData) {
+        dailyRecords = (existingData && existingData.details) ? existingData.details : {};
         db.ref('students').once('value', snap => {
             const list = document.getElementById('st-list');
             list.innerHTML = "";
-            dailyRecords = (existingData && existingData.details) ? existingData.details : {};
-            
-            let foundSelf = false;
-            let studentHtml = "";
+            let html = "";
+            const isAdmin = currentUser.email === ADMIN_EMAIL;
 
             snap.forEach(child => {
                 const s = child.val();
-                const studentId = child.key;
-                const status = dailyRecords[studentId] || "Pending";
-                const statusColor = status === 'P' ? 'text-green-600' : (status === 'A' ? 'text-red-600' : 'text-gray-400');
+                const id = child.key;
+                const status = dailyRecords[id] || "";
 
-                // Filter Logic: Show only if email matches
-                if (s.email === currentUserEmail) {
-                    foundSelf = true;
-                    studentHtml += `
-                        <div class="st-row" style="border: 2px solid var(--accent)">
-                            <div>
-                                <div style="font-size:10px; color:var(--accent)">YOUR RECORD</div>
-                                <b>${s.name}</b>
-                            </div>
-                            <div class="status-label" style="font-weight:bold; color:${status === 'P' ? '#1b5e20' : '#b71c1c'}">
-                                ${status === 'P' ? 'PRESENT' : (status === 'A' ? 'ABSENT' : 'Not Marked')}
-                            </div>
-                        </div>`;
-                } else if (currentUserEmail === "harshitkaushal9129@gmail.com") { 
-                    // Admin View: Show all
-                    studentHtml += `
-                        <div class="st-row">
-                            <b>${s.name}</b>
-                            <div class="btn-group">
-                                <button id="p-${studentId}" class="btn ${status==='P'?'p-btn active':''}" onclick="mark('${studentId}','P')">P</button>
-                                <button id="a-${studentId}" class="btn ${status==='A'?'a-btn active':''}" onclick="mark('${studentId}','A')">A</button>
-                            </div>
-                        </div>`;
+                if (isAdmin) {
+                    html += `<div class="st-row">
+                        <b style="font-size:14px;">${s.name}</b>
+                        <div class="btn-group">
+                            <button id="p-${id}" class="btn ${status==='P'?'p-btn active':''}" onclick="mark('${id}','P')">P</button>
+                            <button id="a-${id}" class="btn ${status==='A'?'a-btn active':''}" onclick="mark('${id}','A')">A</button>
+                        </div>
+                    </div>`;
+                } else if (s.email === currentUser.email) {
+                    const statusText = status === 'P' ? 'PRESENT' : (status === 'A' ? 'ABSENT' : 'Pending');
+                    const color = status === 'P' ? 'var(--success)' : (status === 'A' ? 'var(--danger)' : '#64748b');
+                    html = `<div class="st-row" style="background:#f8fafc; border:1.5px solid var(--accent); border-radius:12px; padding:20px;">
+                        <div><small style="color:var(--accent); font-weight:bold;">YOUR ATTENDANCE</small><br><b>${s.name}</b></div>
+                        <div style="font-weight:900; color:${color}">${statusText}</div>
+                    </div>`;
                 }
             });
 
-            if (studentHtml === "") {
-                list.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Record Not Found for this Email.</p>";
-            } else {
-                list.innerHTML = studentHtml;
-            }
-
-            // Show Admin UI if the user is the developer/admin
-            if (currentUserEmail === "harshitkaushal9129@gmail.com") {
-                document.getElementById('admin-controls').classList.remove('hidden');
-                document.getElementById('save-btn').classList.remove('hidden');
-                document.getElementById('panel-title').innerText = "Admin Panel";
+            list.innerHTML = html || "<p style='text-align:center; padding:20px;'>No record found.</p>";
+            
+            if(isAdmin) {
+                document.getElementById('admin-tools').classList.remove('hidden');
+                document.getElementById('panel-tag').innerText = "Admin Panel";
+                document.getElementById('admin-unholiday').classList.remove('hidden');
             }
         });
     }
 
-    function mark(id, status) {
+    window.mark = (id, status) => {
         dailyRecords[id] = status;
         document.querySelectorAll(`[id^="p-${id}"], [id^="a-${id}"]`).forEach(b => b.classList.remove('active'));
         if(status === 'P') document.getElementById(`p-${id}`).classList.add('active');
         if(status === 'A') document.getElementById(`a-${id}`).classList.add('active');
-    }
+    };
 
-    function showHolidayUI(name, type) {
+    function showHolidayUI(name) {
         document.getElementById('holiday-banner').style.display = "block";
         document.getElementById('main-content').style.display = "none";
         document.getElementById('holiday-name-text').innerText = name;
-        document.getElementById('override-msg').innerText = `(${type})`;
     }
 
     function hideHolidayUI() {
@@ -203,23 +175,20 @@
         document.getElementById('main-content').style.display = "block";
     }
 
-    function saveToCloud() {
-        const dateKey = `${dayS.value}-${monS.value}-${yerS.value}`;
-        const data = { type: 'ATTENDANCE', details: dailyRecords };
-        
-        db.ref('attendance/' + dateKey).set(data).then(() => {
-            alert("Attendance Saved! ✅");
-        });
-    }
+    window.forceLoadAttendance = () => hideHolidayUI();
 
-    function setAsHoliday() {
-        const hName = document.getElementById('h-input').value;
-        if(!hName) return alert("Enter Holiday Name");
+    window.saveToCloud = () => {
         const dateKey = `${dayS.value}-${monS.value}-${yerS.value}`;
-        db.ref('attendance/' + dateKey).set({ type: 'HOLIDAY', name: hName }).then(() => {
-            location.reload();
-        });
-    }
+        db.ref('attendance/' + dateKey).set({ type: 'ATTENDANCE', details: dailyRecords })
+          .then(() => alert("Data Saved! ✅"));
+    };
+
+    window.setAsHoliday = () => {
+        const name = document.getElementById('h-input').value;
+        if(!name) return alert("Enter Holiday Name");
+        const dateKey = `${dayS.value}-${monS.value}-${yerS.value}`;
+        db.ref('attendance/' + dateKey).set({ type: 'HOLIDAY', name: name });
+    };
 </script>
 </body>
 </html>
