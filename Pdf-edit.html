@@ -3,44 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload PDF - Pro Dashboard</title>
+    <title>PDF Uploader - Free Tier</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #f8fafc; --text: #1e293b; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h2 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; }
-        .form-group { margin-bottom: 1.2rem; }
+        :root { --primary: #6366f1; --bg: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        h2 { color: var(--primary); margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; font-family: inherit; }
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
-        button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        button:disabled { background: #a5a6f6; cursor: not-allowed; }
-        #progress { display: none; text-align: center; margin-top: 10px; font-weight: 600; color: var(--primary); }
-        .view-link { text-align: center; display: block; margin-top: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button:disabled { background: #a5a6f6; }
+        #status { margin-top: 15px; font-weight: 600; color: var(--primary); display: none; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📄 PDF Uploader</h2>
+        <h2>📄 PDF Uploader (Free)</h2>
         <form id="pdfForm">
             <div class="form-group">
-                <label>File Select Karein (Unlimited Size)</label>
+                <label>File Select Karein (Max 4MB)</label>
                 <input type="file" id="pdfFile" accept="application/pdf" required>
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea id="pdfDesc" placeholder="File ke baare mein likhein..." rows="3" required></textarea>
+                <textarea id="pdfDesc" placeholder="Syllabus, Notes, etc..." rows="3" required></textarea>
             </div>
             <button type="submit" id="submitBtn">Save Karein</button>
-            <div id="progress">Uploading: <span id="percent">0%</span></div>
+            <div id="status">Processing File...</div>
         </form>
-        <a href="pdf.html" class="view-link">Saved Files Dekhein →</a>
+        <a href="pdf.html" style="display:block; margin-top:1.5rem; color:#64748b; text-decoration:none; font-size:0.9rem;">Saved Files Dekhein →</a>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -50,51 +47,47 @@
             projectId: "snt-computer-institute",
             storageBucket: "snt-computer-institute.firebasestorage.app",
             messagingSenderId: "117580784781",
-            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4",
-            measurementId: "G-6FKGX17D7F"
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const storage = firebase.storage();
 
         document.getElementById('pdfForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
+            const status = document.getElementById('status');
             const file = document.getElementById('pdfFile').files[0];
             const desc = document.getElementById('pdfDesc').value;
-            const progressDiv = document.getElementById('progress');
-            const percentText = document.getElementById('percent');
+
+            if (file.size > 4194304) { // 4MB Limit
+                alert("File bahut badi hai. 4MB se kam ki PDF upload karein.");
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerText = "Wait...";
-            progressDiv.style.display = "block";
+            status.style.display = "block";
+            status.innerText = "Converting & Saving...";
 
-            // Storage Ref (Unique name ke liye timestamp use kiya)
-            const storageRef = storage.ref('my_pdfs/' + Date.now() + "_" + file.name);
-            const uploadTask = storageRef.put(file);
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newData = {
+                    name: file.name,
+                    pdf: event.target.result, // PDF as Base64 string
+                    desc: desc,
+                    date: new Date().toLocaleDateString()
+                };
 
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    percentText.innerText = Math.round(prog) + "%";
-                }, 
-                (error) => { alert(error.message); btn.disabled = false; }, 
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        const newData = {
-                            name: file.name,
-                            pdf: downloadURL,
-                            desc: desc,
-                            date: new Date().toLocaleDateString()
-                        };
-                        database.ref('myPDFs').push(newData).then(() => {
-                            alert('Success! File Save ho gayi.');
-                            location.reload();
-                        });
-                    });
-                }
-            );
+                database.ref('myPDFs').push(newData)
+                .then(() => {
+                    alert('Success! File save ho gayi.');
+                    location.reload();
+                })
+                .catch((err) => {
+                    alert('Error: ' + err.message);
+                    btn.disabled = false;
+                });
+            };
+            reader.readAsDataURL(file);
         });
     </script>
 </body>
