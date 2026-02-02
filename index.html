@@ -20,9 +20,6 @@
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; }
         .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .calc-btn { background: #1e293b; padding: 20px 10px; border-radius: 12px; font-weight: bold; border: 1px solid #334155; color: white; font-size: 1.2rem; text-align: center; }
-        .calc-btn:active { background: #334155; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         
@@ -30,7 +27,6 @@
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         
-        /* Contact Buttons */
         .contact-btn { padding: 8px; border-radius: 10px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
     </style>
 </head>
@@ -119,20 +115,6 @@
         </div>
     </div>
 
-    <div id="calc-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-3xl w-72 border border-sky-500/30 shadow-2xl">
-            <div class="text-[10px] text-center font-black text-sky-500 uppercase tracking-[0.3em] mb-4">Security Access</div>
-            <div id="calc-display" class="bg-slate-950 p-4 rounded-xl text-right text-2xl font-mono mb-5 border border-slate-800 h-16 flex items-center justify-end text-sky-400 shadow-inner">0</div>
-            <div class="calc-grid">
-                <button class="calc-btn" onclick="pressNum('7')">7</button><button class="calc-btn" onclick="pressNum('8')">8</button><button class="calc-btn" onclick="pressNum('9')">9</button><button class="calc-btn bg-red-900/20 text-red-500" onclick="clearCalc()">C</button>
-                <button class="calc-btn" onclick="pressNum('4')">4</button><button class="calc-btn" onclick="pressNum('5')">5</button><button class="calc-btn" onclick="pressNum('6')">6</button><button class="calc-btn" onclick="pressNum('0')">0</button>
-                <button class="calc-btn" onclick="pressNum('1')">1</button><button class="calc-btn" onclick="pressNum('2')">2</button><button class="calc-btn" onclick="pressNum('3')">3</button>
-                <button class="calc-btn bg-sky-600 text-white" onclick="verifyPass()">OK</button>
-            </div>
-            <button onclick="closeCalc()" class="w-full mt-6 text-[10px] text-slate-500 uppercase font-bold text-center">Cancel</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -154,14 +136,12 @@
         const menuItems = [
             { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
             { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-            { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400', locked: true },
+            { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
             { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-           { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/pdf.html', icon: 'fa-file-pdf', color: 'text-red-500' },
+            { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/pdf.html', icon: 'fa-file-pdf', color: 'text-red-500' },
             { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
             { name: 'Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/verify.html', icon: 'fa-shield-alt', color: 'text-teal-400' },
-            { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400', locked: true },
-            { name: 'ID Verify', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-verify.html', icon: 'fa-user-check', color: 'text-emerald-400' },
-            { name: 'V-Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/v-receipt.html', icon: 'fa-receipt', color: 'text-indigo-400' },
+            { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
             { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
             { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
         ];
@@ -225,22 +205,12 @@
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `
                 <div class="app-card p-4 rounded-3xl text-center shadow-lg" 
-                     onclick="${item.locked ? `openCalc('${item.url}')` : `location.href='${item.url}'`}">
+                     onclick="location.href='${item.url}'">
                     <i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i>
                     <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">${item.name}</p>
                 </div>
             `).join('');
         }
-
-        let calcValue = ""; let target = "";
-        window.openCalc = (url) => { target = url; document.getElementById('calc-modal').style.display = "flex"; clearCalc(); };
-        window.closeCalc = () => document.getElementById('calc-modal').style.display = "none";
-        window.pressNum = (n) => { if(calcValue.length < 6) calcValue += n; document.getElementById('calc-display').innerText = calcValue; };
-        window.clearCalc = () => { calcValue = ""; document.getElementById('calc-display').innerText = "0"; };
-        window.verifyPass = () => {
-            if(calcValue === "912919") location.href = target;
-            else { alert("PIN Incorrect!"); clearCalc(); }
-        };
 
         document.onkeydown = e => { 
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
