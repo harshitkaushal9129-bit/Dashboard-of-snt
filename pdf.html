@@ -9,25 +9,16 @@
         :root { --primary: #6366f1; --bg: #f8fafc; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; }
         .container { max-width: 1000px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; }
-        .card h3 { margin: 0; font-size: 1.1rem; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .card p { font-size: 0.85rem; color: #64748b; margin: 10px 0; }
-        .actions { display: flex; gap: 10px; margin-top: 15px; }
-        .btn { flex: 1; padding: 8px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; }
-        .btn-open { background: var(--primary); color: white; }
-        .btn-del { background: #fee2e2; color: #ef4444; }
-        #loading { text-align: center; padding: 40px; color: #64748b; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .btn { padding: 10px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 600; border: none; cursor: pointer; font-size: 0.9rem; }
+        .btn-open { background: var(--primary); color: white; width: 100%; margin-top: 10px; text-align: center;}
+        .btn-del { color: #ef4444; background: none; font-size: 0.8rem; margin-top: 10px; width: 100%; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Library 📚</h1>
-            <input type="text" id="search" placeholder="Search..." onkeyup="filter()" style="padding:8px; border-radius:6px; border:1px solid #ddd;">
-        </div>
-        <div id="loading">Files load ho rahi hain...</div>
+        <h1>Online Library 📚</h1>
         <div id="grid" class="grid"></div>
     </div>
 
@@ -46,19 +37,27 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let cacheData = {};
+
+        // Ye function 'blocked' error ko fix karta hai
+        function viewPDF(base64Data) {
+            const base64Parts = base64Data.split(',');
+            const contentType = base64Parts[0].split(':')[1].split(';')[0];
+            const byteCharacters = atob(base64Parts[1]);
+            const byteArrays = [];
+
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteArrays.push(byteCharacters.charCodeAt(i));
+            }
+            const blob = new Blob([new Uint8Array(byteArrays)], {type: contentType});
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, '_blank');
+        }
 
         db.ref('myPDFs').on('value', (snap) => {
-            const data = snap.val() || {};
-            cacheData = data;
-            render(data);
-        });
-
-        function render(data) {
             const grid = document.getElementById('grid');
-            document.getElementById('loading').style.display = 'none';
             grid.innerHTML = '';
-            
+            const data = snap.val() || {};
+
             Object.keys(data).reverse().forEach(key => {
                 const item = data[key];
                 const div = document.createElement('div');
@@ -66,29 +65,15 @@
                 div.innerHTML = `
                     <h3>${item.name}</h3>
                     <p>${item.desc}</p>
-                    <small style="color:#94a3b8">${item.date}</small>
-                    <div class="actions">
-                        <a href="${item.pdf}" target="_blank" class="btn btn-open">View</a>
-                        <button onclick="deleteFile('${key}')" class="btn btn-del">Delete</button>
-                    </div>
+                    <button onclick="viewPDF('${item.pdf}')" class="btn btn-open">View PDF</button>
+                    <button onclick="deletePDF('${key}')" class="btn btn-del">Delete</button>
                 `;
                 grid.appendChild(div);
             });
-        }
+        });
 
-        function deleteFile(key) {
-            if(confirm("Kya aap ise delete karna chahte hain?")) {
-                db.ref('myPDFs/' + key).remove();
-            }
-        }
-
-        function filter() {
-            const q = document.getElementById('search').value.toLowerCase();
-            const filtered = {};
-            Object.keys(cacheData).forEach(k => {
-                if(cacheData[k].name.toLowerCase().includes(q)) filtered[k] = cacheData[k];
-            });
-            render(filtered);
+        function deletePDF(key) {
+            if(confirm("Delete karein?")) db.ref('myPDFs/' + key).remove();
         }
     </script>
 </body>
