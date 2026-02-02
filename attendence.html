@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SNT Attendance - Smart View</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Status Colors */
+        .p-status { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .a-status { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .h-status { background: rgba(234, 179, 8, 0.1); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.2); }
+        
+        .calendar-day { aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; font-size: 14px; font-weight: 800; transition: 0.2s; cursor: pointer; }
+        .calendar-day:active { transform: scale(0.9); }
+        
+        #detail-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-md mx-auto flex items-center justify-between mb-8 pt-4">
+        <button onclick="history.back()" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-sky-400 active:scale-90 transition-transform">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="text-center">
+            <h1 class="text-xl font-black tracking-tight uppercase">Attendance <span class="text-sky-500">Log</span></h1>
+            <p id="current-month" class="text-[10px] text-slate-500 font-bold tracking-[0.2em]"></p>
+        </div>
+        <div class="w-12"></div>
+    </div>
+
+    <div class="max-w-md mx-auto grid grid-cols-3 gap-3 mb-8">
+        <div class="glass p-4 rounded-3xl text-center border-b-4 border-green-500">
+            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Present</p>
+            <p id="count-present" class="text-xl font-black text-green-400">0</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center border-b-4 border-red-500">
+            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Absent</p>
+            <p id="count-absent" class="text-xl font-black text-red-400">0</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center border-b-4 border-yellow-500">
+            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Holiday</p>
+            <p id="count-holiday" class="text-xl font-black text-yellow-400">0</p>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto glass rounded-[2rem] p-5 shadow-2xl">
+        <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-black text-slate-500 mb-4 tracking-widest">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+        </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+            </div>
+    </div>
+
+    <div id="detail-modal" onclick="closeModal()">
+        <div class="glass p-8 rounded-[2.5rem] w-72 text-center border-t-4 border-sky-500 animate-fade-in" onclick="event.stopPropagation()">
+            <div id="modal-icon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg"></div>
+            <h2 id="modal-date" class="text-lg font-black mb-1">Date</h2>
+            <p id="modal-status" class="text-[10px] font-black uppercase tracking-widest mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400">Close</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            projectId: "snt-computer-institute",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const holidays = ["2026-01-26", "2026-03-24", "2026-08-15", "2026-10-02", "2026-10-21", "2026-12-25"];
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const attendRef = ref(db, 'attendance');
+                onValue(attendRef, (snap) => {
+                    renderCalendar(snap.val() || {}, user.email);
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function renderCalendar(data, email) {
+            const grid = document.getElementById('calendar-grid');
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth();
+            
+            document.getElementById('current-month').innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            
+            let html = '';
+            let p = 0, a = 0, h = 0;
+
+            for(let i=0; i<firstDay; i++) html += `<div></div>`;
+
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${y}-${String(m+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isSun = new Date(y, m, d).getDay() === 0;
+                const isHol = holidays.includes(dateStr);
+                
+                const record = Object.values(data).find(r => r.email === email && r.date === dateStr);
+                
+                let status = 'none', display = d, css = 'bg-slate-800/20 text-slate-600';
+
+                if(record) {
+                    if(record.status === 'Present') { status = 'Present'; css = 'p-status'; display = 'P'; p++; }
+                    else { status = 'Absent'; css = 'a-status'; display = 'A'; a++; }
+                } else if(isSun || isHol) {
+                    status = isSun ? 'Sunday' : 'Holiday'; css = 'h-status'; display = 'H'; h++;
+                }
+
+                html += `<div class="calendar-day ${css}" onclick="showDetail('${dateStr}', '${status}')">${display}</div>`;
+            }
+
+            grid.innerHTML = html;
+            document.getElementById('count-present').innerText = p;
+            document.getElementById('count-absent').innerText = a;
+            document.getElementById('count-holiday').innerText = h;
+        }
+
+        window.showDetail = (date, status) => {
+            const modal = document.getElementById('detail-modal');
+            const iconBox = document.getElementById('modal-icon');
+            document.getElementById('modal-date').innerText = date;
+            document.getElementById('modal-status').innerText = status;
+
+            iconBox.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg ";
+            
+            if(status === 'Present') {
+                iconBox.innerHTML = '<i class="fas fa-check"></i>';
+                iconBox.classList.add('bg-green-500/20', 'text-green-500');
+            } else if(status === 'Absent') {
+                iconBox.innerHTML = '<i class="fas fa-times"></i>';
+                iconBox.classList.add('bg-red-500/20', 'text-red-500');
+            } else {
+                iconBox.innerHTML = '<i class="fas fa-umbrella-beach"></i>';
+                iconBox.classList.add('bg-yellow-500/20', 'text-yellow-500');
+            }
+
+            modal.style.display = 'flex';
+        };
+
+        window.closeModal = () => { document.getElementById('detail-modal').style.display = 'none'; };
+    </script>
+</body>
+</html>
