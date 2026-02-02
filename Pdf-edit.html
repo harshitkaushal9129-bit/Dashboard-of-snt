@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload PDF - Pro Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 15px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #4f46e5; transform: translateY(-2px); }
+        .view-link { text-align: center; display: block; margin-top: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📄 PDF Uploader (Firebase)</h2>
+        <form id="pdfForm">
+            <div class="form-group">
+                <label>File Select Karein</label>
+                <input type="file" id="pdfFile" accept="application/pdf" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="pdfDesc" placeholder="File ke baare mein likhein..." rows="3" required></textarea>
+            </div>
+            <button type="submit" id="submitBtn">Save Karein</button>
+        </form>
+        <a href="pdf.html" class="view-link">Saved Files Dekhein →</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            projectId: "snt-computer-institute",
+            storageBucket: "snt-computer-institute.firebasestorage.app",
+            messagingSenderId: "117580784781",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4",
+            measurementId: "G-6FKGX17D7F"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        document.getElementById('pdfForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const file = document.getElementById('pdfFile').files[0];
+            const desc = document.getElementById('pdfDesc').value;
+            
+            if(file.size > 1048576) { // 1MB limit check for Realtime DB
+                alert("File size 1MB se kam honi chahiye!");
+                return;
+            }
+
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newData = {
+                    name: file.name,
+                    pdf: event.target.result,
+                    desc: desc,
+                    date: new Date().toLocaleDateString()
+                };
+
+                database.ref('myPDFs').push(newData)
+                    .then(() => {
+                        alert('Success! Firebase mein save ho gayi.');
+                        location.reload();
+                    })
+                    .catch((error) => {
+                        alert('Error: ' + error.message);
+                        btn.innerText = "Save Karein";
+                        btn.disabled = false;
+                    });
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>

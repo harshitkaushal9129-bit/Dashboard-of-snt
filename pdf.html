@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My PDF Vault - Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --bg: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; margin: 0; }
+        .container { max-width: 1100px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #searchBar { padding: 10px 15px; border: 2px solid #e2e8f0; border-radius: 8px; width: 300px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+        .pdf-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; }
+        .pdf-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(99, 102, 241, 0.15); }
+        .card-icon { background: #f1f5f9; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .card-body { padding: 20px; }
+        .footer-card { padding: 15px; border-top: 1px solid #f1f5f9; }
+        .btn-view { background: var(--primary); color: white; padding: 10px; border-radius: 8px; text-decoration: none; display: block; text-align: center; font-weight: 600; }
+        #loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 style="margin:0; font-size: 1.5rem;">Online Library 📚</h1>
+                <small style="color:#64748b">Firebase Powered Storage</small>
+            </div>
+            <input type="text" id="searchBar" placeholder="Search files..." onkeyup="filterFiles()">
+        </div>
+        <div id="loading">Loading files from Firebase...</div>
+        <div id="grid" class="grid"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            projectId: "snt-computer-institute",
+            storageBucket: "snt-computer-institute.firebasestorage.app",
+            messagingSenderId: "117580784781",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4",
+            measurementId: "G-6FKGX17D7F"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        let allData = [];
+
+        function render(data) {
+            const grid = document.getElementById('grid');
+            document.getElementById('loading').style.display = 'none';
+            grid.innerHTML = '';
+            
+            if (Object.keys(data).length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Koi files nahi mili!</p>';
+                return;
+            }
+
+            Object.values(data).reverse().forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'pdf-card';
+                card.innerHTML = `
+                    <div class="card-icon">📄</div>
+                    <div class="card-body">
+                        <h3 title="${item.name}">${item.name}</h3>
+                        <p>${item.desc}</p>
+                        <small style="color:#94a3b8">${item.date}</small>
+                    </div>
+                    <div class="footer-card">
+                        <a href="${item.pdf}" target="_blank" class="btn-view">Open PDF</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Realtime Listener
+        database.ref('myPDFs').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            allData = data;
+            render(data);
+        });
+
+        function filterFiles() {
+            const query = document.getElementById('searchBar').value.toLowerCase();
+            const filtered = Object.values(allData).filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                item.desc.toLowerCase().includes(query)
+            );
+            render(filtered);
+        }
+    </script>
+</body>
+</html>
