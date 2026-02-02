@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Uploader - Free Tier</title>
+    <title>Upload PDF - Free Tier</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg: #f8fafc; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .card { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
-        h2 { color: var(--primary); margin-bottom: 1.5rem; }
         .form-group { margin-bottom: 1.2rem; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        button:disabled { background: #a5a6f6; }
-        #status { margin-top: 15px; font-weight: 600; color: var(--primary); display: none; }
+        #status { margin-top: 10px; font-size: 0.85rem; color: #6366f1; display: none; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📄 PDF Uploader (Free)</h2>
+        <h2>📄 PDF Uploader</h2>
         <form id="pdfForm">
             <div class="form-group">
-                <label>File Select Karein (Max 4MB)</label>
+                <label>PDF Select Karein (Max 4MB)</label>
                 <input type="file" id="pdfFile" accept="application/pdf" required>
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea id="pdfDesc" placeholder="Syllabus, Notes, etc..." rows="3" required></textarea>
+                <textarea id="pdfDesc" rows="3" required></textarea>
             </div>
             <button type="submit" id="submitBtn">Save Karein</button>
-            <div id="status">Processing File...</div>
+            <div id="status">Wait... Saving to Database...</div>
         </form>
-        <a href="pdf.html" style="display:block; margin-top:1.5rem; color:#64748b; text-decoration:none; font-size:0.9rem;">Saved Files Dekhein →</a>
+        <a href="pdf.html" style="display:block; margin-top:15px; text-decoration:none; color:#64748b; font-size:0.9rem;">View Library →</a>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -59,32 +57,22 @@
             const file = document.getElementById('pdfFile').files[0];
             const desc = document.getElementById('pdfDesc').value;
 
-            if (file.size > 4194304) { // 4MB Limit
-                alert("File bahut badi hai. 4MB se kam ki PDF upload karein.");
-                return;
-            }
+            if(file.size > 4194304) { alert("File 4MB se badi hai!"); return; }
 
             btn.disabled = true;
             status.style.display = "block";
-            status.innerText = "Converting & Saving...";
 
             const reader = new FileReader();
             reader.onload = function(event) {
                 const newData = {
                     name: file.name,
-                    pdf: event.target.result, // PDF as Base64 string
+                    pdf: event.target.result, // Base64 String
                     desc: desc,
                     date: new Date().toLocaleDateString()
                 };
-
-                database.ref('myPDFs').push(newData)
-                .then(() => {
-                    alert('Success! File save ho gayi.');
+                database.ref('myPDFs').push(newData).then(() => {
+                    alert('Save Ho Gaya!');
                     location.reload();
-                })
-                .catch((err) => {
-                    alert('Error: ' + err.message);
-                    btn.disabled = false;
                 });
             };
             reader.readAsDataURL(file);
