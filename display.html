@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <link rel="icon" type="image/jpeg" href="SNT.jpg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNT Institute - My Dashboard</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+  <style>
+    :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); margin: 0; padding: 15px; user-select: none; }
+    
+    header { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+    header h1 { font-size: 18px; margin: 0; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+
+    .student-card { background: var(--card-bg); border-radius: 25px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+    .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+    .profile-img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+    
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .info-box { background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 15px; border-left: 4px solid var(--accent); }
+    .label { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+    .val { font-size: 14px; font-weight: 600; margin-top: 4px; }
+
+    .history-section { margin-top: 25px; }
+    .history-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .badge-container { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge { padding: 6px 12px; border-radius: 10px; font-size: 12px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .extra-badge { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #10b981; }
+
+    .btn-action { margin-top: 25px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    #loader { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: bold; }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+
+  <div id="loader">वेरिफाइंग एक्सेस...</div>
+
+  <header>
+    <h1>SNT Dashboard</h1>
+    <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">Logout</button>
+  </header>
+
+  <div id="main-content" style="display:none;">
+    <div class="student-card">
+      <div class="profile-header">
+        <img id="u-img" src="" class="profile-img">
+        <div>
+          <div id="u-name" style="font-size: 20px; font-weight: 800;">Loading...</div>
+          <div id="u-status" style="font-size: 11px; margin-top: 2px;">Status: --</div>
+        </div>
+      </div>
+
+      <div class="data-grid">
+        <div class="info-box"><div class="label">Student ID</div><div id="u-id" class="val">--</div></div>
+        <div class="info-box"><div class="label">Course</div><div id="u-course" class="val">--</div></div>
+        <div class="info-box"><div class="label">Mobile</div><div id="u-phone" class="val">--</div></div>
+        <div class="info-box"><div class="label">Won Cash</div><div id="u-won" class="val" style="color:#10b981">₹0</div></div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-title">📅 Monthly Fees History</div>
+        <div id="fee-hist" class="badge-container"></div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-title">📄 Extra Charges</div>
+        <div id="extra-hist" class="badge-container"></div>
+      </div>
+
+      <button class="btn-action" onclick="location.href='calendar.html'">My Attendance Report</button>
+      <button class="btn-action" style="background:#1e293b; color:#fff; margin-top: 10px;" onclick="location.href='basic.html'">Download Receipt</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = { 
+      apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", 
+      authDomain: "snt-computer-institute.firebaseapp.com", 
+      databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com/", 
+      projectId: "snt-computer-institute", 
+      appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" 
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        loadMyData(user.email);
+      } else {
+        window.location.href = "index.html"; // Login nahi hai toh bahar bhej do
+      }
+    });
+
+    function loadMyData(email) {
+      db.ref('students').orderByChild('email').equalTo(email).on('value', (snap) => {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+
+        if (snap.exists()) {
+          const key = Object.keys(snap.val())[0];
+          const data = snap.val()[key];
+
+          document.getElementById('u-img').src = data.profilePicture || 'https://via.placeholder.com/100';
+          document.getElementById('u-name').innerText = data.name;
+          document.getElementById('u-id').innerText = data.studentId || 'N/A';
+          document.getElementById('u-course').innerText = data.course || (data.courses ? data.courses[0] : 'N/A');
+          document.getElementById('u-phone').innerText = data.mobile || data.phone || '--';
+          document.getElementById('u-won').innerText = `₹${data.wonCash || 0}`;
+          document.getElementById('u-status').innerText = `Status: ${data.registrationStatus || 'Active'}`;
+          document.getElementById('u-status').style.color = data.registrationStatus === 'Pending' ? '#ef4444' : '#10b981';
+
+          // Fees History
+          const feeContainer = document.getElementById('fee-hist');
+          feeContainer.innerHTML = (data.paymentHistory || []).map(p => `<span class="badge">${p.month}: ₹${p.amount}</span>`).join('') || 'No records';
+
+          // Extra History
+          const extraContainer = document.getElementById('extra-hist');
+          extraContainer.innerHTML = (data.extraHistory || []).map(e => `<span class="badge extra-badge">${e.reason}: ₹${e.amount}</span>`).join('') || 'No records';
+
+        } else {
+          alert("आपका ईमेल डेटाबेस में नहीं मिला। कृपया एडमिन से रजिस्टर करवाएं।");
+          logout();
+        }
+      });
+    }
+
+    function logout() {
+      auth.signOut().then(() => window.location.href = "index.html");
+    }
+
+    // Security
+    document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; };
+  </script>
+</body>
+</html>
