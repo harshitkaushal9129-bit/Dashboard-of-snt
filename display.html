@@ -19,7 +19,7 @@
 
     .student-card { background: var(--card-bg); border-radius: 25px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
     .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
-    .profile-img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+    .profile-img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: #0f172a; }
     
     .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .info-box { background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 15px; border-left: 4px solid var(--accent); }
@@ -29,51 +29,58 @@
     .history-section { margin-top: 25px; }
     .history-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
     .badge-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .badge { padding: 6px 12px; border-radius: 10px; font-size: 12px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .badge { padding: 6px 12px; border-radius: 10px; font-size: 11px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); }
     .extra-badge { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #10b981; }
 
-    .btn-action { margin-top: 25px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; }
-    #loader { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: bold; }
+    .btn-action { margin-top: 20px; width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
+    .btn-action:active { transform: scale(0.98); }
+    
+    #loader { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body oncontextmenu="return false;">
 
-  <div id="loader">वेरिफाइंग एक्सेस...</div>
+  <div id="loader">
+    <div class="spinner"></div>
+    <div style="font-weight: bold; font-size: 12px; letter-spacing: 2px;">FETCHING PROFILE...</div>
+  </div>
 
   <header>
-    <h1>SNT Dashboard</h1>
-    <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">Logout</button>
+    <h1>SNT PORTAL</h1>
+    <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size: 12px;">LOGOUT</button>
   </header>
 
   <div id="main-content" style="display:none;">
     <div class="student-card">
       <div class="profile-header">
-        <img id="u-img" src="" class="profile-img">
+        <img id="u-img" src="SNT.jpg" class="profile-img">
         <div>
-          <div id="u-name" style="font-size: 20px; font-weight: 800;">Loading...</div>
-          <div id="u-status" style="font-size: 11px; margin-top: 2px;">Status: --</div>
+          <div id="u-name" style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">---</div>
+          <div id="u-status" style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 4px;">Status: --</div>
         </div>
       </div>
 
       <div class="data-grid">
-        <div class="info-box"><div class="label">Student ID</div><div id="u-id" class="val">--</div></div>
+        <div class="info-box"><div class="label">Roll Number</div><div id="u-id" class="val">--</div></div>
         <div class="info-box"><div class="label">Course</div><div id="u-course" class="val">--</div></div>
         <div class="info-box"><div class="label">Mobile</div><div id="u-phone" class="val">--</div></div>
-        <div class="info-box"><div class="label">Won Cash</div><div id="u-won" class="val" style="color:#10b981">₹0</div></div>
+        <div class="info-box"><div class="label">Rewards</div><div id="u-won" class="val" style="color:#10b981">₹0</div></div>
       </div>
 
       <div class="history-section">
-        <div class="history-title">📅 Monthly Fees History</div>
+        <div class="history-title">📅 Fees History</div>
         <div id="fee-hist" class="badge-container"></div>
       </div>
 
       <div class="history-section">
-        <div class="history-title">📄 Extra Charges</div>
+        <div class="history-title">📑 Other Charges</div>
         <div id="extra-hist" class="badge-container"></div>
       </div>
 
-      <button class="btn-action" onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html'">My Attendance Report</button>
-      <button class="btn-action" style="background:#1e293b; color:#fff; margin-top: 10px;" onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html'">Download Receipt</button>
+      <button id="att-btn" class="btn-action">My Attendance Report</button>
+      <button id="rec-btn" class="btn-action" style="background:#1e293b; color:#fff; border: 1px solid #334155; margin-top: 10px;">Download Receipt</button>
     </div>
   </div>
 
@@ -90,42 +97,56 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
+    // Jab user login status change ho
     auth.onAuthStateChanged((user) => {
       if (user) {
         loadMyData(user.email);
       } else {
-        window.location.href = "index.html"; // Login nahi hai toh bahar bhej do
+        window.location.href = "index.html"; 
       }
     });
 
     function loadMyData(email) {
       db.ref('students').orderByChild('email').equalTo(email).on('value', (snap) => {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-
         if (snap.exists()) {
-          const key = Object.keys(snap.val())[0];
-          const data = snap.val()[key];
+          // Database ki main Unique Key (ID) nikaalna
+          const dbId = Object.keys(snap.val())[0];
+          const data = snap.val()[dbId];
 
-          document.getElementById('u-img').src = data.profilePicture || 'https://via.placeholder.com/100';
+          // UI Update
+          document.getElementById('u-img').src = data.profilePicture || 'SNT.jpg';
           document.getElementById('u-name').innerText = data.name;
           document.getElementById('u-id').innerText = data.studentId || 'N/A';
           document.getElementById('u-course').innerText = data.course || (data.courses ? data.courses[0] : 'N/A');
           document.getElementById('u-phone').innerText = data.mobile || data.phone || '--';
           document.getElementById('u-won').innerText = `₹${data.wonCash || 0}`;
-          document.getElementById('u-status').innerText = `Status: ${data.registrationStatus || 'Active'}`;
-          document.getElementById('u-status').style.color = data.registrationStatus === 'Pending' ? '#ef4444' : '#10b981';
+          
+          const statusEl = document.getElementById('u-status');
+          statusEl.innerText = `Status: ${data.registrationStatus || 'Active'}`;
+          statusEl.style.color = data.registrationStatus === 'Pending' ? '#ef4444' : '#10b981';
 
-          // Fees History
+          // Attendance button link mein Database ID (dbId) add karna
+          document.getElementById('att-btn').onclick = () => {
+            window.location.href = `calendar.html?id=${dbId}`;
+          };
+
+          // Receipt button link mein Name add karna
+          document.getElementById('rec-btn').onclick = () => {
+            window.location.href = `basic.html?search=${encodeURIComponent(data.name)}`;
+          };
+
+          // Histories
           const feeContainer = document.getElementById('fee-hist');
           feeContainer.innerHTML = (data.paymentHistory || []).map(p => `<span class="badge">${p.month}: ₹${p.amount}</span>`).join('') || 'No records';
 
-          // Extra History
           const extraContainer = document.getElementById('extra-hist');
-          extraContainer.innerHTML = (data.extraHistory || []).map(e => `<span class="badge extra-badge">${e.reason}: ₹${e.amount}</span>`).join('') || 'No records';
+          extraContainer.innerHTML = (data.extraHistory || []).map(e => `<span class="badge extra-badge">${e.reason}: ₹${e.amount}</span>`).join('') || 'None';
 
+          // Content dikhana
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('main-content').style.display = 'block';
         } else {
-          alert("आपका ईमेल डेटाबेस में नहीं मिला। कृपया एडमिन से रजिस्टर करवाएं।");
+          alert("Error: Your email is not registered in our database.");
           logout();
         }
       });
@@ -135,8 +156,10 @@
       auth.signOut().then(() => window.location.href = "index.html");
     }
 
-    // Security
-    document.onkeydown = e => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; };
+    // Protection
+    document.onkeydown = e => { 
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) return false; 
+    };
   </script>
 </body>
 </html>
