@@ -146,7 +146,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, query, orderByChild, equalTo, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -173,7 +173,28 @@
             { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
         ];
 
-        window.loginWithGoogle = () => signInWithPopup(auth, provider);
+        // Modified Login Function to Track Users
+        window.loginWithGoogle = () => {
+            signInWithPopup(auth, provider).then((result) => {
+                const user = result.user;
+                const userRef = ref(db, 'students/' + user.uid);
+                
+                // Check if user already exists
+                get(userRef).then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        // If new user, save their basic info
+                        set(userRef, {
+                            name: user.displayName,
+                            email: user.email,
+                            profilePic: user.photoURL,
+                            registrationStatus: "Guest User",
+                            joinDate: new Date().toLocaleString()
+                        });
+                    }
+                });
+            });
+        };
+
         window.logout = () => signOut(auth).then(() => location.reload());
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
 
@@ -187,8 +208,6 @@
             document.getElementById('info-time').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
         };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
-        
-        // QR Modal Controls
         window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
 
@@ -198,31 +217,36 @@
                 document.getElementById('dashboard').classList.remove('hidden');
                 
                 const studentsRef = ref(db, 'students');
-                const emailQuery = query(studentsRef, orderByChild('email'), equalTo(user.email));
-
-                onValue(emailQuery, (snapshot) => {
+                // Use UID for more accurate tracking, but keeping email query for backward compatibility
+                onValue(studentsRef, (snapshot) => {
                     if (snapshot.exists()) {
-                        const rawData = snapshot.val();
-                        const sData = Object.values(rawData)[0];
-                        document.getElementById('user-name').innerText = sData.name || user.displayName;
-                        document.getElementById('user-email').innerText = user.email;
-                        document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
-                        document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "N/A");
-                        document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
+                        const allData = snapshot.val();
+                        let sData = allData[user.uid]; // Priority 1: Match by UID
                         
-                        const statusEl = document.getElementById('user-status-badge');
-                        if(sData.registrationStatus === "Pending") {
-                            statusEl.innerText = "Pending";
-                            statusEl.className = "text-[9px] bg-red-500/10 text-red-400 px-3 py-1 rounded border border-red-500/20 font-black uppercase";
-                        } else {
-                            statusEl.innerText = "Active";
-                            statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
+                        // Priority 2: Match by Email if UID not found
+                        if (!sData) {
+                            sData = Object.values(allData).find(s => s.email === user.email);
                         }
-                    } else {
-                        document.getElementById('user-name').innerText = user.displayName;
-                        document.getElementById('user-email').innerText = user.email;
-                        document.getElementById('user-roll').innerText = "GUEST";
-                        document.getElementById('mobile-val').innerText = "Update Profile";
+
+                        if (sData) {
+                            document.getElementById('user-name').innerText = sData.name || user.displayName;
+                            document.getElementById('user-email').innerText = user.email;
+                            document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
+                            document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
+                            document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
+                            
+                            const statusEl = document.getElementById('user-status-badge');
+                            const status = sData.registrationStatus || "Guest User";
+                            statusEl.innerText = status;
+
+                            if(status === "Pending") {
+                                statusEl.className = "text-[9px] bg-red-500/10 text-red-400 px-3 py-1 rounded border border-red-500/20 font-black uppercase";
+                            } else if(status === "Guest User") {
+                                statusEl.className = "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
+                            } else {
+                                statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
+                            }
+                        }
                     }
                 });
                 renderMenu();
