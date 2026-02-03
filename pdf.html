@@ -3,25 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My PDF Vault</title>
+    <title>My PDF Vault - SNT</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #f8fafc; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; }
+        :root { --primary: #38bdf8; --bg: #0f172a; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; color: white; }
         .container { max-width: 1000px; margin: auto; }
+        .user-info { background: rgba(56, 189, 248, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.2); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .btn { padding: 10px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 600; border: none; cursor: pointer; font-size: 0.9rem; }
-        .btn-open { background: var(--primary); color: white; width: 100%; margin-top: 10px; text-align: center;}
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .btn-open { background: var(--primary); color: #0f172a; width: 100%; margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer; }
+        .status-msg { text-align: center; margin-top: 50px; color: #94a3b8; }
+        .course-badge { background: var(--primary); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Online Library 📚</h1>
+        <div class="user-info" id="user-header">
+            <h2 id="welcome-msg">Loading Library...</h2>
+            <p id="course-msg" style="font-size: 12px; color: #94a3b8; margin: 0;"></p>
+        </div>
+
         <div id="grid" class="grid"></div>
+        <div id="no-access" class="status-msg" style="display:none;">
+            <h3>Aapke course ke liye koi PDF nahi mili.</h3>
+            <p>Kripya Admin se sampark karein.</p>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
     <script>
@@ -36,14 +47,14 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
 
-        // Ye function 'blocked' error ko fix karta hai
+        // PDF View Logic
         function viewPDF(base64Data) {
             const base64Parts = base64Data.split(',');
             const contentType = base64Parts[0].split(':')[1].split(';')[0];
             const byteCharacters = atob(base64Parts[1]);
             const byteArrays = [];
-
             for (let i = 0; i < byteCharacters.length; i++) {
                 byteArrays.push(byteCharacters.charCodeAt(i));
             }
@@ -52,23 +63,59 @@
             window.open(blobUrl, '_blank');
         }
 
-        db.ref('myPDFs').on('value', (snap) => {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            const data = snap.val() || {};
+        // Auth Logic to filter by User's Course
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // 1. Pehle Student ka Course pata karte hain
+                db.ref('students/' + user.uid).once('value', (studentSnap) => {
+                    let userCourse = "";
+                    if (studentSnap.exists()) {
+                        // Maan lete hain students table mein 'course' field hai (ADCA, CCC etc)
+                        userCourse = studentSnap.val().course || studentSnap.val().registrationStatus; 
+                    }
 
-            Object.keys(data).reverse().forEach(key => {
-                const item = data[key];
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <h3>${item.name}</h3>
-                    <p>${item.desc}</p>
-                    <button onclick="viewPDF('${item.pdf}')" class="btn btn-open">View PDF</button>
-                `;
-                grid.appendChild(div);
-            });
+                    document.getElementById('welcome-msg').innerText = "Hello, " + (studentSnap.val()?.name || user.displayName);
+                    document.getElementById('course-msg').innerText = "Personalized Notes for: " + (userCourse || "Guest");
+
+                    // 2. Ab wahi PDFs fetch karte hain jo is Course se match karein
+                    loadFilteredPDFs(userCourse);
+                });
+            } else {
+                window.location.href = "index.html"; // Login nahi hai to wapas bhej do
+            }
         });
+
+        function loadFilteredPDFs(course) {
+            db.ref('myPDFs').on('value', (snap) => {
+                const grid = document.getElementById('grid');
+                const noAccess = document.getElementById('no-access');
+                grid.innerHTML = '';
+                const data = snap.val() || {};
+                
+                let count = 0;
+
+                Object.keys(data).reverse().forEach(key => {
+                    const item = data[key];
+                    
+                    // FILTER LOGIC: Agar PDF ki category user ke course se match karti hai
+                    // Ya fir PDF category "All" rakhi gayi ho
+                    if (item.category === course || item.category === "Other" || !item.category) {
+                        count++;
+                        const div = document.createElement('div');
+                        div.className = 'card';
+                        div.innerHTML = `
+                            <span class="course-badge">${item.category || 'General'}</span>
+                            <h3 style="margin-top:10px;">${item.name}</h3>
+                            <p style="color:#94a3b8; font-size:12px;">${item.desc}</p>
+                            <button onclick="viewPDF('${item.pdf}')" class="btn-open">View PDF</button>
+                        `;
+                        grid.appendChild(div);
+                    }
+                });
+
+                noAccess.style.display = (count === 0) ? 'block' : 'none';
+            });
+        }
     </script>
 </body>
 </html>
