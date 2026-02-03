@@ -27,11 +27,18 @@
                 <label>Course Select Karein</label>
                 <select id="pdfCategory" required>
                     <option value="" disabled selected>Course chunein...</option>
-                    <option value="ADCA">ADCA</option>
+                    <option value="Computer Basics">Computer Basics</option>
+                    <option value="Computer Foundation">Computer Foundation</option>
+                    <option value="C++ Language">C++ Language</option>
+                    <option value="Java">Java</option>
+                    <option value="DCA & ADCA">DCA & ADCA</option>
                     <option value="CCC">CCC</option>
-                    <option value="DCA">DCA</option>
-                    <option value="Tally">Tally</option>
-                    <option value="Hardware">Hardware</option>
+                    <option value="'O' Level">'O' Level</option>
+                    <option value="Web Design">Web Design</option>
+                    <option value="Python">Python</option>
+                    <option value="Tally ERP 9">Tally ERP 9</option>
+                    <option value="Adv. Excel">Adv. Excel</option>
+                    <option value="Hardware & Net.">Hardware & Net.</option>
                     <option value="Other">Other</option>
                 </select>
             </div>
@@ -73,7 +80,6 @@
             const desc = document.getElementById('pdfDesc').value;
             const category = document.getElementById('pdfCategory').value;
 
-            // File size validation (4MB)
             if(file.size > 4194304) { 
                 alert("File size 4MB se zyada hai! Please choti file upload karein."); 
                 return; 
@@ -86,13 +92,12 @@
             reader.onload = function(event) {
                 const newData = {
                     name: file.name,
-                    pdf: event.target.result, // Base64 String
+                    pdf: event.target.result, 
                     desc: desc,
-                    category: category, // Category added here
+                    category: category, 
                     date: new Date().toLocaleString()
                 };
 
-                // Saving to Firebase
                 database.ref('myPDFs').push(newData).then(() => {
                     alert('Badhai ho! PDF Category (' + category + ') mein save ho gaya!');
                     location.reload();
