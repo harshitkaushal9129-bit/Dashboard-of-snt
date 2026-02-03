@@ -7,31 +7,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; color: white; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); padding: 20px; color: white; margin: 0; }
         .container { max-width: 1000px; margin: auto; }
-        .user-info { background: rgba(56, 189, 248, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.2); }
+        .user-info { background: rgba(56, 189, 248, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.2); text-align: left; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; position: relative; }
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .btn-open { background: var(--primary); color: #0f172a; width: 100%; margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
         .btn-open:hover { background: #7dd3fc; }
         .status-msg { text-align: center; margin-top: 50px; color: #94a3b8; }
-        .course-badge { background: var(--primary); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        h3 { margin: 10px 0 5px 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .course-badge { background: var(--primary); color: #0f172a; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        h3 { margin: 12px 0 5px 0; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #welcome-msg { margin: 0; color: #f8fafc; font-size: 22px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="user-info" id="user-header">
             <h2 id="welcome-msg">Library Load Ho Rahi Hai...</h2>
-            <p id="course-msg" style="font-size: 12px; color: #94a3b8; margin: 0;"></p>
+            <p id="course-msg" style="font-size: 14px; color: #38bdf8; margin-top: 5px; font-weight: 600;"></p>
         </div>
 
         <div id="grid" class="grid"></div>
         
         <div id="no-access" class="status-msg" style="display:none;">
-            <h3>Aapke course ke liye filhal koi PDF nahi hai.</h3>
-            <p>Naye notes upload hone par yahan dikhayi denge.</p>
+            <h3>Aapke course ke liye koi PDF nahi mili.</h3>
+            <p>Admin ne shayad abhi tak aapke course ke notes upload nahi kiye hain.</p>
         </div>
     </div>
 
@@ -53,7 +54,7 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // PDF Open Function
+        // PDF Preview/Download Logic
         function viewPDF(base64Data) {
             try {
                 const base64Parts = base64Data.split(',');
@@ -67,40 +68,53 @@
                 const blobUrl = URL.createObjectURL(blob);
                 window.open(blobUrl, '_blank');
             } catch (e) {
-                alert("PDF open karne mein dikkat aa rahi hai.");
+                alert("PDF open karne mein error: File data corrupt ho sakta hai.");
             }
         }
 
-        // Auth and Filter Logic
+        // Student Data Fetch and PDF Filtering
         auth.onAuthStateChanged((user) => {
             if (user) {
-                db.ref('students').orderByChild('mobile').equalTo(user.phoneNumber?.replace('+91','') || "").once('value', (snapshot) => {
-                    let userData = null;
-                    if (snapshot.exists()) {
-                        // Agar phone se login hai toh data aise nikalega
-                        const key = Object.keys(snapshot.val())[0];
-                        userData = snapshot.val()[key];
+                // User ke data ke liye "students" node scan karna
+                db.ref('students').on('value', (snapshot) => {
+                    let studentFound = null;
+                    const allData = snapshot.val();
+                    
+                    if (allData) {
+                        // 1. UID se check karein (Agar login UID se linked hai)
+                        if (allData[user.uid]) {
+                            studentFound = allData[user.uid];
+                        } else {
+                            // 2. Mobile se check karein (Admission form ke mobile field se match)
+                            const myMobile = user.phoneNumber ? user.phoneNumber.replace('+91', '') : "";
+                            Object.values(allData).forEach(st => {
+                                if (st.mobile === myMobile || st.phone === myMobile) {
+                                    studentFound = st;
+                                }
+                            });
+                        }
                     }
 
-                    // Fallback: Agar UID se database save hai
-                    db.ref('students/' + user.uid).once('value', (snapUid) => {
-                        const finalData = userData || snapUid.val();
-                        
-                        if (finalData) {
-                            const studentName = finalData.name || "Student";
-                            const studentCourses = finalData.courses || []; // Yeh array hona chahiye
-                            
-                            document.getElementById('welcome-msg').innerText = "Namaste, " + studentName;
-                            document.getElementById('course-msg').innerText = "Aapke Courses: " + (Array.isArray(studentCourses) ? studentCourses.join(", ") : studentCourses);
+                    if (studentFound) {
+                        // Admission form mein field 'courses' (array) hai
+                        const myCourses = studentFound.courses || studentFound.course || [];
+                        const studentName = studentFound.name || "Student";
 
-                            loadFilteredPDFs(studentCourses);
-                        } else {
-                            document.getElementById('welcome-msg').innerText = "Hello, Guest";
-                            loadFilteredPDFs([]); 
-                        }
-                    });
+                        document.getElementById('welcome-msg').innerText = "Namaste, " + studentName;
+                        
+                        // Array ko display string mein badlein
+                        const courseTxt = Array.isArray(myCourses) ? myCourses.join(", ") : myCourses;
+                        document.getElementById('course-msg').innerText = "Aapke Course: " + (courseTxt || "Not Assigned");
+
+                        loadFilteredPDFs(myCourses);
+                    } else {
+                        document.getElementById('welcome-msg').innerText = "Profile Not Found";
+                        document.getElementById('course-msg').innerText = "Kripya Admission process poora karein.";
+                        loadFilteredPDFs([]); // No data
+                    }
                 });
             } else {
+                // Agar login nahi hai toh Admission form/Login page par bhej dein
                 window.location.href = "index.html";
             }
         });
@@ -113,23 +127,29 @@
                 const data = snap.val() || {};
                 
                 let count = 0;
-                const coursesArray = Array.isArray(studentCourses) ? studentCourses : [studentCourses];
+                // Student ke courses ko standard array format mein lana
+                const stCoursesArray = Array.isArray(studentCourses) 
+                    ? studentCourses.map(c => String(c).trim()) 
+                    : [String(studentCourses).trim()];
 
                 Object.keys(data).reverse().forEach(key => {
-                    const item = data[key];
-                    
-                    // Logic: Match PDF category with Student's course list
-                    const hasAccess = coursesArray.some(c => c === item.category) || item.category === "Other" || item.category === "All";
+                    const pdfItem = data[key];
+                    const pdfCategory = pdfItem.category ? String(pdfItem.category).trim() : "";
 
-                    if (hasAccess) {
+                    // Match logic: Kya student ka koi bhi course PDF ki category se match karta hai?
+                    const canSee = stCoursesArray.includes(pdfCategory) || 
+                                   pdfCategory === "Other" || 
+                                   pdfCategory === "All";
+
+                    if (canSee) {
                         count++;
                         const div = document.createElement('div');
                         div.className = 'card';
                         div.innerHTML = `
-                            <span class="course-badge">${item.category || 'General'}</span>
-                            <h3>${item.name}</h3>
-                            <p style="color:#94a3b8; font-size:12px; height: 35px; overflow: hidden;">${item.desc}</p>
-                            <button onclick="viewPDF('${item.pdf}')" class="btn-open">View PDF</button>
+                            <span class="course-badge">${pdfCategory || 'General'}</span>
+                            <h3>${pdfItem.name}</h3>
+                            <p style="color:#94a3b8; font-size:12px; height: 35px; overflow: hidden; margin-bottom:0;">${pdfItem.desc}</p>
+                            <button onclick="viewPDF('${pdfItem.pdf}')" class="btn-open">View PDF</button>
                         `;
                         grid.appendChild(div);
                     }
