@@ -11,23 +11,27 @@
         .container { max-width: 1000px; margin: auto; }
         .user-info { background: rgba(56, 189, 248, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.2); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .btn-open { background: var(--primary); color: #0f172a; width: 100%; margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer; }
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .btn-open { background: var(--primary); color: #0f172a; width: 100%; margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-open:hover { background: #7dd3fc; }
         .status-msg { text-align: center; margin-top: 50px; color: #94a3b8; }
         .course-badge { background: var(--primary); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        h3 { margin: 10px 0 5px 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="user-info" id="user-header">
-            <h2 id="welcome-msg">Loading Library...</h2>
+            <h2 id="welcome-msg">Library Load Ho Rahi Hai...</h2>
             <p id="course-msg" style="font-size: 12px; color: #94a3b8; margin: 0;"></p>
         </div>
 
         <div id="grid" class="grid"></div>
+        
         <div id="no-access" class="status-msg" style="display:none;">
-            <h3>Aapke course ke liye koi PDF nahi mili.</h3>
-            <p>Kripya Admin se sampark karein.</p>
+            <h3>Aapke course ke liye filhal koi PDF nahi hai.</h3>
+            <p>Naye notes upload hone par yahan dikhayi denge.</p>
         </div>
     </div>
 
@@ -49,43 +53,59 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // PDF View Logic
+        // PDF Open Function
         function viewPDF(base64Data) {
-            const base64Parts = base64Data.split(',');
-            const contentType = base64Parts[0].split(':')[1].split(';')[0];
-            const byteCharacters = atob(base64Parts[1]);
-            const byteArrays = [];
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteArrays.push(byteCharacters.charCodeAt(i));
+            try {
+                const base64Parts = base64Data.split(',');
+                const contentType = base64Parts[0].split(':')[1].split(';')[0];
+                const byteCharacters = atob(base64Parts[1]);
+                const byteArrays = [];
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteArrays.push(byteCharacters.charCodeAt(i));
+                }
+                const blob = new Blob([new Uint8Array(byteArrays)], {type: contentType});
+                const blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, '_blank');
+            } catch (e) {
+                alert("PDF open karne mein dikkat aa rahi hai.");
             }
-            const blob = new Blob([new Uint8Array(byteArrays)], {type: contentType});
-            const blobUrl = URL.createObjectURL(blob);
-            window.open(blobUrl, '_blank');
         }
 
-        // Auth Logic to filter by User's Course
+        // Auth and Filter Logic
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // 1. Pehle Student ka Course pata karte hain
-                db.ref('students/' + user.uid).once('value', (studentSnap) => {
-                    let userCourse = "";
-                    if (studentSnap.exists()) {
-                        // Maan lete hain students table mein 'course' field hai (ADCA, CCC etc)
-                        userCourse = studentSnap.val().course || studentSnap.val().registrationStatus; 
+                db.ref('students').orderByChild('mobile').equalTo(user.phoneNumber?.replace('+91','') || "").once('value', (snapshot) => {
+                    let userData = null;
+                    if (snapshot.exists()) {
+                        // Agar phone se login hai toh data aise nikalega
+                        const key = Object.keys(snapshot.val())[0];
+                        userData = snapshot.val()[key];
                     }
 
-                    document.getElementById('welcome-msg').innerText = "Hello, " + (studentSnap.val()?.name || user.displayName);
-                    document.getElementById('course-msg').innerText = "Personalized Notes for: " + (userCourse || "Guest");
+                    // Fallback: Agar UID se database save hai
+                    db.ref('students/' + user.uid).once('value', (snapUid) => {
+                        const finalData = userData || snapUid.val();
+                        
+                        if (finalData) {
+                            const studentName = finalData.name || "Student";
+                            const studentCourses = finalData.courses || []; // Yeh array hona chahiye
+                            
+                            document.getElementById('welcome-msg').innerText = "Namaste, " + studentName;
+                            document.getElementById('course-msg').innerText = "Aapke Courses: " + (Array.isArray(studentCourses) ? studentCourses.join(", ") : studentCourses);
 
-                    // 2. Ab wahi PDFs fetch karte hain jo is Course se match karein
-                    loadFilteredPDFs(userCourse);
+                            loadFilteredPDFs(studentCourses);
+                        } else {
+                            document.getElementById('welcome-msg').innerText = "Hello, Guest";
+                            loadFilteredPDFs([]); 
+                        }
+                    });
                 });
             } else {
-                window.location.href = "index.html"; // Login nahi hai to wapas bhej do
+                window.location.href = "index.html";
             }
         });
 
-        function loadFilteredPDFs(course) {
+        function loadFilteredPDFs(studentCourses) {
             db.ref('myPDFs').on('value', (snap) => {
                 const grid = document.getElementById('grid');
                 const noAccess = document.getElementById('no-access');
@@ -93,20 +113,22 @@
                 const data = snap.val() || {};
                 
                 let count = 0;
+                const coursesArray = Array.isArray(studentCourses) ? studentCourses : [studentCourses];
 
                 Object.keys(data).reverse().forEach(key => {
                     const item = data[key];
                     
-                    // FILTER LOGIC: Agar PDF ki category user ke course se match karti hai
-                    // Ya fir PDF category "All" rakhi gayi ho
-                    if (item.category === course || item.category === "Other" || !item.category) {
+                    // Logic: Match PDF category with Student's course list
+                    const hasAccess = coursesArray.some(c => c === item.category) || item.category === "Other" || item.category === "All";
+
+                    if (hasAccess) {
                         count++;
                         const div = document.createElement('div');
                         div.className = 'card';
                         div.innerHTML = `
                             <span class="course-badge">${item.category || 'General'}</span>
-                            <h3 style="margin-top:10px;">${item.name}</h3>
-                            <p style="color:#94a3b8; font-size:12px;">${item.desc}</p>
+                            <h3>${item.name}</h3>
+                            <p style="color:#94a3b8; font-size:12px; height: 35px; overflow: hidden;">${item.desc}</p>
                             <button onclick="viewPDF('${item.pdf}')" class="btn-open">View PDF</button>
                         `;
                         grid.appendChild(div);
