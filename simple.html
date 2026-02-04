@@ -3,48 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT Computer Institute - OTP Login</title>
+    <title>SNT Computer Institute | OTP Verification</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-auth-compat.js"></script>
+
+    <style>
+        .arduino-bg { background-color: #00979D; }
+        .arduino-text { color: #00979D; }
+    </style>
 </head>
-<body class="bg-[#f3f4f6] flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-teal-500">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        
         <div class="text-center mb-8">
+            <div class="flex justify-center mb-2">
+                <svg class="h-12 w-12 arduino-text" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.5,9C10.12,9,9,10.12,9,11.5S10.12,14,11.5,14S14,12.88,14,11.5S12.88,9,11.5,9z M11.5,13c-0.83,0-1.5-0.67-1.5-1.5 S10.67,10,11.5,10S13,10.67,13,11.5S12.33,13,11.5,13z"/>
+                    <path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8 S16.41,20,12,20z"/>
+                </svg>
+            </div>
             <h1 class="text-2xl font-bold text-gray-800">SNT Institute</h1>
-            <p class="text-gray-500">OTP Verification System</p>
+            <p class="text-gray-500 text-sm">Secure Login via OTP</p>
         </div>
 
-        <div id="phone-container">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
-            <input type="text" id="phone-number" placeholder="+91 9876543210" 
-                   class="w-full p-4 border rounded-xl mb-4 focus:ring-2 focus:ring-teal-400 outline-none transition">
-            
-            <div id="recaptcha-container" class="mb-4"></div>
+        <div id="step1">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Mobile Number</label>
+                <input type="text" id="phoneNumber" placeholder="+91 9876543210" 
+                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-400 outline-none transition duration-200">
+                <p class="text-xs text-gray-400 mt-1">Include country code (e.g. +91)</p>
+            </div>
 
-            <button onclick="sendOTP()" id="send-btn"
-                    class="w-full bg-teal-500 text-white font-bold py-4 rounded-xl hover:bg-teal-600 shadow-lg transition">
-                Get OTP
+            <div id="recaptcha-container" class="mb-4 flex justify-center"></div>
+
+            <button onclick="onSignInSubmit()" id="sendBtn"
+                class="w-full arduino-bg text-white font-bold py-3 rounded-xl hover:opacity-90 transition shadow-lg">
+                Send OTP
             </button>
         </div>
 
-        <div id="otp-container" class="hidden">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Enter 6-Digit OTP</label>
-            <input type="text" id="otp-code" placeholder="123456" 
-                   class="w-full p-4 border rounded-xl mb-6 focus:ring-2 focus:ring-green-400 outline-none text-center text-2xl tracking-widest">
-            
-            <button onclick="verifyOTP()" 
-                    class="w-full bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 shadow-lg transition">
-                Verify OTP
+        <div id="step2" class="hidden">
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2 text-center text-lg">Verify OTP</label>
+                <input type="text" id="verificationCode" placeholder="Enter 6-digit code" 
+                    class="w-full px-4 py-4 border-2 border-dashed border-teal-200 rounded-xl focus:border-teal-500 outline-none text-center text-2xl tracking-[10px] font-mono">
+            </div>
+
+            <button onclick="verifyCode()"
+                class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition shadow-lg mb-4">
+                Verify & Continue
             </button>
-            <button onclick="location.reload()" class="w-full mt-4 text-sm text-gray-400">Change Number</button>
+            
+            <button onclick="location.reload()" class="w-full text-gray-400 text-sm hover:underline">
+                Back to Change Number
+            </button>
+        </div>
+
+        <div id="successMessage" class="hidden text-center">
+            <div class="text-green-500 text-5xl mb-4">✔</div>
+            <h2 class="text-xl font-bold text-gray-800">Login Successful!</h2>
+            <p class="text-gray-500">Welcome to SNT Computer Institute.</p>
         </div>
     </div>
 
     <script>
-        // Aapka Firebase Config
+        // --- YOUR FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -58,49 +85,47 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
 
-        // Recaptcha Setup
+        // Setup Recaptcha
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
             'size': 'normal',
             'callback': (response) => {
-                console.log("Recaptcha solved");
+                console.log("Recaptcha verified!");
             }
         });
 
         // Function to Send OTP
-        function sendOTP() {
-            const number = document.getElementById('phone-number').value;
-            
-            if (number.length < 10) {
-                alert("Please enter a valid number with country code (e.g., +91...)");
+        function onSignInSubmit() {
+            const number = document.getElementById('phoneNumber').value;
+            const appVerifier = window.recaptchaVerifier;
+
+            if(number.trim() === "") {
+                alert("Mobile number daaliye!");
                 return;
             }
 
-            const appVerifier = window.recaptchaVerifier;
-
-            auth.signInWithPhoneNumber(number, appVerifier)
+            firebase.auth().signInWithPhoneNumber(number, appVerifier)
                 .then((confirmationResult) => {
                     window.confirmationResult = confirmationResult;
-                    document.getElementById('phone-container').classList.add('hidden');
-                    document.getElementById('otp-container').classList.remove('hidden');
-                    alert("OTP has been sent to " + number);
+                    document.getElementById('step1').classList.add('hidden');
+                    document.getElementById('step2').classList.remove('hidden');
+                    alert("OTP bhej diya gaya hai!");
                 }).catch((error) => {
                     alert("Error: " + error.message);
-                    location.reload();
+                    console.error(error);
                 });
         }
 
         // Function to Verify OTP
-        function verifyOTP() {
-            const code = document.getElementById('otp-code').value;
-            
+        function verifyCode() {
+            const code = document.getElementById('verificationCode').value;
+
             confirmationResult.confirm(code).then((result) => {
                 const user = result.user;
-                alert("Success! User Verified: " + user.phoneNumber);
-                // Yahan aap user ko dashboard par redirect kar sakte hain
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
             }).catch((error) => {
-                alert("Invalid OTP. Try again.");
+                alert("Galat OTP! Fir se koshish karein.");
             });
         }
     </script>
