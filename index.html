@@ -28,9 +28,6 @@
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         
         .contact-btn { padding: 8px; border-radius: 10px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
-        
-        /* QR Modal Style */
-        #qr-modal { z-index: 1100; }
         .qr-card { background: white; color: #1e293b; padding: 20px; border-radius: 24px; text-align: center; width: 280px; position: relative; }
     </style>
 </head>
@@ -41,47 +38,36 @@
             <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
             <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Digital Student Portal</p>
-
-            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all shadow-xl active:scale-95">
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
                 LOGIN WITH GOOGLE
             </button>
-            <p class="mt-8 text-[9px] text-slate-500 uppercase tracking-widest font-bold">Secure Access Only</p>
         </div>
     </div>
 
     <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
         <header class="flex justify-between items-center mb-8">
             <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
-            <div class="text-center">
-                <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
-            </div>
+            <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
             <div class="flex gap-2">
-                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
-                    <i class="fas fa-circle-info"></i>
-                </button>
-                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
-                    <i class="fas fa-share-nodes"></i>
-                </button>
+                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-circle-info"></i></button>
+                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes"></i></button>
             </div>
         </header>
 
         <div id="profile-section" class="glass p-6 rounded-3xl mb-8 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
             <div class="relative">
                 <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800">
-                <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#0f172a] rounded-full"></div>
             </div>
             <div class="flex-1">
                 <h3 id="user-name" class="text-lg font-black text-white leading-tight mb-0.5">Loading...</h3>
                 <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-2 italic opacity-60"></p>
-                
                 <p class="text-sky-300 text-[11px] font-bold flex items-center gap-2 mb-3">
                     <i class="fas fa-phone-alt text-[9px]"></i> <span id="mobile-val">Fetching...</span>
                 </p>
-
                 <div class="flex gap-2">
                     <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded border border-sky-500/20 font-black uppercase">ID: ...</span>
-                    <span id="user-status-badge" class="text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase">Member</span>
+                    <span id="user-status-badge" class="text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase">Loading</span>
                 </div>
             </div>
         </div>
@@ -91,62 +77,20 @@
 
     <div id="info-modal" class="modal-overlay">
         <div class="glass p-8 rounded-3xl w-80 border border-sky-500/30 shadow-2xl relative">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-sky-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-microchip text-sky-400 text-2xl"></i>
-                </div>
-                <h2 class="text-xl font-black tracking-tighter uppercase">System Info</h2>
-            </div>
-            
+            <h2 class="text-xl font-black text-center mb-6 uppercase">System Info</h2>
             <div class="space-y-1 mb-6">
-                <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">Detecting...</span></div>
-                <div class="info-row"><span class="info-label">Time</span><span id="info-time" class="info-value">00:00</span></div>
-                <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.0.4 Premium</span></div>
+                <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">...</span></div>
+                <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.0.6 Premium</span></div>
                 <div class="info-row border-none"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
             </div>
-
-            <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest text-center mb-3">Contact & Support</p>
-            <div class="grid grid-cols-2 gap-3 mb-3">
-                <a href="https://wa.me/919129191898" target="_blank" class="contact-btn bg-green-600/20 text-green-400 border border-green-600/30 active:scale-95">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
-                </a>
-                <a href="tel:9129191898" class="contact-btn bg-sky-600/20 text-sky-400 border border-sky-600/30 active:scale-95">
-                    <i class="fas fa-phone"></i> Call Now
-                </a>
-            </div>
-            
-            <button onclick="openQR()" class="w-full contact-btn bg-gradient-to-r from-purple-600/30 to-pink-600/30 text-pink-400 border border-pink-500/30 active:scale-95 py-3">
-                <i class="fas fa-heart"></i> DEVELOPER SUPPORT
-            </button>
-
-            <button onclick="closeInfo()" class="w-full mt-6 bg-slate-800 text-slate-400 p-3 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close</button>
-        </div>
-    </div>
-
-    <div id="qr-modal" class="modal-overlay">
-        <div class="qr-card animate-fade-in">
-            <button onclick="closeQR()" class="absolute -top-3 -right-3 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center border-2 border-white shadow-xl">
-                <i class="fas fa-xmark"></i>
-            </button>
-            <h3 class="font-black text-slate-800 text-lg mb-1">Support Developer</h3>
-            <p class="text-[10px] text-slate-500 font-bold mb-4 uppercase tracking-tighter">Scan to pay via any UPI App</p>
-            
-            <div class="bg-slate-50 p-4 rounded-2xl mb-4 flex justify-center border-2 border-dashed border-slate-200">
-                <img id="upi-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=mandavikaushal913@okaxis&pn=MANDAVI&cu=INR" class="w-48 h-48">
-            </div>
-            
-            <div class="bg-slate-100 p-3 rounded-xl">
-                <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">UPI ID</p>
-                <p class="text-sm font-black text-slate-800 break-all">mandavikaushal913@okaxis</p>
-            </div>
-            <p class="mt-4 text-[9px] font-bold text-slate-400">Thanks for your support! ❤️</p>
+            <button onclick="closeInfo()" class="w-full bg-slate-800 text-slate-400 p-3 rounded-xl font-black text-[10px] uppercase">Close</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, query, orderByChild, equalTo, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -161,118 +105,105 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        const menuItems = [
-            { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
-            { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-            { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
-            { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-            { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/pdf.html', icon: 'fa-file-pdf', color: 'text-red-500' },
-            { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
-            { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-            { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
-            { name: 'Basic Info', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-database', color: 'text-gray-400' }
-        ];
-
-        // Modified Login Function to Track Users
-        window.loginWithGoogle = () => {
-            signInWithPopup(auth, provider).then((result) => {
+        // FIXED: Login without duplication logic
+        window.loginWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-                const userRef = ref(db, 'students/' + user.uid);
+                const studentsRef = ref(db, 'students');
+                const snapshot = await get(studentsRef);
                 
-                // Check if user already exists
-                get(userRef).then((snapshot) => {
-                    if (!snapshot.exists()) {
-                        // If new user, save their basic info
-                        set(userRef, {
-                            name: user.displayName,
-                            email: user.email,
-                            profilePic: user.photoURL,
-                            registrationStatus: "Guest User",
-                            joinDate: new Date().toLocaleString()
-                        });
-                    }
-                });
-            });
+                let existingId = null;
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    // Search if email exists anywhere in the list
+                    existingId = Object.keys(data).find(key => data[key].email === user.email);
+                }
+
+                if (existingId) {
+                    // Update only last login, don't overwrite user info
+                    await update(ref(db, `students/${existingId}`), { 
+                        lastLogin: new Date().toLocaleString(),
+                        profilePic: user.photoURL 
+                    });
+                } else {
+                    // Create new entry ONLY if email is not found
+                    await set(ref(db, `students/${user.uid}`), {
+                        name: user.displayName,
+                        email: user.email,
+                        profilePic: user.photoURL,
+                        registrationStatus: "Guest User",
+                        joinDate: new Date().toLocaleString(),
+                        studentId: "NEW"
+                    });
+                }
+            } catch (error) { console.error("Login Error", error); }
         };
 
         window.logout = () => signOut(auth).then(() => location.reload());
-        window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
-
-        window.openInfo = async () => {
-            document.getElementById('info-modal').style.display = "flex";
-            if (navigator.getBattery) {
-                const b = await navigator.getBattery();
-                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "% " + (b.charging ? "⚡" : "🔋");
-            }
-            const now = new Date();
-            document.getElementById('info-time').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
-        };
-        window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
-        window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
-        window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                const studentsRef = ref(db, 'students');
-                // Use UID for more accurate tracking, but keeping email query for backward compatibility
-                onValue(studentsRef, (snapshot) => {
+                // Real-time listener for student data
+                onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
-                        const allData = snapshot.val();
-                        let sData = allData[user.uid]; // Priority 1: Match by UID
-                        
-                        // Priority 2: Match by Email if UID not found
-                        if (!sData) {
-                            sData = Object.values(allData).find(s => s.email === user.email);
-                        }
-
+                        const data = snapshot.val();
+                        const sData = Object.values(data).find(s => s.email === user.email);
                         if (sData) {
                             document.getElementById('user-name').innerText = sData.name || user.displayName;
                             document.getElementById('user-email').innerText = user.email;
-                            document.getElementById('user-img').src = sData.profilePicture || sData.profilePic || user.photoURL || "./SNT.jpg";
+                            document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
                             document.getElementById('mobile-val').innerText = sData.mobile || sData.phone || "Not Linked";
                             
                             const statusEl = document.getElementById('user-status-badge');
                             const status = sData.registrationStatus || "Guest User";
                             statusEl.innerText = status;
-
-                            if(status === "Pending") {
-                                statusEl.className = "text-[9px] bg-red-500/10 text-red-400 px-3 py-1 rounded border border-red-500/20 font-black uppercase";
-                            } else if(status === "Guest User") {
-                                statusEl.className = "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
-                            } else {
-                                statusEl.className = "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase";
-                            }
+                            statusEl.className = status === "Active" ? 
+                                "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
+                                "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
                         }
                     }
                 });
                 renderMenu();
-            } else {
-                document.getElementById('auth-container').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
             }
         });
 
         function renderMenu() {
-            const grid = document.getElementById('app-grid');
-            grid.innerHTML = menuItems.map(item => `
-                <div class="app-card p-4 rounded-3xl text-center shadow-lg" 
-                     onclick="location.href='${item.url}'">
+            const menuItems = [
+                { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+                { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
+                { name: 'Admin', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admin.html', icon: 'fa-user-shield', color: 'text-red-400' },
+                { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
+                { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/pdf.html', icon: 'fa-file-pdf', color: 'text-red-500' },
+                { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+                { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
+                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }
+            ];
+            document.getElementById('app-grid').innerHTML = menuItems.map(item => `
+                <div class="app-card p-4 rounded-3xl" onclick="location.href='${item.url}'">
                     <i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">${item.name}</p>
+                    <p class="text-[9px] font-black uppercase text-slate-300">${item.name}</p>
                 </div>
             `).join('');
         }
 
-        document.onkeydown = e => { 
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
+        window.openInfo = async () => {
+            document.getElementById('info-modal').style.display = "flex";
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%";
+            }
         };
+        window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
+        window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
     </script>
 
     <script>
+        // Service Worker Registration for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail'));
