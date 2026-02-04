@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT Computer Institute - OTP Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-auth-compat.js"></script>
+</head>
+<body class="bg-[#f3f4f6] flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-teal-500">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">SNT Institute</h1>
+            <p class="text-gray-500">OTP Verification System</p>
+        </div>
+
+        <div id="phone-container">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+            <input type="text" id="phone-number" placeholder="+91 9876543210" 
+                   class="w-full p-4 border rounded-xl mb-4 focus:ring-2 focus:ring-teal-400 outline-none transition">
+            
+            <div id="recaptcha-container" class="mb-4"></div>
+
+            <button onclick="sendOTP()" id="send-btn"
+                    class="w-full bg-teal-500 text-white font-bold py-4 rounded-xl hover:bg-teal-600 shadow-lg transition">
+                Get OTP
+            </button>
+        </div>
+
+        <div id="otp-container" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Enter 6-Digit OTP</label>
+            <input type="text" id="otp-code" placeholder="123456" 
+                   class="w-full p-4 border rounded-xl mb-6 focus:ring-2 focus:ring-green-400 outline-none text-center text-2xl tracking-widest">
+            
+            <button onclick="verifyOTP()" 
+                    class="w-full bg-green-500 text-white font-bold py-4 rounded-xl hover:bg-green-600 shadow-lg transition">
+                Verify OTP
+            </button>
+            <button onclick="location.reload()" class="w-full mt-4 text-sm text-gray-400">Change Number</button>
+        </div>
+    </div>
+
+    <script>
+        // Aapka Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            projectId: "snt-computer-institute",
+            storageBucket: "snt-computer-institute.firebasestorage.app",
+            messagingSenderId: "117580784781",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4",
+            measurementId: "G-6FKGX17D7F"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Recaptcha Setup
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            'size': 'normal',
+            'callback': (response) => {
+                console.log("Recaptcha solved");
+            }
+        });
+
+        // Function to Send OTP
+        function sendOTP() {
+            const number = document.getElementById('phone-number').value;
+            
+            if (number.length < 10) {
+                alert("Please enter a valid number with country code (e.g., +91...)");
+                return;
+            }
+
+            const appVerifier = window.recaptchaVerifier;
+
+            auth.signInWithPhoneNumber(number, appVerifier)
+                .then((confirmationResult) => {
+                    window.confirmationResult = confirmationResult;
+                    document.getElementById('phone-container').classList.add('hidden');
+                    document.getElementById('otp-container').classList.remove('hidden');
+                    alert("OTP has been sent to " + number);
+                }).catch((error) => {
+                    alert("Error: " + error.message);
+                    location.reload();
+                });
+        }
+
+        // Function to Verify OTP
+        function verifyOTP() {
+            const code = document.getElementById('otp-code').value;
+            
+            confirmationResult.confirm(code).then((result) => {
+                const user = result.user;
+                alert("Success! User Verified: " + user.phoneNumber);
+                // Yahan aap user ko dashboard par redirect kar sakte hain
+            }).catch((error) => {
+                alert("Invalid OTP. Try again.");
+            });
+        }
+    </script>
+</body>
+</html>
