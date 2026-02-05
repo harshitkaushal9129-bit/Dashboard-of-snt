@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaushal Vastralaya ERP - Realtime</title>
+    <title>Kaushal Vastralaya ERP - Pro Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
@@ -28,7 +28,9 @@
         .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
         .btn-save { background: var(--secondary); width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; }
         .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
-        .delete-btn { color: var(--danger); cursor: pointer; font-weight: bold; }
+        .delete-btn { color: var(--danger); cursor: pointer; font-weight: bold; font-size: 18px; border: none; background: none; }
+        .low-stock { color: var(--danger); font-weight: bold; animation: blink 1s infinite; }
+        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;} }
         @media print { .sidebar, .no-print, .btn { display: none !important; } .main { margin-left: 0; width: 100%; } }
     </style>
 </head>
@@ -59,14 +61,14 @@
                 </div>
                 <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
                 <div class="input-group"><label>Qty</label><input type="number" id="sQty" value="1"></div>
-                <button class="btn" style="background:var(--accent)" onclick="addToCart('sale')">Add</button>
+                <button class="btn" style="background:var(--accent)" onclick="addToCart('sale')">Add Item</button>
             </div>
             <table>
                 <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
                 <tbody id="saleBody"></tbody>
             </table>
             <div style="text-align:right; font-size:24px; font-weight:bold; margin-top:15px">Total: ₹<span id="saleTotal">0.00</span></div>
-            <button class="btn btn-save" onclick="saveTransaction('sale')">Save & Send WhatsApp Bill</button>
+            <button class="btn btn-save" onclick="saveTransaction('sale')">💾 Save & Send WhatsApp Bill</button>
         </div>
     </div>
 
@@ -77,13 +79,13 @@
                 <div class="input-group"><label>Item Name</label><input type="text" id="itemName"></div>
                 <div class="input-group"><label>Sale Price</label><input type="number" id="itemPrice"></div>
                 <div class="input-group"><label>Initial Stock</label><input type="number" id="itemStock" value="0"></div>
-                <button class="btn" style="background:var(--secondary)" onclick="addNewItemManual()">Save Item</button>
+                <button class="btn" style="background:var(--secondary)" onclick="addNewItemManual()">Save Product</button>
             </div>
         </div>
         <div class="card">
             <h3>Current Inventory</h3>
             <table>
-                <thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                <thead><tr><th>Img</th><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
                 <tbody id="stockBody"></tbody>
             </table>
         </div>
@@ -91,33 +93,33 @@
 
     <div id="purchase" class="tab-content" style="display:none">
         <div class="card">
-            <h3>Purchase Entry</h3>
+            <h3>Purchase Entry (Stock In)</h3>
             <div class="flex-row">
-                <div class="input-group"><label>Supplier</label><input type="text" id="pParty" placeholder="Vendor"></div>
+                <div class="input-group"><label>Supplier Name</label><input type="text" id="pParty" placeholder="Vendor"></div>
                 <div class="input-group"><label>Date</label><input type="date" id="pDate"></div>
             </div>
             <div class="flex-row">
                 <div class="input-group" style="flex:2"><label>Item</label><select id="pItem" onchange="fillPurchasePrice()"></select></div>
                 <div class="input-group"><label>Rate</label><input type="number" id="pPrice"></div>
                 <div class="input-group"><label>Qty</label><input type="number" id="pQty" value="1"></div>
-                <button class="btn" style="background:var(--warning)" onclick="addToCart('pur')">Add</button>
+                <button class="btn" style="background:var(--warning)" onclick="addToCart('pur')">Add To List</button>
             </div>
             <table>
                 <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
                 <tbody id="purBody"></tbody>
             </table>
-            <button class="btn btn-save" style="background:var(--warning)" onclick="saveTransaction('pur')">Save Purchase</button>
+            <button class="btn btn-save" style="background:var(--warning)" onclick="saveTransaction('pur')">Confirm Purchase</button>
         </div>
     </div>
 
     <div id="vouchers" class="tab-content" style="display:none">
         <div class="card">
-            <h3>Payment & Receipt</h3>
+            <h3>Cash/Bank Vouchers</h3>
             <div class="flex-row">
-                <div class="input-group"><label>Type</label><select id="vType"><option value="Receipt">Receipt</option><option value="Payment">Payment</option></select></div>
-                <div class="input-group"><label>Party Name</label><input type="text" id="vParty"></div>
+                <div class="input-group"><label>Type</label><select id="vType"><option value="Receipt">Receipt (Aaya)</option><option value="Payment">Payment (Diya)</option></select></div>
+                <div class="input-group"><label>Party/Reason</label><input type="text" id="vParty"></div>
                 <div class="input-group"><label>Amount</label><input type="number" id="vAmt"></div>
-                <button class="btn" style="background:var(--secondary)" onclick="saveVoucher()">Save</button>
+                <button class="btn" style="background:var(--secondary)" onclick="saveVoucher()">Save Voucher</button>
             </div>
         </div>
     </div>
@@ -125,7 +127,7 @@
     <div id="reports" class="tab-content" style="display:none">
         <div class="stat-grid" id="statGrid"></div>
         <div class="card">
-            <h3>Transaction History</h3>
+            <h3>Transaction History (Latest First)</h3>
             <table>
                 <thead><tr><th>Date</th><th>Type</th><th>Party</th><th>Total</th></tr></thead>
                 <tbody id="historyBody"></tbody>
@@ -138,7 +140,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config
     const firebaseConfig = {
         databaseURL: "https://pdf-for-students-default-rtdb.firebaseio.com", 
         projectId: "pdf-for-students"
@@ -148,7 +149,7 @@
     const db = getDatabase(app);
     let items = [], tempCart = [];
 
-    // --- TAB NAVIGATION ---
+    // --- GLOBAL SCOPE FIX ---
     window.showTab = (id, btn) => {
         document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -157,7 +158,6 @@
         if(id === 'reports') loadReports();
     };
 
-    // --- REAL-TIME DATA SYNC ---
     onValue(ref(db, 'items'), (snapshot) => {
         const data = snapshot.val();
         items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -171,29 +171,33 @@
         document.getElementById('sItem').innerHTML = opts;
         document.getElementById('pItem').innerHTML = opts;
         
-        document.getElementById('stockBody').innerHTML = items.map(it => `
+        document.getElementById('stockBody').innerHTML = items.map(it => {
+            const isLow = (it.stock || 0) < 5;
+            return `
             <tr>
-                <td><img src="${it.img || 'https://via.placeholder.com/40'}" class="thumb"></td>
+                <td><img src="https://via.placeholder.com/40?text=Cloth" class="thumb"></td>
                 <td>${it.name}</td>
                 <td>₹${it.price}</td>
-                <td style="color:${(it.stock || 0) <= 2 ? 'red' : 'green'}; font-weight:bold">${it.stock || 0}</td>
-                <td><button class="delete-btn" onclick="deleteItem('${it.id}')">Del</button></td>
-            </tr>
-        `).join('');
+                <td class="${isLow ? 'low-stock' : ''}">${it.stock || 0} ${isLow ? '⚠️' : ''}</td>
+                <td><button class="delete-btn" onclick="deleteItem('${it.id}')">🗑️</button></td>
+            </tr>`;
+        }).join('');
     }
 
-    // --- OPERATIONS ---
     window.addNewItemManual = () => {
-        const name = document.getElementById('itemName').value;
+        const name = document.getElementById('itemName').value.trim();
         const price = parseFloat(document.getElementById('itemPrice').value);
         const stock = parseFloat(document.getElementById('itemStock').value) || 0;
         
         if(name && !isNaN(price)) {
             const newItemRef = push(ref(db, 'items'));
             set(newItemRef, { name, price, stock, img: '' });
-            alert("Item Added!");
+            alert("Item Added Successfully!");
             document.getElementById('itemName').value = "";
             document.getElementById('itemPrice').value = "";
+            document.getElementById('itemStock').value = "0";
+        } else {
+            alert("Please enter Name and Price!");
         }
     };
 
@@ -215,11 +219,15 @@
         const rate = parseFloat(document.getElementById(pfx+'Price').value);
         const qty = parseFloat(document.getElementById(pfx+'Qty').value);
         
-        if(idx==="" || isNaN(rate)) return;
+        if(idx==="" || isNaN(rate) || qty <= 0) return;
         
-        if(type === 'sale' && (items[idx].stock || 0) < qty) { 
-            alert("Insufficient Stock!"); 
-            return; 
+        if(type === 'sale') {
+            const currentStock = items[idx].stock || 0;
+            const alreadyInCart = tempCart.filter(c => c.itemId === items[idx].id).reduce((s,i)=>s+i.qty, 0);
+            if(currentStock < (alreadyInCart + qty)) { 
+                alert("Stock Not Available!"); 
+                return; 
+            }
         }
 
         tempCart.push({ 
@@ -229,10 +237,10 @@
             qty, 
             total: rate * qty 
         });
-        renderCart(type);
+        window.renderCart(type);
     };
 
-    function renderCart(type) {
+    window.renderCart = (type) => {
         let total = 0;
         const bodyId = type === 'sale' ? 'saleBody' : 'purBody';
         document.getElementById(bodyId).innerHTML = tempCart.map((c, i) => {
@@ -240,23 +248,23 @@
             return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td class="delete-btn" onclick="removeFromCart(${i}, '${type}')">❌</td></tr>`;
         }).join('');
         if(type==='sale') document.getElementById('saleTotal').innerText = total.toFixed(2);
-    }
+    };
 
     window.removeFromCart = (i, type) => {
         tempCart.splice(i, 1);
-        renderCart(type);
+        window.renderCart(type);
     };
 
     window.saveTransaction = async (type) => {
         if(!tempCart.length) { alert("Cart is empty!"); return; }
         
         const partyName = document.getElementById(type==='sale'?'sCust':'pParty').value || "Cash";
-        const phone = document.getElementById('sPhone').value;
+        const phone = document.getElementById('sPhone').value.trim();
         const totalAmt = tempCart.reduce((s,i)=>s+i.total,0);
 
         const entry = {
             party: partyName,
-            phone: phone || '',
+            phone: phone,
             date: document.getElementById(type==='sale'?'sDate':'pDate').value,
             total: totalAmt,
             items: [...tempCart],
@@ -265,10 +273,7 @@
         };
         
         try {
-            // Save to DB
             await push(ref(db, 'transactions'), entry);
-            
-            // Update Stocks
             for(let c of tempCart) {
                 const item = items.find(it => it.id === c.itemId);
                 const newStock = type === 'sale' ? (item.stock - c.qty) : (item.stock + c.qty);
@@ -276,26 +281,31 @@
             }
 
             if(type === 'sale' && phone) {
-                sendWhatsApp(partyName, phone, totalAmt, tempCart);
+                window.sendWhatsApp(partyName, phone, totalAmt, tempCart);
             }
 
-            alert("Transaction Saved Successfully!");
+            alert("Saved Successfully!");
             tempCart = [];
-            renderCart(type);
+            window.renderCart(type);
+            if(type === 'sale') {
+                document.getElementById('sCust').value = "";
+                document.getElementById('sPhone').value = "";
+            }
         } catch (e) {
             alert("Error: " + e.message);
         }
     };
 
-    function sendWhatsApp(name, phone, total, cartItems) {
-        let msg = `*कौशल वस्त्रालय - बिल*%0A`;
-        msg += `ग्राहक: ${name}%0A--------------------%0A`;
+    window.sendWhatsApp = (name, phone, total, cartItems) => {
+        let msg = `*कौशल वस्त्रालय - बिल*\n`;
+        msg += `ग्राहक: ${name}\n--------------------\n`;
         cartItems.forEach(i => {
-            msg += `${i.name} x ${i.qty} = ₹${i.total}%0A`;
+            msg += `${i.name} x ${i.qty} = ₹${i.total}\n`;
         });
-        msg += `--------------------%0A*Total: ₹${total}*%0Aधन्यवाद!`;
-        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    }
+        msg += `--------------------\n*Total: ₹${total}*\nधन्यवाद!`;
+        const link = `https://wa.me/${phone.includes('91') ? phone : '91'+phone}?text=${encodeURIComponent(msg)}`;
+        window.open(link, '_blank');
+    };
 
     window.saveVoucher = () => {
         const amt = parseFloat(document.getElementById('vAmt').value);
@@ -308,6 +318,7 @@
         });
         alert("Voucher Saved!");
         document.getElementById('vAmt').value = "";
+        document.getElementById('vParty').value = "";
     };
 
     function loadReports() {
@@ -321,17 +332,15 @@
                 });
             }
             document.getElementById('statGrid').innerHTML = `
-                <div class="stat-card" style="background:var(--secondary)">Total Sales: ₹${s}</div>
-                <div class="stat-card" style="background:var(--warning)">Total Purchase: ₹${p}</div>`;
+                <div class="stat-card" style="background:var(--secondary)">Total Sales: ₹${s.toFixed(2)}</div>
+                <div class="stat-card" style="background:var(--warning)">Total Purchase: ₹${p.toFixed(2)}</div>`;
             document.getElementById('historyBody').innerHTML = html;
         }, { onlyOnce: true });
     }
 
-    // Set Today's Date
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('sDate').value = today;
     document.getElementById('pDate').value = today;
-
 </script>
 </body>
 </html>
