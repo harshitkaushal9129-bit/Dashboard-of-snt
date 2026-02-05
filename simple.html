@@ -25,8 +25,8 @@
         th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
         th { background: #f8f9fa; color: var(--primary); }
         .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
         .btn-save { background: var(--secondary); width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; }
+        .thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #ddd; }
         @media print { .sidebar, .no-print, .btn { display: none !important; } .main { margin-left: 0; width: 100%; } }
     </style>
 </head>
@@ -68,6 +68,23 @@
         </div>
     </div>
 
+    <div id="items" class="tab-content" style="display:none">
+        <div class="card">
+            <h3>Current Inventory (Admin-Linked)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Stock Qty</th>
+                    </tr>
+                </thead>
+                <tbody id="stockBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <div id="purchase" class="tab-content" style="display:none">
         <div class="card">
             <h3>Purchase Entry</h3>
@@ -81,7 +98,7 @@
                 <div class="input-group"><label>Qty</label><input type="number" id="pQty" value="1"></div>
                 <button class="btn" style="background:var(--warning)" onclick="addToCart('pur')">Add</button>
             </div>
-            <table class="card">
+            <table>
                 <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
                 <tbody id="purBody"></tbody>
             </table>
@@ -101,18 +118,6 @@
         </div>
     </div>
 
-    <div id="items" class="tab-content" style="display:none">
-        <div class="card">
-            <h3>Add Product</h3>
-            <div class="flex-row">
-                <input type="text" id="itemName" placeholder="Item Name">
-                <input type="number" id="itemPrice" placeholder="Sale Price">
-                <button class="btn" style="background:var(--secondary)" onclick="addNewItem()">Save</button>
-            </div>
-        </div>
-        <div class="card"><h3>Stock</h3><table><thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead><tbody id="stockBody"></tbody></table></div>
-    </div>
-
     <div id="reports" class="tab-content" style="display:none">
         <div class="stat-grid" id="statGrid"></div>
         <div class="card"><h3>Transactions</h3><table id="historyTable"><thead><tr><th>Date</th><th>Type</th><th>Party</th><th>Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
@@ -121,7 +126,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
@@ -136,10 +141,28 @@
     const db = getFirestore(app);
     let items = [], tempCart = [];
 
+    // REAL-TIME SYNC: Refresh hone par data nahi hatega
     onSnapshot(collection(db, "items"), (snap) => {
         items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderItems();
     });
+
+    function renderItems() {
+        const dropdownHtml = '<option value="">-- Select Item --</option>' + 
+            items.map((it, i) => `<option value="${i}">${it.name} (Available: ${it.stock || 0})</option>`).join('');
+        
+        document.getElementById('sItem').innerHTML = dropdownHtml;
+        document.getElementById('pItem').innerHTML = dropdownHtml;
+        
+        document.getElementById('stockBody').innerHTML = items.map(it => `
+            <tr>
+                <td><img src="${it.img || 'https://via.placeholder.com/40'}" class="thumb"></td>
+                <td>${it.name}</td>
+                <td>₹${it.price}</td>
+                <td style="color:${(it.stock || 0) <= 2 ? 'red' : 'green'}; font-weight:bold">${it.stock || 0}</td>
+            </tr>
+        `).join('');
+    }
 
     window.showTab = (id, btn) => {
         document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
@@ -148,31 +171,6 @@
         if(btn) btn.classList.add('active');
         if(id === 'reports') loadReports();
     };
-
-    window.addNewItem = async () => {
-        const name = document.getElementById('itemName').value;
-        const price = parseFloat(document.getElementById('itemPrice').value);
-        if(name && price) await addDoc(collection(db, "items"), { name, price, stock: 0 });
-        document.getElementById('itemName').value = "";
-        document.getElementById('itemPrice').value = "";
-    };
-
-    function renderItems() {
-        // Updated POS Dropdown to show STOCK
-        const opts = '<option value="">-- Select Item --</option>' + 
-            items.map((it, i) => `<option value="${i}">${it.name} (Stock: ${it.stock})</option>`).join('');
-        
-        document.getElementById('sItem').innerHTML = opts;
-        document.getElementById('pItem').innerHTML = opts;
-        
-        document.getElementById('stockBody').innerHTML = items.map(it => `
-            <tr>
-                <td>${it.name}</td>
-                <td>₹${it.price}</td>
-                <td style="color:${it.stock <= 2 ? 'red' : 'black'}; font-weight:bold">${it.stock}</td>
-            </tr>
-        `).join('');
-    }
 
     window.fillSalePrice = () => {
         const idx = document.getElementById('sItem').value;
@@ -184,12 +182,10 @@
         const idx = document.getElementById(pfx+'Item').value;
         const rate = parseFloat(document.getElementById(pfx+'Price').value);
         const qty = parseFloat(document.getElementById(pfx+'Qty').value);
-        
         if(idx==="") return;
 
-        // Stock check for Sales
-        if(type === 'sale' && items[idx].stock < qty) {
-            alert("उतना स्टॉक उपलब्ध नहीं है! (Only " + items[idx].stock + " left)");
+        if(type === 'sale' && (items[idx].stock || 0) < qty) {
+            alert("उतना स्टॉक उपलब्ध नहीं है!");
             return;
         }
 
@@ -206,26 +202,6 @@
         if(type==='sale') document.getElementById('saleTotal').innerText = total.toFixed(2);
     }
 
-    async function generatePDF(entry) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(22); doc.text("KAUSHAL VASTRALAYA", 105, 20, { align: 'center' });
-        doc.setFontSize(12); doc.text(`Customer: ${entry.party}`, 20, 40);
-        doc.text(`Date: ${entry.date}`, 150, 40);
-        
-        const body = entry.items.map(i => [i.name, i.rate, i.qty, i.total]);
-        doc.autoTable({ startY: 50, head: [['Item', 'Rate', 'Qty', 'Total']], body: body });
-        doc.text(`Grand Total: Rs. ${entry.total}`, 150, doc.lastAutoTable.finalY + 10);
-        
-        doc.save(`Bill_${entry.party}.pdf`);
-        
-        const phone = document.getElementById('sPhone').value;
-        if(phone) {
-            const msg = window.encodeURIComponent(`नमस्ते ${entry.party}, आपका बिल ₹${entry.total} तैयार है।`);
-            window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-        }
-    }
-
     window.saveTransaction = async (type) => {
         if(!tempCart.length) return;
         const entry = {
@@ -236,24 +212,16 @@
             timestamp: serverTimestamp()
         };
         await addDoc(collection(db, "transactions"), { ...entry, type });
+        
         for(let c of tempCart) {
             const itemRef = doc(db, "items", c.itemId);
             const cur = items.find(i=>i.id===c.itemId);
-            await updateDoc(itemRef, { stock: type==='sale' ? cur.stock - c.qty : cur.stock + c.qty });
+            const newStock = type==='sale' ? (cur.stock || 0) - c.qty : (cur.stock || 0) + c.qty;
+            await updateDoc(itemRef, { stock: newStock });
         }
-        if(type==='sale') await generatePDF(entry);
-        alert("Saved Successfully!"); 
-        tempCart = []; 
-        renderCart(type);
+        alert("Success!");
+        tempCart = []; renderCart(type);
     };
-
-    window.saveVoucher = async () => {
-        const amt = parseFloat(document.getElementById('vAmt').value);
-        if(!amt) return;
-        const v = { type: document.getElementById('vType').value, party: document.getElementById('vParty').value, amt: amt, date: new Date().toISOString().split('T')[0] };
-        await addDoc(collection(db, "vouchers"), v);
-        alert("Voucher Saved!");
-    }
 
     async function loadReports() {
         const tSnap = await getDocs(collection(db, "transactions"));
