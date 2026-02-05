@@ -29,7 +29,20 @@
 
         .header { background: var(--tp-header-red); color: white; padding: 15px; text-align: center; }
         .st-profile-box { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px; margin-top: 10px; text-align: left; }
-        .st-photo-circle { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; object-fit: cover; background: #eee; }
+        
+        /* Fixed Photo Styling */
+        .st-photo-circle { 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            object-fit: cover; 
+            background: #fff; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
         .nav { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
         .nav h2 { font-size: 1.1rem; margin: 0; color: #333; font-weight: 700; text-transform: capitalize; }
@@ -81,7 +94,7 @@
 <div class="calendar-card">
     <div class="header" id="header-box">
         <div style="font-weight: 700; font-size: 1.1rem;">SNT ATTENDANCE PORTAL</div>
-    </div>
+        <div id="profile-area"></div> </div>
     
     <div class="nav">
         <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
@@ -121,21 +134,30 @@
     const today = new Date();
 
     const holidays = { "2026-01-26": "Republic Day", "2026-03-24": "Holi", "2026-08-15": "Independence Day" };
-
     const fixedFestivals = { "2026": { "01-01": "नया साल", "26-01": "गणतंत्र दिवस", "15-02": "महाशिवरात्रि", "04-03": "होली", "14-04": "अम्बेडकर जयंती", "15-08": "स्वतंत्रता दिवस", "25-12": "क्रिसमस" } };
 
-    // Authentication & Profile Logic
+    // Authentication Logic
     auth.onAuthStateChanged(user => {
         if (user) {
             currentUser = user;
+            
+            // Database se student details fetch karo
             db.ref('students/' + user.uid).once('value', snap => {
-                const s = snap.val() || { name: user.displayName, profilePic: user.photoURL };
-                document.getElementById('header-box').innerHTML = `
-                    <div style="font-weight: 700; font-size: 1.1rem;">SNT ATTENDANCE PORTAL</div>
+                const s = snap.val() || {};
+                
+                // Photo Logic: Database -> Google Account -> Default Icon
+                const userPhoto = s.profilePicture || s.profilePic || user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                const userName = s.name || user.displayName || "Student";
+
+                document.getElementById('profile-area').innerHTML = `
                     <div class="st-profile-box">
-                        <img src="${s.profilePic || s.profilePicture || 'https://via.placeholder.com/100'}" class="st-photo-circle">
-                        <div><b>${s.name}</b><br><small>UID: ${user.uid.substring(0,8)}...</small></div>
+                        <img src="${userPhoto}" class="st-photo-circle" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                        <div>
+                            <b style="font-size: 1rem;">${userName}</b><br>
+                            <small style="opacity: 0.8;">ID: ${user.uid.substring(0,8)}</small>
+                        </div>
                     </div>`;
+                
                 document.getElementById('loader').style.display = 'none';
                 renderCalendar();
             });
@@ -154,7 +176,6 @@
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // Listen to attendance data once and build the grid
         db.ref('attendance').on('value', snap => {
             const allData = snap.val() || {};
             body.innerHTML = '';
@@ -164,8 +185,8 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const monthFmt = String(month + 1).padStart(2, '0');
                 const dayFmt = String(day).padStart(2, '0');
-                const dateKey = `${year}-${monthFmt}-${dayFmt}`; // YYYY-MM-DD
-                const recordID = `${currentUser.uid}_${dateKey}`; // UID_YYYY-MM-DD
+                const dateKey = `${year}-${monthFmt}-${dayFmt}`; 
+                const recordID = `${currentUser.uid}_${dateKey}`; 
                 const fKey = `${dayFmt}-${monthFmt}`;
 
                 const isToday = new Date(year, month, day).toDateString() === today.toDateString();
@@ -175,7 +196,6 @@
                 let dotHtml = "";
                 let cellStyle = "";
 
-                // Attendance Logic (Matches your Attendance Portal)
                 if (allData[recordID]) {
                     const status = allData[recordID].status;
                     if(status === 'Present') dotHtml = `<span class="dot bg-p"></span>`;
