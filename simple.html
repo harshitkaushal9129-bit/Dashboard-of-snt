@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Kaushal Vastralaya ERP - Cloud Edition</title>
+    <title>Kaushal Vastralaya ERP - Realtime Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
@@ -52,7 +52,7 @@
             </div>
             <div class="flex-row">
                 <div class="input-group" style="flex:2">
-                    <label>Item (Available Stock)</label>
+                    <label>Item (Stock)</label>
                     <select id="sItem" onchange="fillSalePrice()"></select>
                 </div>
                 <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
@@ -72,8 +72,8 @@
         <div class="card">
             <h3>Add New Product</h3>
             <div class="flex-row">
-                <div class="input-group"><label>Item Name</label><input type="text" id="itemName" placeholder="E.g. Banarasi Saree"></div>
-                <div class="input-group"><label>Sale Price</label><input type="number" id="itemPrice" placeholder="0"></div>
+                <div class="input-group"><label>Item Name</label><input type="text" id="itemName"></div>
+                <div class="input-group"><label>Sale Price</label><input type="number" id="itemPrice"></div>
                 <div class="input-group"><label>Initial Stock</label><input type="number" id="itemStock" value="0"></div>
                 <button class="btn" style="background:var(--secondary)" onclick="addNewItemManual()">Save Item</button>
             </div>
@@ -81,7 +81,7 @@
         <div class="card">
             <h3>Current Inventory</h3>
             <table>
-                <thead><tr><th>Image</th><th>Item Name</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                <thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
                 <tbody id="stockBody"></tbody>
             </table>
         </div>
@@ -91,7 +91,7 @@
         <div class="card">
             <h3>Purchase Entry</h3>
             <div class="flex-row">
-                <div class="input-group"><label>Supplier Name</label><input type="text" id="pParty" placeholder="Vendor"></div>
+                <div class="input-group"><label>Supplier</label><input type="text" id="pParty" placeholder="Vendor"></div>
                 <div class="input-group"><label>Date</label><input type="date" id="pDate"></div>
             </div>
             <div class="flex-row">
@@ -128,24 +128,21 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getDatabase, ref, set, push, onValue, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
-        authDomain: "pdf-for-students.firebaseapp.com",
-        projectId: "pdf-for-students",
-        storageBucket: "pdf-for-students.firebasestorage.app",
-        messagingSenderId: "282416295807",
-        appId: "1:282416295807:web:a6113eef2b1e63d17bb44a"
+        databaseURL: "https://pdf-for-students-default-rtdb.firebaseio.com", 
+        projectId: "pdf-for-students"
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getDatabase(app);
     let items = [], tempCart = [];
 
-    // Real-time Sync for Items
-    onSnapshot(collection(db, "items"), (snap) => {
-        items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Real-time Sync: Refresh par data nahi hatega
+    onValue(ref(db, 'items'), (snapshot) => {
+        const data = snapshot.val();
+        items = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         renderItems();
     });
 
@@ -157,22 +154,17 @@
         if(id === 'reports') loadReports();
     };
 
-    // Yahan se aap Item Name likh kar add kar sakte hain
-    window.addNewItemManual = async () => {
+    window.addNewItemManual = () => {
         const name = document.getElementById('itemName').value;
         const price = parseFloat(document.getElementById('itemPrice').value);
         const stock = parseFloat(document.getElementById('itemStock').value) || 0;
         
         if(name && price >= 0) {
-            await addDoc(collection(db, "items"), { 
-                name, price, stock, 
-                img: 'https://via.placeholder.com/40', 
-                timestamp: serverTimestamp() 
-            });
+            const newItemRef = push(ref(db, 'items'));
+            set(newItemRef, { name, price, stock, img: '' });
             alert("Item Saved!");
             document.getElementById('itemName').value = "";
             document.getElementById('itemPrice').value = "";
-            document.getElementById('itemStock').value = "0";
         }
     };
 
@@ -189,14 +181,12 @@
                 <td>${it.name}</td>
                 <td>₹${it.price}</td>
                 <td style="color:${(it.stock || 0) <= 2 ? 'red' : 'green'}; font-weight:bold">${it.stock || 0}</td>
-                <td><button onclick="deleteItem('${it.id}')" style="background:none; border:none; color:red; cursor:pointer">Del</button></td>
+                <td><button onclick="deleteItem('${it.id}')" style="color:red; background:none; border:none; cursor:pointer">Del</button></td>
             </tr>
         `).join('');
     }
 
-    window.deleteItem = async (id) => {
-        if(confirm("Delete this item?")) await deleteDoc(doc(db, "items", id));
-    };
+    window.deleteItem = (id) => { if(confirm("Delete?")) remove(ref(db, 'items/' + id)); };
 
     window.fillSalePrice = () => {
         const idx = document.getElementById('sItem').value;
@@ -209,12 +199,9 @@
         const rate = parseFloat(document.getElementById(pfx+'Price').value);
         const qty = parseFloat(document.getElementById(pfx+'Qty').value);
         if(idx==="") return;
+        if(type === 'sale' && (items[idx].stock || 0) < qty) { alert("No Stock!"); return; }
 
-        if(type === 'sale' && (items[idx].stock || 0) < qty) {
-            alert("उतना स्टॉक उपलब्ध नहीं है!"); return;
-        }
-
-        tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty });
+        tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty, originalIdx: idx });
         renderCart(type);
     };
 
@@ -222,7 +209,7 @@
         let total = 0;
         document.getElementById(type+'Body').innerHTML = tempCart.map((c, i) => {
             total += c.total;
-            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart('${type}')" style="cursor:pointer">❌</td></tr>`;
+            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart('${type}')">❌</td></tr>`;
         }).join('');
         if(type==='sale') document.getElementById('saleTotal').innerText = total.toFixed(2);
     }
@@ -234,48 +221,50 @@
             date: document.getElementById(type==='sale'?'sDate':'pDate').value,
             total: tempCart.reduce((s,i)=>s+i.total,0),
             items: [...tempCart],
-            timestamp: serverTimestamp()
+            type: type,
+            timestamp: Date.now()
         };
-        await addDoc(collection(db, "transactions"), { ...entry, type });
         
-        for(let c of tempCart) {
-            const itemRef = doc(db, "items", c.itemId);
-            const cur = items.find(i=>i.id===c.itemId);
-            const newStock = type==='sale' ? (cur.stock || 0) - c.qty : (cur.stock || 0) + c.qty;
-            await updateDoc(itemRef, { stock: newStock });
-        }
-        alert("Success!");
-        tempCart = []; renderCart(type);
+        // Save Transaction
+        push(ref(db, 'transactions'), entry);
+        
+        // Update Stock
+        tempCart.forEach(c => {
+            const item = items.find(it => it.id === c.itemId);
+            const newStock = type === 'sale' ? (item.stock - c.qty) : (item.stock + c.qty);
+            update(ref(db, 'items/' + c.itemId), { stock: newStock });
+        });
+
+        alert("Saved!"); tempCart = []; renderCart(type);
     };
 
-    window.saveVoucher = async () => {
+    window.saveVoucher = () => {
         const amt = parseFloat(document.getElementById('vAmt').value);
         if(!amt) return;
-        await addDoc(collection(db, "vouchers"), { 
-            type: document.getElementById('vType').value, 
-            party: document.getElementById('vParty').value, 
-            amt: amt, 
-            date: new Date().toISOString().split('T')[0] 
+        push(ref(db, 'vouchers'), {
+            type: document.getElementById('vType').value,
+            party: document.getElementById('vParty').value,
+            amt: amt,
+            date: new Date().toISOString().split('T')[0]
         });
         alert("Voucher Saved!");
-    }
+    };
 
-    async function loadReports() {
-        const tSnap = await getDocs(collection(db, "transactions"));
-        const vSnap = await getDocs(collection(db, "vouchers"));
-        let s=0, p=0, r=0, py=0, html="";
-        tSnap.forEach(d => { 
-            const data=d.data(); 
-            if(data.type==='sale') s+=data.total; else p+=data.total;
-            html+=`<tr><td>${data.date}</td><td>${data.type.toUpperCase()}</td><td>${data.party}</td><td>₹${data.total}</td></tr>`;
-        });
-        vSnap.forEach(d => { const data=d.data(); if(data.type=='Receipt') r+=data.amt; else py+=data.amt; });
-        document.getElementById('statGrid').innerHTML = `
-            <div class="stat-card" style="background:var(--secondary)">Sales: ₹${s}</div>
-            <div class="stat-card" style="background:var(--warning)">Purchase: ₹${p}</div>
-            <div class="stat-card" style="background:var(--accent)">Receipt: ₹${r}</div>
-            <div class="stat-card" style="background:var(--danger)">Payment: ₹${py}</div>`;
-        document.getElementById('historyBody').innerHTML = html;
+    function loadReports() {
+        onValue(ref(db, 'transactions'), (snap) => {
+            const trans = snap.val();
+            let s=0, p=0, html="";
+            if(trans) {
+                Object.values(trans).forEach(d => {
+                    if(d.type==='sale') s+=d.total; else p+=d.total;
+                    html+=`<tr><td>${d.date}</td><td>${d.type.toUpperCase()}</td><td>${d.party}</td><td>₹${d.total}</td></tr>`;
+                });
+            }
+            document.getElementById('statGrid').innerHTML = `
+                <div class="stat-card" style="background:var(--secondary)">Sales: ₹${s}</div>
+                <div class="stat-card" style="background:var(--warning)">Purchase: ₹${p}</div>`;
+            document.getElementById('historyBody').innerHTML = html;
+        }, { onlyOnce: true });
     }
 
     document.getElementById('sDate').valueAsDate = new Date();
