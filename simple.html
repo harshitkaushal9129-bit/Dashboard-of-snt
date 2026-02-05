@@ -1,175 +1,205 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NIELIT Official Practical Portal - 2026</title>
+    <title>NIELIT Official Practical Exam 2026</title>
     <style>
-        :root { --blue: #3b5998; --green: #68bd45; --red: #e74c3c; --gray: #f4f7f9; }
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Arial; height: 100%; background: var(--gray); overflow: hidden; }
+        :root { --nielit-blue: #3b5998; --green: #68bd45; --red: #e74c3c; --terminal-black: #1e1e1e; }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Arial; height: 100%; background: #f4f7f9; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* --- LOGIN PAGE --- */
-        #login-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: #e9ecef; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 380px; text-align: center; border-top: 8px solid var(--blue); }
-        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        /* --- LOGIN SCREEN --- */
+        #login-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #e9ecef; }
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 400px; text-align: center; border-top: 8px solid var(--nielit-blue); }
+        .login-box select, .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
 
         /* --- EXAM INTERFACE --- */
         header { display: flex; justify-content: space-between; align-items: center; padding: 5px 20px; background: white; border-bottom: 1px solid #ddd; height: 50px; }
-        .timer { font-weight: bold; color: var(--red); font-size: 18px; }
-
         .main-container { display: flex; height: calc(100vh - 110px); }
         .q-sidebar { width: 25%; background: white; padding: 20px; border-right: 2px solid #ddd; overflow-y: auto; }
-        .editor-container { width: 75%; display: flex; flex-direction: column; position: relative; background: white; }
+        .editor-container { width: 75%; display: flex; flex-direction: column; position: relative; }
         
-        .editor-header { padding: 10px; background: #eee; display: flex; gap: 10px; align-items: center; }
-        textarea { flex: 1; padding: 15px; font-family: 'Consolas', monospace; font-size: 15px; border: none; outline: none; background: #fafafa; }
-
-        /* --- COMPILER BOX --- */
-        .terminal { position: absolute; bottom: 0; width: 100%; background: #1e1e1e; color: #ddd; padding: 10px; font-size: 13px; height: 120px; overflow-y: auto; border-top: 3px solid #444; }
-        .err-text { color: #ff5f56; }
-        .success-text { color: #27c93f; }
-
-        /* --- RESULT PAGE --- */
-        #result-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: white; flex-direction: column; }
-        .score-card { border: 2px solid var(--blue); padding: 50px; border-radius: 10px; text-align: center; }
-
+        /* --- EDITOR & TERMINAL --- */
+        .editor-tools { padding: 10px; background: #eee; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
+        textarea { flex: 1; padding: 15px; font-family: 'Consolas', monospace; font-size: 16px; border: none; outline: none; background: #fff; }
+        .terminal { background: var(--terminal-black); color: #fff; padding: 15px; font-family: 'Consolas', monospace; font-size: 13px; height: 150px; border-top: 4px solid #444; overflow-y: auto; }
+        
+        /* --- FOOTER --- */
         footer { height: 60px; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
         .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-blue { background: var(--blue); color: white; }
+        .btn-blue { background: var(--nielit-blue); color: white; }
         .btn-green { background: var(--green); color: white; }
         .btn-red { background: var(--red); color: white; }
+
+        /* --- PALETTE --- */
+        .p-box { display: inline-block; width: 35px; height: 35px; border: 1px solid #999; margin: 5px; line-height: 35px; text-align: center; cursor: pointer; }
+        .done { background: #b8d1f3; }
+        .active { border: 2px solid var(--nielit-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="login-page">
+    <div id="login-screen">
         <div class="login-box">
-            <img src="https://www.nielit.gov.in/sites/all/themes/nielit/logo.png" width="150">
-            <h3>CANDIDATE LOGIN</h3>
-            <input type="text" id="uname" placeholder="Roll Number / Name">
-            <input type="password" placeholder="Password">
-            <button class="btn btn-blue" style="width:100%" onclick="startExam()">LOGIN TO EXAM</button>
+            <img src="https://www.nielit.gov.in/sites/all/themes/nielit/logo.png" width="180">
+            <h3>PRACTICAL EXAMINATION</h3>
+            <input type="text" id="stuName" placeholder="Enter Full Name">
+            <select id="moduleSelect">
+                <option value="M2">M2-R5: Web Designing</option>
+                <option value="M3">M3-R5: Python Programming</option>
+                <option value="M4">M4-R5: Internet of Things (IoT)</option>
+            </select>
+            <button class="btn btn-blue" style="width:100%" onclick="startExam()">START EXAMINATION</button>
         </div>
     </div>
 
-    <div id="exam-page" class="hidden">
+    <div id="exam-screen" class="hidden">
         <header>
-            <b>NIELIT PRACTICAL PORTAL</b>
-            <div class="timer" id="clock">45:00</div>
-            <div>User: <b id="display-name">Guest</b></div>
+            <b id="mod-header">NIELIT - PR</b>
+            <div style="font-size: 18px; color: var(--red); font-weight: bold;" id="timer">45:00</div>
+            <div id="user-info">User: <b>Guest</b></div>
         </header>
 
         <div class="main-container">
             <div class="q-sidebar">
                 <h4 id="q-title">Question 1</h4>
-                <p id="q-desc">Write an Arduino code to blink LED on Pin 13.</p>
+                <p id="q-desc"></p>
                 <hr>
-                <div id="palette">
-                    <b>Question Palette:</b><br><br>
-                    <button onclick="loadQ(0)">1</button>
-                    <button onclick="loadQ(1)">2</button>
-                    <button onclick="loadQ(2)">3</button>
+                <b>Question Palette:</b><br>
+                <div id="palette-container">
+                    <div class="p-box active" onclick="jumpTo(0)" id="p0">1</div>
+                    <div class="p-box" onclick="jumpTo(1)" id="p1">2</div>
+                    <div class="p-box" onclick="jumpTo(2)" id="p2">3</div>
                 </div>
             </div>
 
             <div class="editor-container">
-                <div class="editor-header">
-                    <b id="lang-label">Arduino (C++)</b>
-                    <button class="btn btn-blue" onclick="runCompiler()">Compile & Run</button>
-                    <button class="btn btn-green" onclick="saveResp()">Save Response</button>
+                <div class="editor-tools">
+                    <button class="btn btn-blue" onclick="compileCode()">Compile & Run</button>
+                    <button class="btn btn-green" onclick="saveAnswer()">Save Response</button>
                 </div>
-                <textarea id="editor" spellcheck="false"></textarea>
-                <div class="terminal" id="console">
-                    Welcome to NIELIT Compiler Terminal... Ready for input.
-                </div>
+                <textarea id="code-editor" spellcheck="false" placeholder="Write code here..."></textarea>
+                <div class="terminal" id="terminal">Terminal ready... Waiting for Compilation.</div>
             </div>
         </div>
 
         <footer>
             <button class="btn btn-blue" onclick="prevQ()">Previous</button>
             <button class="btn btn-blue" onclick="nextQ()">Next</button>
-            <button class="btn btn-red" onclick="finishExam()">FINISH & SUBMIT TEST</button>
+            <button class="btn btn-red" onclick="finishExam()">SUBMIT MODULE TEST</button>
         </footer>
     </div>
 
-    <div id="result-page" class="hidden">
-        <div class="score-card">
-            <h1 style="color:var(--blue)">EXAM COMPLETED</h1>
-            <p>Name: <b id="res-name"></b></p>
-            <p>Total Marks: 80 / 80</p>
-            <h2 style="color:var(--green)">STATUS: PASS (PROVISIONAL)</h2>
-            <button class="btn btn-blue" onclick="location.reload()">EXIT</button>
+    <div id="result-screen" class="hidden" style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:white;">
+        <h1 style="color:var(--nielit-blue)">FINAL RESULT CARD</h1>
+        <div style="border:2px solid #ddd; padding:40px; border-radius:10px; text-align:center; min-width:400px;">
+            <h2 id="res-name"></h2>
+            <p id="res-module"></p>
+            <div style="font-size: 50px; font-weight: bold; margin: 20px 0;" id="res-score">0/100</div>
+            <h3 id="res-grade" style="color:var(--green)"></h3>
+            <button class="btn btn-blue" onclick="location.reload()">EXIT PORTAL</button>
         </div>
     </div>
 
     <script>
-        const questions = [
-            { title: "Question 1 (Arduino)", desc: "Blink an LED on Pin 13 with 1s delay.", lang: "Arduino", code: "void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(1000);\n}", keyword: "pinMode" },
-            { title: "Question 2 (Python)", desc: "Write a program to find Factorial of a number.", lang: "Python", code: "def factorial(n):\n    return 1 if n==0 else n * factorial(n-1)", keyword: "def" },
-            { title: "Question 3 (C Language)", desc: "Swap two numbers without using third variable.", lang: "C", code: "a = a + b;\nb = a - b;\na = a - b;", keyword: "a =" }
-        ];
+        const bank = {
+            M2: [
+                { q: "Create an HTML Table with 2 rows and border 5px.", k: ["<table", "border=\"5\"", "<tr>"], code: "" },
+                { q: "CSS code to change background to yellow and text to red.", k: ["background-color: yellow", "color: red"], code: "" },
+                { q: "Create an Anchor tag linking to nielit.gov.in.", k: ["<a", "href", "nielit.gov.in"], code: "" }
+            ],
+            M3: [
+                { q: "Write a Python function to check even or odd.", k: ["def", "if", "%", "=="], code: "" },
+                { q: "Python code to print numbers from 1 to 10 using while loop.", k: ["while", "print", "<="], code: "" },
+                { q: "Create a list in Python and append 'NIELIT' to it.", k: ["list", "append(", "'NIELIT'"], code: "" }
+            ],
+            M4: [
+                { q: "Arduino code to initialize Pin 13 as OUTPUT.", k: ["pinMode", "13", "OUTPUT"], code: "" },
+                { q: "Read analog value from Pin A0 and store in variable 'val'.", k: ["analogRead", "A0", "val"], code: "" },
+                { q: "Write Arduino code for a 500ms delay.", k: ["delay", "500"], code: "" }
+            ]
+        };
 
-        let currentQ = 0;
-        let timeLeft = 2700;
+        let currentModule = "M2";
+        let qIdx = 0;
+        let score = 0;
 
         function startExam() {
-            let name = document.getElementById('uname').value;
-            if(!name) return alert("Pehle Login Details bhariye!");
-            document.getElementById('display-name').innerText = name.toUpperCase();
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('exam-page').classList.remove('hidden');
-            loadQ(0);
+            let name = document.getElementById('stuName').value;
+            if(!name) return alert("Please enter name!");
+            currentModule = document.getElementById('moduleSelect').value;
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+            document.getElementById('user-info').innerHTML = `User: <b>${name}</b>`;
+            document.getElementById('mod-header').innerText = `NIELIT - ${currentModule}-R5 Practical`;
+            
+            loadQuestion();
             startTimer();
         }
 
-        function loadQ(index) {
-            currentQ = index;
-            document.getElementById('q-title').innerText = questions[index].title;
-            document.getElementById('q-desc').innerText = questions[index].desc;
-            document.getElementById('lang-label').innerText = questions[index].lang;
-            document.getElementById('editor').value = questions[index].code;
-            document.getElementById('console').innerHTML = "Terminal cleared. Ready to compile Question " + (index+1);
+        function loadQuestion() {
+            let q = bank[currentModule][qIdx];
+            document.getElementById('q-title').innerText = "Question " + (qIdx + 1);
+            document.getElementById('q-desc').innerText = q.q;
+            document.getElementById('code-editor').value = q.code;
+            
+            document.querySelectorAll('.p-box').forEach(b => b.classList.remove('active'));
+            document.getElementById('p' + qIdx).classList.add('active');
+            document.getElementById('terminal').innerHTML = "Terminal ready...";
         }
 
-        function runCompiler() {
-            let code = document.getElementById('editor').value;
-            let consoleBox = document.getElementById('console');
+        function compileCode() {
+            let code = document.getElementById('code-editor').value;
+            let keys = bank[currentModule][qIdx].k;
+            let term = document.getElementById('terminal');
             
-            // LOGIC CHECKER (Strict Validation)
-            if (code.includes(';') || code.includes('def') || code.includes('void')) {
-                if (code.length < 20 || !code.includes(questions[currentQ].keyword)) {
-                    consoleBox.innerHTML = `<span class="err-text">Compilation Error: Syntax Error at line 4. Expected logic is missing. Check your logic again!</span>`;
-                } else {
-                    consoleBox.innerHTML = `<span class="success-text">✔ Compilation Successful!</span><br>Execution Time: 0.002s<br>Memory Used: 924 bytes.`;
-                }
+            let missing = keys.filter(k => !code.toLowerCase().includes(k.toLowerCase()));
+            
+            if(code.length < 10 || missing.length > 0) {
+                term.innerHTML = `<span style="color:var(--red)">[ERROR] Compilation Failed!</span><br>Missing Logic/Syntax near: ${missing[0] || 'Incomplete code'}.<br>Check your tags/syntax carefully.`;
             } else {
-                consoleBox.innerHTML = `<span class="err-text">FATAL ERROR: Semicolon or Bracket missing. Program terminated unexpectedly.</span>`;
+                term.innerHTML = `<span style="color:var(--green)">[SUCCESS] Compiled successfully!</span><br>Execution finished without errors.<br>Memory used: 124KB.`;
             }
         }
 
-        function saveResp() {
-            alert("Response Saved! Palette color changed to Blue.");
+        function saveAnswer() {
+            bank[currentModule][qIdx].code = document.getElementById('code-editor').value;
+            document.getElementById('p' + qIdx).classList.add('done');
+            alert("Response Saved!");
+        }
+
+        function jumpTo(i) { qIdx = i; loadQuestion(); }
+        function nextQ() { if(qIdx < 2) { qIdx++; loadQuestion(); } }
+        function prevQ() { if(qIdx > 0) { qIdx--; loadQuestion(); } }
+
+        function finishExam() {
+            if(!confirm("Are you sure? All 3 questions will be submitted.")) return;
+            
+            let finalPoints = 0;
+            bank[currentModule].forEach(q => {
+                let matchCount = q.k.filter(k => q.code.toLowerCase().includes(k.toLowerCase())).length;
+                if(matchCount === q.k.length && q.code.length > 10) finalPoints += 33.33;
+            });
+
+            let total = Math.round(finalPoints);
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('res-name').innerText = "Name: " + document.getElementById('stuName').value;
+            document.getElementById('res-module').innerText = "Module: " + currentModule;
+            document.getElementById('res-score').innerText = total + "/100";
+            document.getElementById('res-grade').innerText = total >= 50 ? "RESULT: PASS (PROVISIONAL)" : "RESULT: FAIL";
         }
 
         function startTimer() {
+            let t = 2700;
             setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('clock').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                t--;
+                let m = Math.floor(t / 60);
+                let s = t % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
             }, 1000);
         }
-
-        function finishExam() {
-            if(confirm("Are you sure? Final submission ke baad result dikhega.")) {
-                document.getElementById('exam-page').classList.add('hidden');
-                document.getElementById('result-page').classList.remove('hidden');
-                document.getElementById('res-name').innerText = document.getElementById('uname').value;
-            }
-        }
-
-        function nextQ() { if(currentQ < 2) loadQ(currentQ + 1); }
-        function prevQ() { if(currentQ > 0) loadQ(currentQ - 1); }
     </script>
 </body>
 </html>
