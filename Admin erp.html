@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kaushal Vastralaya Admin - Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --accent: #2980b9; --meesho: #ff008a; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); }
+        .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; }
+        .nav-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; background: none; color: #bdc3c7; text-align: left; cursor: pointer; border-radius: 4px; }
+        .nav-btn.active { background: #34495e; color: white; border-left: 4px solid var(--secondary); }
+        .main { margin-left: 300px; padding: 30px; width: calc(100% - 360px); }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .flex-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
+        .input-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { padding: 20px; border-radius: 8px; color: white; text-align: center; }
+        .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>KV Admin</h2>
+    <button class="nav-btn active" onclick="showTab('pos')">🛒 Sales</button>
+    <button class="nav-btn" onclick="showTab('items')">📦 Inventory & Upload</button>
+    <button class="nav-btn" onclick="showTab('reports')">📊 Dashboard</button>
+</div>
+
+<div class="main">
+    <div id="pos" class="tab-content">
+        <div class="card">
+            <h3>Sales Invoice</h3>
+            <div class="flex-row">
+                <input type="text" id="sCust" placeholder="Customer Name">
+                <input type="text" id="sPhone" placeholder="WhatsApp No.">
+                <input type="date" id="sDate">
+            </div>
+            <div class="flex-row">
+                <select id="sItem" onchange="fillPrice()" style="flex:2"></select>
+                <input type="number" id="sPrice" placeholder="Rate">
+                <input type="number" id="sQty" value="1">
+                <button onclick="addToCart()" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:4px;">Add</button>
+            </div>
+            <table width="100%" id="cartTable">
+                <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th></tr></thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+            <h2 align="right">Total: ₹<span id="gTotal">0</span></h2>
+            <button onclick="saveSale()" style="width:100%; padding:15px; background:var(--secondary); color:white; border:none; font-size:18px; border-radius:8px; cursor:pointer;">Complete Sale & Send Bill</button>
+        </div>
+    </div>
+
+    <div id="items" class="tab-content" style="display:none">
+        <div class="card">
+            <h3>Add New Product (for Meesho App)</h3>
+            <div class="flex-row">
+                <input type="text" id="newName" placeholder="Item Name">
+                <input type="number" id="newPrice" placeholder="Selling Price">
+                <input type="text" id="newImg" placeholder="Image URL (e.g. Imgur link)">
+                <button onclick="addItem()" style="background:var(--secondary); color:white; border:none; padding:10px 20px;">Save Product</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Current Stock</h3>
+            <table width="100%">
+                <thead><tr><th>Image</th><th>Item</th><th>Price</th><th>Stock</th></tr></thead>
+                <tbody id="stockList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="reports" class="tab-content" style="display:none">
+        <div class="stat-grid" id="stats"></div>
+        <div class="card">
+            <h3>Recent Sales</h3>
+            <table width="100%"><tbody id="salesHistory"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
+        authDomain: "pdf-for-students.firebaseapp.com",
+        projectId: "pdf-for-students",
+        storageBucket: "pdf-for-students.firebasestorage.app",
+        messagingSenderId: "282416295807",
+        appId: "1:282416295807:web:a6113eef2b1e63d17bb44a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let allItems = [], cart = [];
+
+    // Real-time Sync
+    onSnapshot(collection(db, "items"), (snap) => {
+        allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        updateDropdowns();
+        renderStock();
+    });
+
+    window.showTab = (id) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
+        document.getElementById(id).style.display='block';
+        if(id === 'reports') loadDashboard();
+    };
+
+    window.addItem = async () => {
+        const name = document.getElementById('newName').value;
+        const price = document.getElementById('newPrice').value;
+        const img = document.getElementById('newImg').value || "https://via.placeholder.com/150";
+        await addDoc(collection(db, "items"), { name, price: parseFloat(price), image: img, stock: 10 });
+        alert("Product Added!");
+    };
+
+    function updateDropdowns() {
+        const html = allItems.map((it, i) => `<option value="${i}">${it.name}</option>`).join('');
+        document.getElementById('sItem').innerHTML = html;
+    }
+
+    window.fillPrice = () => {
+        const it = allItems[document.getElementById('sItem').value];
+        document.getElementById('sPrice').value = it.price;
+    };
+
+    window.addToCart = () => {
+        const it = allItems[document.getElementById('sItem').value];
+        const q = parseFloat(document.getElementById('sQty').value);
+        cart.push({ id: it.id, name: it.name, rate: it.price, qty: q, total: it.price * q });
+        renderCart();
+    };
+
+    function renderCart() {
+        let gt = 0;
+        document.getElementById('cartBody').innerHTML = cart.map(c => {
+            gt += c.total;
+            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td></tr>`;
+        }).join('');
+        document.getElementById('gTotal').innerText = gt;
+    }
+
+    window.saveSale = async () => {
+        const total = cart.reduce((s, c) => s + c.total, 0);
+        const saleData = { 
+            party: document.getElementById('sCust').value || "Cash", 
+            total, 
+            items: cart, 
+            date: document.getElementById('sDate').value,
+            type: 'sale' 
+        };
+        await addDoc(collection(db, "transactions"), saleData);
+        // Stock Update
+        for(let c of cart) {
+            const ref = doc(db, "items", c.id);
+            const item = allItems.find(i => i.id === c.id);
+            await updateDoc(ref, { stock: item.stock - c.qty });
+        }
+        alert("Sale Saved!");
+        window.open(`https://wa.me/${document.getElementById('sPhone').value}?text=Hello, your bill of ₹${total} is generated.`);
+        cart = []; renderCart();
+    };
+
+    async function loadDashboard() {
+        const snap = await getDocs(collection(db, "transactions"));
+        let sales = 0;
+        snap.forEach(d => { if(d.data().type === 'sale') sales += d.data().total; });
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-card" style="background:var(--secondary)">Total Sales: ₹${sales}</div>
+            <div class="stat-card" style="background:var(--accent)">Items: ${allItems.length}</div>
+        `;
+    }
+
+    function renderStock() {
+        document.getElementById('stockList').innerHTML = allItems.map(it => `
+            <tr>
+                <td><img src="${it.image}" class="img-preview"></td>
+                <td>${it.name}</td>
+                <td>₹${it.price}</td>
+                <td>${it.stock}</td>
+            </tr>
+        `).join('');
+    }
+
+    document.getElementById('sDate').valueAsDate = new Date();
+</script>
+</body>
+</html>
