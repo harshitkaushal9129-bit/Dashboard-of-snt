@@ -2,41 +2,51 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Kaushal Admin - Inventory</title>
+    <title>Kaushal Admin Pro - Realtime</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #ff008a; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
-        .sidebar { width: 250px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; }
-        .main { margin-left: 290px; padding: 20px; width: 100%; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        .btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        :root { --meesho: #ff008a; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; display: flex; }
+        .sidebar { width: 260px; background: var(--dark); color: white; height: 100vh; position: fixed; padding: 20px; }
+        .main { margin-left: 300px; padding: 30px; width: 100%; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        input, select { padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        .btn { background: var(--meesho); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>Shop Admin</h2>
+    <h2>KV Admin Pro</h2>
     <hr>
-    <p>📦 Product Upload</p>
-    <p>🚚 View Orders</p>
+    <p>📦 Inventory Management</p>
+    <p>📑 Customer Orders</p>
 </div>
 
 <div class="main">
     <div class="card">
-        <h3>Naya Product Upload Karein</h3>
-        <input type="text" id="pName" placeholder="Product Name">
-        <input type="number" id="pPrice" placeholder="Price (₹)">
+        <h3>🛍️ Naya Maal Add Karein</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="text" id="pName" placeholder="Product Name">
+            <input type="number" id="pPrice" placeholder="Price (₹)">
+        </div>
+        <select id="pCat">
+            <option value="Saree">Saree</option>
+            <option value="Suits">Suits</option>
+            <option value="Kurtis">Kurtis</option>
+            <option value="Kids">Kids Wear</option>
+        </select>
         <input type="file" id="pFile" accept="image/*">
-        <button class="btn" id="upBtn" onclick="upload()">Publish to App</button>
+        <button class="btn" id="upBtn" onclick="uploadToApp()">App Par Publish Karein</button>
+        <p id="status"></p>
     </div>
 
     <div class="card">
-        <h3>Live Stock</h3>
+        <h3>📦 Live Stock on Meesho App</h3>
         <table id="stockTable">
-            <thead><tr><th>Photo</th><th>Name</th><th>Price</th><th>Action</th></tr></thead>
+            <thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>Price</th><th>Action</th></tr></thead>
             <tbody id="list"></tbody>
         </table>
     </div>
@@ -55,20 +65,25 @@
     const db = getDatabase(app);
     const storage = getStorage(app);
 
-    window.upload = async () => {
+    window.uploadToApp = async () => {
         const file = document.getElementById('pFile').files[0];
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
+        const cat = document.getElementById('pCat').value;
 
-        if(!file || !name) return alert("Details bhariye!");
+        if(!file || !name || !price) return alert("Sab fields bhariye!");
 
-        const imgRef = sRef(storage, 'products/' + Date.now());
+        document.getElementById('upBtn').disabled = true;
+        document.getElementById('status').innerText = "Uploading...";
+
+        const imgRef = sRef(storage, 'shop/' + Date.now());
         await uploadBytes(imgRef, file);
         const url = await getDownloadURL(imgRef);
 
         const newP = push(ref(db, 'products'));
-        await set(newP, { name, price, img: url });
-        alert("Live ho gaya!"); location.reload();
+        await set(newP, { name, price, category: cat, img: url });
+        
+        alert("Product Live!"); location.reload();
     };
 
     onValue(ref(db, 'products'), (snap) => {
@@ -76,16 +91,17 @@
         snap.forEach(c => {
             const p = c.val();
             html += `<tr>
-                <td><img src="${p.img}" width="50"></td>
+                <td><img src="${p.img}" class="thumb"></td>
                 <td>${p.name}</td>
+                <td>${p.category}</td>
                 <td>₹${p.price}</td>
-                <td><button onclick="removeIt('${c.key}')">❌</button></td>
+                <td><button onclick="removeIt('${c.key}')" style="color:red; background:none; border:none; cursor:pointer;">Hatao</button></td>
             </tr>`;
         });
         document.getElementById('list').innerHTML = html;
     });
 
-    window.removeIt = (id) => remove(ref(db, 'products/' + id));
+    window.removeIt = (id) => { if(confirm("Kya aap ise hatana chahte hain?")) remove(ref(db, 'products/' + id)); };
 </script>
 </body>
 </html>
