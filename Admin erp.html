@@ -22,9 +22,12 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
         th { background: #f8f9fa; color: var(--primary); }
-        .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
         .btn-save { background: var(--accent); width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; }
         .thumb-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .stock-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .low-stock { background: #ffebee; color: #c62828; }
+        .in-stock { background: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -45,7 +48,10 @@
                 <div class="input-group"><label>WhatsApp Number</label><input type="text" id="sPhone" placeholder="91XXXXXXXXXX"></div>
             </div>
             <div class="flex-row">
-                <div class="input-group" style="flex:2"><label>Item</label><select id="sItem" onchange="fillSalePrice()"></select></div>
+                <div class="input-group" style="flex:2">
+                    <label>Item (Stock | Price)</label>
+                    <select id="sItem" onchange="fillSalePrice()"></select>
+                </div>
                 <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
                 <div class="input-group"><label>Qty</label><input type="number" id="sQty" value="1"></div>
                 <button class="btn" style="background:var(--primary)" onclick="addToCart('sale')">Add</button>
@@ -65,6 +71,7 @@
             <div class="flex-row">
                 <div class="input-group"><label>Item Name</label><input type="text" id="itemName"></div>
                 <div class="input-group"><label>Sale Price</label><input type="number" id="itemPrice"></div>
+                <div class="input-group"><label>Initial Stock</label><input type="number" id="itemStock" value="0"></div>
                 <div class="input-group"><label>Category</label>
                     <select id="itemCat">
                         <option value="Saree">Saree</option>
@@ -82,7 +89,7 @@
         <div class="card">
             <h3>Current Inventory (स्टॉक लिस्ट)</h3>
             <table>
-                <thead><tr><th>Image</th><th>Item Name</th><th>Category</th><th>Price</th><th>Stock Qty</th><th>Action</th></tr></thead>
+                <thead><tr><th>Image</th><th>Item Name</th><th>Price</th><th>Stock Qty</th><th>Action</th></tr></thead>
                 <tbody id="stockBody"></tbody>
             </table>
         </div>
@@ -111,7 +118,6 @@
     const storage = getStorage(app);
     let items = [], tempCart = [];
 
-    // --- Sync Data ---
     onSnapshot(collection(db, "items"), (snap) => {
         items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderItems();
@@ -124,10 +130,10 @@
         if(btn) btn.classList.add('active');
     };
 
-    // --- Add New Item with Image ---
     window.addNewItem = async () => {
         const name = document.getElementById('itemName').value;
         const price = parseFloat(document.getElementById('itemPrice').value);
+        const stock = parseFloat(document.getElementById('itemStock').value) || 0;
         const cat = document.getElementById('itemCat').value;
         const file = document.getElementById('itemFile').files[0];
         const btn = document.getElementById('upBtn');
@@ -138,14 +144,12 @@
         btn.innerText = "Uploading...";
 
         try {
-            // 1. Upload Image to Storage
             const imgRef = sRef(storage, 'products/' + Date.now() + "_" + file.name);
             const snapshot = await uploadBytes(imgRef, file);
             const url = await getDownloadURL(snapshot.ref);
 
-            // 2. Save to Firestore
             await addDoc(collection(db, "items"), {
-                name, price, category: cat, img: url, stock: 10, timestamp: serverTimestamp()
+                name, price, category: cat, img: url, stock: stock, timestamp: serverTimestamp()
             });
 
             alert("Product Added Successfully!");
@@ -157,19 +161,23 @@
     };
 
     function renderItems() {
-        // Fill POS Dropdown
-        const opts = '<option value="">-- Select Item --</option>' + items.map((it, i) => `<option value="${i}">${it.name}</option>`).join('');
+        // POS Dropdown showing Stock and Price
+        const opts = '<option value="">-- Select Item --</option>' + 
+            items.map((it, i) => `<option value="${i}">${it.name} [Stk: ${it.stock} | ₹${it.price}]</option>`).join('');
         document.getElementById('sItem').innerHTML = opts;
 
-        // Fill Inventory Table
+        // Inventory Table
         document.getElementById('stockBody').innerHTML = items.map(it => `
             <tr>
                 <td><img src="${it.img || ''}" class="thumb-img"></td>
-                <td><b>${it.name}</b></td>
-                <td>${it.category || 'General'}</td>
+                <td><b>${it.name}</b><br><small>${it.category}</small></td>
                 <td>₹${it.price}</td>
-                <td style="color:${it.stock < 5 ? 'red' : 'green'}; font-weight:bold">${it.stock}</td>
-                <td><button onclick="deleteItem('${it.id}')" style="background:none; border:none; color:red; cursor:pointer">Delete</button></td>
+                <td>
+                    <span class="stock-badge ${it.stock < 5 ? 'low-stock' : 'in-stock'}">${it.stock} Pcs</span>
+                </td>
+                <td>
+                    <button onclick="deleteItem('${it.id}')" style="background:var(--danger); font-size:10px;" class="btn">Del</button>
+                </td>
             </tr>
         `).join('');
     }
@@ -188,6 +196,9 @@
         const rate = parseFloat(document.getElementById('sPrice').value);
         const qty = parseFloat(document.getElementById('sQty').value);
         if(idx==="") return;
+        
+        if(items[idx].stock < qty) return alert("Not enough stock!");
+
         tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty });
         renderCart();
     };
@@ -196,7 +207,7 @@
         let total = 0;
         document.getElementById('saleBody').innerHTML = tempCart.map((c, i) => {
             total += c.total;
-            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart()">❌</td></tr>`;
+            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart()" style="cursor:pointer">❌</td></tr>`;
         }).join('');
         document.getElementById('saleTotal').innerText = total.toFixed(2);
     }
@@ -212,7 +223,6 @@
         
         await addDoc(collection(db, "transactions"), entry);
         
-        // Update Stock
         for(let c of tempCart) {
             const itemRef = doc(db, "items", c.itemId);
             const cur = items.find(i=>i.id===c.itemId);
