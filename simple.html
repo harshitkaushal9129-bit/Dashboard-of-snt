@@ -2,199 +2,166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIELIT O-Level Practical System</title>
+    <title>NIELIT 4-Module Practical Portal</title>
     <style>
-        :root { --nielit-blue: #003366; --nielit-orange: #ff6600; --bg: #f0f2f5; }
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); height: 100%; }
-
+        :root { --nielit-blue: #003366; --nielit-orange: #ff6600; --bg: #f4f7f6; }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100%; background: var(--bg); }
         .hidden { display: none !important; }
 
-        /* --- Login Section --- */
-        #login-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--nielit-blue), #0056b3); }
-        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: 350px; }
-        .login-box img { width: 150px; margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .btn-main { background: var(--nielit-orange); color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn-main:hover { background: #e65c00; }
+        /* Login */
+        #login-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: var(--nielit-blue); }
+        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-        /* --- Module Dashboard --- */
-        #dashboard { padding: 50px; text-align: center; }
+        /* Dashboard */
+        #dashboard { padding: 40px; text-align: center; }
         .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 800px; margin: 30px auto; }
-        .mod-card { background: white; padding: 40px; border-radius: 10px; cursor: pointer; border-top: 6px solid var(--nielit-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-        .mod-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .mod-card { background: white; padding: 30px; border-radius: 8px; cursor: pointer; border-bottom: 5px solid var(--nielit-blue); box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s; }
+        .mod-card:hover { transform: translateY(-5px); background: #fffbf0; }
 
-        /* --- Exam Portal Layout --- */
-        #exam-portal { display: grid; grid-template-rows: 60px 1fr 50px; height: 100vh; }
-        header { background: var(--nielit-blue); color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; font-weight: bold; }
-        
-        .main-content { display: grid; grid-template-columns: 350px 1fr 200px; gap: 2px; background: #ccc; overflow: hidden; }
-        
-        /* Question & Editor Area */
-        .q-panel { background: white; padding: 25px; overflow-y: auto; }
-        .editor-container { background: #1e1e1e; display: flex; flex-direction: column; }
-        textarea { flex: 1; background: #1e1e1e; color: #00ff00; padding: 20px; font-family: 'Consolas', monospace; font-size: 17px; border: none; outline: none; resize: none; }
-        
-        /* Navigation Sidebar */
-        .nav-sidebar { background: #f8f9fa; padding: 20px; text-align: center; }
-        .q-btn { width: 50px; height: 50px; margin: 5px; border: 1px solid #999; border-radius: 5px; cursor: pointer; background: white; font-weight: bold; }
+        /* Exam Layout */
+        #exam-portal { display: grid; grid-template-rows: 60px 1fr 50px; height: 100vh; background: white; }
+        header { background: var(--nielit-blue); color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .main-container { display: grid; grid-template-columns: 350px 1fr 150px; background: #ddd; gap: 2px; overflow: hidden; }
+        .panel { background: white; padding: 20px; overflow-y: auto; }
+        textarea { width: 100%; height: 90%; background: #1e1e1e; color: #00ff00; font-family: 'Consolas', monospace; font-size: 16px; padding: 15px; border: none; outline: none; resize: none; }
+
+        /* Buttons */
+        .q-btn { width: 40px; height: 40px; margin: 5px; cursor: pointer; border: 1px solid #999; border-radius: 5px; background: white; }
         .q-btn.active { background: var(--nielit-orange); color: white; border: none; }
-        .q-btn.answered { background: #28a745; color: white; border: none; }
-
-        footer { background: #eee; border-top: 1px solid #bbb; display: flex; justify-content: flex-end; align-items: center; padding: 0 25px; }
-
-        /* --- Result Screen --- */
-        #result-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: #fff; }
-        .result-box { text-align: center; border: 2px solid var(--nielit-blue); padding: 50px; border-radius: 15px; background: #f9f9f9; }
-        .grade-text { font-size: 40px; color: var(--nielit-blue); font-weight: bold; margin: 20px 0; }
+        .btn-submit { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        /* Result */
+        #result-page { height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .result-box { text-align: center; border: 3px solid var(--nielit-blue); padding: 40px; border-radius: 15px; background: #fff; width: 400px; }
     </style>
 </head>
 <body>
 
     <div id="login-page">
         <div class="login-box">
-            <img src="https://www.nielit.gov.in/sites/all/themes/nielit/logo.png" alt="Logo">
-            <h3>Practical Exam Portal</h3>
-            <input type="text" id="studentName" placeholder="Enter Student Name...">
-            <button class="btn-main" onclick="showModules()">SUBMIT</button>
+            <h2 style="color:var(--nielit-blue)">NIELIT EXAM</h2>
+            <input type="text" id="userName" placeholder="Enter Student Name" style="width:90%; padding:10px; margin-bottom:20px;">
+            <button onclick="login()" style="width:100%; padding:10px; background:var(--nielit-orange); color:white; border:none; border-radius:5px; cursor:pointer;">SUBMIT</button>
         </div>
     </div>
 
     <div id="dashboard" class="hidden">
-        <h2 id="welcomeText"></h2>
-        <p>Select your module to begin the practical assessment.</p>
+        <h2 id="greet"></h2>
+        <p>Select a Module to start 3-Question Practical Exam:</p>
         <div class="module-grid">
-            <div class="mod-card" onclick="alert('Module M1 is locked for this demo.')"><h3>M1-R5</h3><p>IT Tools</p></div>
-            <div class="mod-card" onclick="startM2()"><h3>M2-R5</h3><p>Web Designing</p></div>
-            <div class="mod-card" onclick="alert('Module M3 is locked for this demo.')"><h3>M3-R5</h3><p>Python Programming</p></div>
-            <div class="mod-card" onclick="alert('Module M4 is locked for this demo.')"><h3>M4-R5</h3><p>IoT</p></div>
+            <div class="mod-card" onclick="initExam('M1')"><h3>M1-R5</h3><p>IT Tools</p></div>
+            <div class="mod-card" onclick="initExam('M2')"><h3>M2-R5</h3><p>Web Designing</p></div>
+            <div class="mod-card" onclick="initExam('M3')"><h3>M3-R5</h3><p>Python</p></div>
+            <div class="mod-card" onclick="initExam('M4')"><h3>M4-R5</h3><p>IoT</p></div>
         </div>
     </div>
 
     <div id="exam-portal" class="hidden">
         <header>
-            <div>NIELIT M2-R5 PRACTICAL</div>
-            <div id="userLabel">Candidate: </div>
-            <div id="timer">Time: 45:00</div>
+            <div id="mod-title">Module</div>
+            <div id="timer">Time Remaining: 30:00</div>
+            <button class="btn-submit" onclick="finishExam()">FINISH EXAM</button>
         </header>
-
-        <div class="main-content">
-            <div class="q-panel">
-                <h3 id="q-title">Question 1</h3>
-                <hr>
-                <p id="q-desc" style="line-height: 1.6; font-size: 1.1em;"></p>
-                <p style="color: #666; font-size: 0.9em; margin-top: 30px;">Note: Use proper HTML tags for evaluation.</p>
+        <div class="main-container">
+            <div class="panel">
+                <h4 id="q-label">Question 1</h4>
+                <p id="q-text" style="line-height:1.6;"></p>
             </div>
-
-            <div class="editor-container">
-                <div style="background: #333; color: #ddd; padding: 8px 15px; font-size: 13px;">Code Editor (HTML/CSS)</div>
-                <textarea id="code-editor" spellcheck="false" oninput="saveCurrentCode()"></textarea>
+            <div style="background:#1e1e1e;">
+                <textarea id="editor" oninput="saveAns()" spellcheck="false"></textarea>
             </div>
-
-            <div class="nav-sidebar">
-                <h4>Questions</h4>
-                <div id="q-nav-buttons">
-                    <button class="q-btn active" onclick="switchQ(0)">1</button>
-                    <button class="q-btn" onclick="switchQ(1)">2</button>
-                    <button class="q-btn" onclick="switchQ(2)">3</button>
-                </div>
+            <div class="panel" style="text-align:center;">
+                <h4>Palette</h4>
+                <button class="q-btn active" id="b0" onclick="switchQ(0)">1</button>
+                <button class="q-btn" id="b1" onclick="switchQ(1)">2</button>
+                <button class="q-btn" id="b2" onclick="switchQ(2)">3</button>
             </div>
         </div>
-
-        <footer>
-            <button class="btn-main" style="width: auto; padding: 10px 40px;" onclick="finishExam()">FINISH & SUBMIT</button>
-        </footer>
     </div>
 
     <div id="result-page" class="hidden">
         <div class="result-box">
-            <h2>FINAL SCORECARD</h2>
-            <p id="final-name"></p>
-            <div id="final-score" style="font-size: 20px;">Score: 0/100</div>
-            <div class="grade-text" id="final-grade">GRADE: F</div>
-            <p id="final-status" style="font-weight: bold;"></p>
+            <h2 id="res-module-name"></h2>
+            <p id="res-student-name"></p>
+            <hr>
+            <div id="res-score" style="font-size: 24px; margin: 20px 0;">Score: 0</div>
+            <div id="res-grade" style="font-size: 30px; font-weight:bold; color:var(--nielit-blue);">Grade: F</div>
             <br>
-            <button class="btn-main" onclick="location.reload()">RE-LOGIN</button>
+            <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">Logout / Restart</button>
         </div>
     </div>
 
     <script>
-        let student = "";
+        let studentName = "";
+        let currentModule = "";
         let currentQIdx = 0;
-        let examData = [
-            { 
-                title: "Question 1", 
-                desc: "Create an HTML table with 2 rows and 2 columns. The table must have a 'border' attribute.",
-                answer: "",
-                rules: ["<table", "<tr>", "<td>", "border"]
-            },
-            { 
-                title: "Question 2", 
-                desc: "Create an unordered list (&lt;ul&gt;) containing three items: HTML, CSS, and JavaScript.",
-                answer: "",
-                rules: ["<ul>", "<li>", "html", "css", "javascript"]
-            },
-            { 
-                title: "Question 3", 
-                desc: "Create a hyperlink (&lt;a&gt;) that points to 'www.nielit.gov.in' with the link text 'Visit NIELIT'.",
-                answer: "",
-                rules: ["<a", "href", "nielit.gov.in", "Visit NIELIT"]
-            }
-        ];
+        let activeQuestions = [];
 
-        function showModules() {
-            student = document.getElementById('studentName').value;
-            if(!student) return alert("Please enter your name!");
+        const questionsBank = {
+            "M1": [
+                { q: "Create a Table in Writer with 3 columns and 4 rows.", keys: ["table", "column", "row"] },
+                { q: "Write steps to insert a Watermark in a document.", keys: ["insert", "watermark", "page"] },
+                { q: "Formula to find the Sum of cells A1 to A10 in Calc.", keys: ["=sum(", "a1:a10", ")"] }
+            ],
+            "M2": [
+                { q: "Create an HTML table with border 1.", keys: ["<table", "border=", "</table>"] },
+                { q: "Design a red background button in CSS.", keys: ["background-color:", "red", "button"] },
+                { q: "Create an Ordered List of 3 colors.", keys: ["<ol>", "<li>", "</ol>"] }
+            ],
+            "M3": [
+                { q: "Python program to print 'Hello World'.", keys: ["print(", "hello world", ")"] },
+                { q: "Program to check if a number is Even or Odd.", keys: ["if", "%", "==", "else"] },
+                { q: "Create a list in Python with 3 items.", keys: ["[", ",", "]"] }
+            ],
+            "M4": [
+                { q: "Code to blink LED connected to Pin 13 in Arduino.", keys: ["pinmode", "13", "output", "digitalwrite"] },
+                { q: "Read value from Analog Pin A0.", keys: ["analogread", "a0"] },
+                { q: "Syntax to start Serial Monitor at 9600 baud rate.", keys: ["serial.begin", "9600"] }
+            ]
+        };
+
+        function login() {
+            studentName = document.getElementById('userName').value;
+            if(!studentName) return alert("Enter Name!");
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('welcomeText').innerText = "Welcome, " + student;
+            document.getElementById('greet').innerText = "Welcome, " + studentName;
         }
 
-        function startM2() {
+        function initExam(mod) {
+            currentModule = mod;
+            activeQuestions = questionsBank[mod].map(q => ({ ...q, userAns: "" }));
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('exam-portal').classList.remove('hidden');
-            document.getElementById('userLabel').innerText = "Candidate: " + student;
+            document.getElementById('mod-title').innerText = "Module: " + mod;
             switchQ(0);
         }
 
         function switchQ(idx) {
-            // Update Active UI
-            const btns = document.querySelectorAll('.q-btn');
-            btns[currentQIdx].classList.remove('active');
-            if(examData[currentQIdx].answer.length > 5) btns[currentQIdx].classList.add('answered');
-
+            document.getElementById(`b${currentQIdx}`).classList.remove('active');
             currentQIdx = idx;
-            btns[idx].classList.add('active');
-
-            // Load Content
-            document.getElementById('q-title').innerText = examData[idx].title;
-            document.getElementById('q-desc').innerHTML = examData[idx].desc;
-            document.getElementById('code-editor').value = examData[idx].answer;
+            document.getElementById(`b${idx}`).classList.add('active');
+            document.getElementById('q-label').innerText = "Question " + (idx + 1);
+            document.getElementById('q-text').innerText = activeQuestions[idx].q;
+            document.getElementById('editor').value = activeQuestions[idx].userAns;
         }
 
-        function saveCurrentCode() {
-            examData[currentQIdx].answer = document.getElementById('code-editor').value;
+        function saveAns() {
+            activeQuestions[currentQIdx].userAns = document.getElementById('editor').value;
         }
 
         function finishExam() {
-            if(!confirm("Are you sure you want to submit the exam?")) return;
-
-            let totalMarks = 0;
-            examData.forEach(q => {
-                let points = 0;
-                let code = q.answer.toLowerCase();
-                q.rules.forEach(rule => {
-                    if(code.includes(rule.toLowerCase())) points++;
-                });
+            let totalScore = 0;
+            activeQuestions.forEach(item => {
+                let matchCount = 0;
+                let code = item.userAns.toLowerCase();
+                item.keys.forEach(k => { if(code.includes(k)) matchCount++; });
                 
-                // If all rules match, give full marks for this question (33.3)
-                if(points === q.rules.length) totalMarks += 33.34;
+                if(matchCount === item.keys.length && code.length > 5) totalScore += 33.33;
+                else if (matchCount > 0) totalScore += (matchCount / item.keys.length) * 20; 
             });
 
-            totalMarks = Math.round(totalMarks);
-            if(totalMarks > 100) totalMarks = 100;
-
-            showResult(totalMarks);
+            showResult(Math.round(totalScore));
         }
 
         function showResult(score) {
@@ -202,20 +169,16 @@
             document.getElementById('result-page').classList.remove('hidden');
             
             let grade = "F";
-            let status = "FAILED";
-            
             if(score >= 85) grade = "S";
             else if(score >= 75) grade = "A";
             else if(score >= 65) grade = "B";
             else if(score >= 50) grade = "C";
 
-            if(score >= 50) status = "PASSED";
-
-            document.getElementById('final-name').innerText = "Candidate Name: " + student;
-            document.getElementById('final-score').innerText = "Total Score: " + score + "/100";
-            document.getElementById('final-grade').innerText = "GRADE: " + grade;
-            document.getElementById('final-status').innerText = "EXAM STATUS: " + status;
-            document.getElementById('final-status').style.color = (status === "PASSED") ? "green" : "red";
+            document.getElementById('res-module-name').innerText = "Module: " + currentModule;
+            document.getElementById('res-student-name').innerText = "Student: " + studentName;
+            document.getElementById('res-score').innerText = "Final Score: " + score + "/100";
+            document.getElementById('res-grade').innerText = "Grade: " + grade;
+            document.getElementById('res-grade').style.color = (score >= 50) ? "green" : "red";
         }
     </script>
 </body>
