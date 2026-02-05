@@ -2,107 +2,93 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Kaushal Vastralaya ERP - Pro Edition</title>
+    <title>Kaushal Vastralaya - Admin Panel (Meesho Edition)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --accent: #ff008a; --warning: #f39c12; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); color: #333; }
-        .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; overflow-y: auto; z-index: 100;}
-        .sidebar h2 { text-align: center; border-bottom: 2px solid #34495e; padding-bottom: 15px; color: var(--accent); }
-        .nav-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; background: none; color: #bdc3c7; text-align: left; cursor: pointer; border-radius: 4px; font-size: 15px; transition: 0.3s; }
-        .nav-btn:hover, .nav-btn.active { background: #34495e; color: white; border-left: 4px solid var(--accent); }
-        .main { margin-left: 300px; padding: 30px; width: calc(100% - 360px); min-height: 100vh; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 4px solid var(--accent); }
-        .flex-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
-        .input-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
-        .input-group label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --meesho: #ff008a; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); }
+        .sidebar { width: 240px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; }
+        .sidebar h2 { color: var(--meesho); text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .nav-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; background: none; color: #bdc3c7; text-align: left; cursor: pointer; border-radius: 4px; }
+        .nav-btn.active { background: #34495e; color: white; border-left: 4px solid var(--meesho); }
+        .main { margin-left: 280px; padding: 30px; width: calc(100% - 320px); }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 4px solid var(--meesho); }
+        .flex-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .input-group { flex: 1; display: flex; flex-direction: column; min-width: 200px; }
+        label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
-        th { background: #f8f9fa; color: var(--primary); }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
-        .btn-save { background: var(--accent); width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; }
-        .thumb-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        .stock-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .low-stock { background: #ffebee; color: #c62828; }
-        .in-stock { background: #e8f5e9; color: #2e7d32; }
+        th { background: #f8f9fa; }
+        .btn { padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; }
+        .btn-upload { background: var(--meesho); width: 100%; font-size: 16px; }
+        .thumb-img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+        .stock-tag { font-weight: bold; color: var(--secondary); }
     </style>
 </head>
 <body>
 
-<div class="sidebar no-print">
+<div class="sidebar">
     <h2>कौशल वस्त्रालय</h2>
-    <button class="nav-btn active" onclick="showTab('pos', this)">🛒 Sales (बिक्री)</button>
-    <button class="nav-btn" onclick="showTab('items', this)">📦 Inventory (स्टॉक)</button>
-    <button class="nav-btn" onclick="showTab('reports', this)">📊 Reports</button>
+    <button class="nav-btn active">📦 Product Manager</button>
 </div>
 
 <div class="main">
-    <div id="pos" class="tab-content">
-        <div class="card">
-            <h3>New Sales Invoice</h3>
-            <div class="flex-row">
-                <div class="input-group"><label>Customer Name</label><input type="text" id="sCust" placeholder="Cash"></div>
-                <div class="input-group"><label>WhatsApp Number</label><input type="text" id="sPhone" placeholder="91XXXXXXXXXX"></div>
+    <div class="card">
+        <h3>Add New Product (Meesho Upload)</h3>
+        <div class="flex-row">
+            <div class="input-group">
+                <label>Item Name</label>
+                <input type="text" id="itemName" placeholder="e.g. Designer Banarasi Saree">
             </div>
-            <div class="flex-row">
-                <div class="input-group" style="flex:2">
-                    <label>Item (Stock | Price)</label>
-                    <select id="sItem" onchange="fillSalePrice()"></select>
-                </div>
-                <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
-                <div class="input-group"><label>Qty</label><input type="number" id="sQty" value="1"></div>
-                <button class="btn" style="background:var(--primary)" onclick="addToCart('sale')">Add</button>
+            <div class="input-group">
+                <label>Selling Price (₹)</label>
+                <input type="number" id="itemPrice" placeholder="0.00">
             </div>
-            <table>
-                <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
-                <tbody id="saleBody"></tbody>
-            </table>
-            <div style="text-align:right; font-size:24px; font-weight:bold; margin-top:15px">Total: ₹<span id="saleTotal">0.00</span></div>
-            <button class="btn btn-save" onclick="saveTransaction('sale')">Save & Send WhatsApp Bill</button>
+            <div class="input-group">
+                <label>Category</label>
+                <select id="itemCat">
+                    <option value="Saree">Saree</option>
+                    <option value="Suits">Suits</option>
+                    <option value="Kurtis">Kurtis</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row">
+            <div class="input-group">
+                <label>Product Image</label>
+                <input type="file" id="itemFile" accept="image/*">
+            </div>
+            <div class="input-group" style="justify-content: flex-end;">
+                <button class="btn btn-upload" id="upBtn" onclick="addNewItem()">Save & Publish to Cloud</button>
+            </div>
         </div>
     </div>
 
-    <div id="items" class="tab-content" style="display:none">
-        <div class="card">
-            <h3>Add Product to App & Stock</h3>
-            <div class="flex-row">
-                <div class="input-group"><label>Item Name</label><input type="text" id="itemName"></div>
-                <div class="input-group"><label>Sale Price</label><input type="number" id="itemPrice"></div>
-                <div class="input-group"><label>Initial Stock</label><input type="number" id="itemStock" value="0"></div>
-                <div class="input-group"><label>Category</label>
-                    <select id="itemCat">
-                        <option value="Saree">Saree</option>
-                        <option value="Suits">Suits</option>
-                        <option value="Kurtis">Kurtis</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex-row">
-                <div class="input-group"><label>Product Image</label><input type="file" id="itemFile" accept="image/*"></div>
-                <button class="btn" style="background:var(--secondary)" id="upBtn" onclick="addNewItem()">Save & Publish</button>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h3>Current Inventory (स्टॉक लिस्ट)</h3>
-            <table>
-                <thead><tr><th>Image</th><th>Item Name</th><th>Price</th><th>Stock Qty</th><th>Action</th></tr></thead>
-                <tbody id="stockBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="reports" class="tab-content" style="display:none">
-        <div class="card"><h3>Transaction History</h3><table><thead><tr><th>Date</th><th>Party</th><th>Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+    <div class="card">
+        <h3>Live Inventory (Sync with Simple.html)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Preview</th>
+                    <th>Item Details</th>
+                    <th>Category</th>
+                    <th>Live Price</th>
+                    <th>Available Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="stockBody">
+                </tbody>
+        </table>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -116,121 +102,66 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
-    let items = [], tempCart = [];
 
+    // --- Live Syncing Stock from Firebase ---
     onSnapshot(collection(db, "items"), (snap) => {
-        items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderItems();
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminStock(items);
     });
 
-    window.showTab = (id, btn) => {
-        document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).style.display='block';
-        if(btn) btn.classList.add('active');
-    };
-
+    // --- Add New Product with Image ---
     window.addNewItem = async () => {
         const name = document.getElementById('itemName').value;
         const price = parseFloat(document.getElementById('itemPrice').value);
-        const stock = parseFloat(document.getElementById('itemStock').value) || 0;
         const cat = document.getElementById('itemCat').value;
         const file = document.getElementById('itemFile').files[0];
         const btn = document.getElementById('upBtn');
 
-        if(!name || !price || !file) return alert("Please fill all fields and select a photo!");
+        if(!name || !price || !file) return alert("Please fill details and select image!");
 
         btn.disabled = true;
-        btn.innerText = "Uploading...";
+        btn.innerText = "Publishing to Meesho/Cloud...";
 
         try {
+            // Upload to Firebase Storage
             const imgRef = sRef(storage, 'products/' + Date.now() + "_" + file.name);
             const snapshot = await uploadBytes(imgRef, file);
             const url = await getDownloadURL(snapshot.ref);
 
+            // Save to Firestore (Initially 0 stock or default)
             await addDoc(collection(db, "items"), {
-                name, price, category: cat, img: url, stock: stock, timestamp: serverTimestamp()
+                name, price, category: cat, img: url, stock: 0, timestamp: serverTimestamp()
             });
 
-            alert("Product Added Successfully!");
-            location.reload();
+            alert("Product Published Successfully!");
+            document.getElementById('itemName').value = "";
+            document.getElementById('itemPrice').value = "";
+            document.getElementById('itemFile').value = "";
         } catch (e) {
             alert("Error: " + e.message);
+        } finally {
             btn.disabled = false;
+            btn.innerText = "Save & Publish to Cloud";
         }
     };
 
-    function renderItems() {
-        // POS Dropdown showing Stock and Price
-        const opts = '<option value="">-- Select Item --</option>' + 
-            items.map((it, i) => `<option value="${i}">${it.name} [Stk: ${it.stock} | ₹${it.price}]</option>`).join('');
-        document.getElementById('sItem').innerHTML = opts;
-
-        // Inventory Table
+    function renderAdminStock(items) {
         document.getElementById('stockBody').innerHTML = items.map(it => `
             <tr>
-                <td><img src="${it.img || ''}" class="thumb-img"></td>
-                <td><b>${it.name}</b><br><small>${it.category}</small></td>
+                <td><img src="${it.img || 'https://via.placeholder.com/60'}" class="thumb-img"></td>
+                <td><b>${it.name}</b></td>
+                <td>${it.category}</td>
                 <td>₹${it.price}</td>
+                <td><span class="stock-tag">${it.stock} Pcs</span></td>
                 <td>
-                    <span class="stock-badge ${it.stock < 5 ? 'low-stock' : 'in-stock'}">${it.stock} Pcs</span>
-                </td>
-                <td>
-                    <button onclick="deleteItem('${it.id}')" style="background:var(--danger); font-size:10px;" class="btn">Del</button>
+                    <button onclick="deleteItem('${it.id}')" style="color:red; background:none; border:none; cursor:pointer;">Remove</button>
                 </td>
             </tr>
         `).join('');
     }
 
     window.deleteItem = async (id) => {
-        if(confirm("Are you sure?")) await deleteDoc(doc(db, "items", id));
-    };
-
-    window.fillSalePrice = () => {
-        const idx = document.getElementById('sItem').value;
-        if(idx !== "") document.getElementById('sPrice').value = items[idx].price;
-    };
-
-    window.addToCart = (type) => {
-        const idx = document.getElementById('sItem').value;
-        const rate = parseFloat(document.getElementById('sPrice').value);
-        const qty = parseFloat(document.getElementById('sQty').value);
-        if(idx==="") return;
-        
-        if(items[idx].stock < qty) return alert("Not enough stock!");
-
-        tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty });
-        renderCart();
-    };
-
-    function renderCart() {
-        let total = 0;
-        document.getElementById('saleBody').innerHTML = tempCart.map((c, i) => {
-            total += c.total;
-            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart()" style="cursor:pointer">❌</td></tr>`;
-        }).join('');
-        document.getElementById('saleTotal').innerText = total.toFixed(2);
-    }
-
-    window.saveTransaction = async (type) => {
-        if(!tempCart.length) return alert("Cart is empty!");
-        const entry = {
-            party: document.getElementById('sCust').value || "Cash",
-            total: tempCart.reduce((s,i)=>s+i.total,0),
-            items: [...tempCart],
-            timestamp: serverTimestamp()
-        };
-        
-        await addDoc(collection(db, "transactions"), entry);
-        
-        for(let c of tempCart) {
-            const itemRef = doc(db, "items", c.itemId);
-            const cur = items.find(i=>i.id===c.itemId);
-            await updateDoc(itemRef, { stock: cur.stock - c.qty });
-        }
-        
-        alert("Sales Saved!"); 
-        tempCart = []; renderCart();
+        if(confirm("Delete this product?")) await deleteDoc(doc(db, "items", id));
     };
 </script>
 </body>
