@@ -1,205 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>NIELIT Official Practical Exam 2026</title>
+    <title>Kaushal Vastralaya ERP - Cloud Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
-        :root { --nielit-blue: #3b5998; --green: #68bd45; --red: #e74c3c; --terminal-black: #1e1e1e; }
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Arial; height: 100%; background: #f4f7f9; overflow: hidden; }
-        .hidden { display: none !important; }
-
-        /* --- LOGIN SCREEN --- */
-        #login-screen { height: 100vh; display: flex; justify-content: center; align-items: center; background: #e9ecef; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 400px; text-align: center; border-top: 8px solid var(--nielit-blue); }
-        .login-box select, .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
-
-        /* --- EXAM INTERFACE --- */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 5px 20px; background: white; border-bottom: 1px solid #ddd; height: 50px; }
-        .main-container { display: flex; height: calc(100vh - 110px); }
-        .q-sidebar { width: 25%; background: white; padding: 20px; border-right: 2px solid #ddd; overflow-y: auto; }
-        .editor-container { width: 75%; display: flex; flex-direction: column; position: relative; }
-        
-        /* --- EDITOR & TERMINAL --- */
-        .editor-tools { padding: 10px; background: #eee; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
-        textarea { flex: 1; padding: 15px; font-family: 'Consolas', monospace; font-size: 16px; border: none; outline: none; background: #fff; }
-        .terminal { background: var(--terminal-black); color: #fff; padding: 15px; font-family: 'Consolas', monospace; font-size: 13px; height: 150px; border-top: 4px solid #444; overflow-y: auto; }
-        
-        /* --- FOOTER --- */
-        footer { height: 60px; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-blue { background: var(--nielit-blue); color: white; }
-        .btn-green { background: var(--green); color: white; }
-        .btn-red { background: var(--red); color: white; }
-
-        /* --- PALETTE --- */
-        .p-box { display: inline-block; width: 35px; height: 35px; border: 1px solid #999; margin: 5px; line-height: 35px; text-align: center; cursor: pointer; }
-        .done { background: #b8d1f3; }
-        .active { border: 2px solid var(--nielit-blue); font-weight: bold; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --danger: #e74c3c; --accent: #2980b9; --warning: #f39c12; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); color: #333; }
+        .sidebar { width: 260px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; overflow-y: auto; z-index: 100;}
+        .sidebar h2 { text-align: center; border-bottom: 2px solid #34495e; padding-bottom: 15px; }
+        .nav-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; background: none; color: #bdc3c7; text-align: left; cursor: pointer; border-radius: 4px; font-size: 15px; transition: 0.3s; }
+        .nav-btn:hover, .nav-btn.active { background: #34495e; color: white; border-left: 4px solid var(--secondary); }
+        .main { margin-left: 300px; padding: 30px; width: calc(100% - 360px); min-height: 100vh; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 4px solid var(--accent); }
+        .flex-row { display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .input-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
+        .input-group label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { padding: 20px; border-radius: 8px; color: white; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; color: var(--primary); }
+        .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-save { background: var(--secondary); width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; }
+        @media print { .sidebar, .no-print, .btn { display: none !important; } .main { margin-left: 0; width: 100%; } }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <img src="https://www.nielit.gov.in/sites/all/themes/nielit/logo.png" width="180">
-            <h3>PRACTICAL EXAMINATION</h3>
-            <input type="text" id="stuName" placeholder="Enter Full Name">
-            <select id="moduleSelect">
-                <option value="M2">M2-R5: Web Designing</option>
-                <option value="M3">M3-R5: Python Programming</option>
-                <option value="M4">M4-R5: Internet of Things (IoT)</option>
-            </select>
-            <button class="btn btn-blue" style="width:100%" onclick="startExam()">START EXAMINATION</button>
-        </div>
-    </div>
+<div class="sidebar no-print">
+    <h2>कौशल वस्त्रालय</h2>
+    <button class="nav-btn active" onclick="showTab('pos', this)">🛒 Sales (बिक्री)</button>
+    <button class="nav-btn" onclick="showTab('purchase', this)">🚚 Purchase (खरीद)</button>
+    <button class="nav-btn" onclick="showTab('items', this)">📦 Inventory</button>
+    <button class="nav-btn" onclick="showTab('vouchers', this)">💸 Vouchers</button>
+    <button class="nav-btn" onclick="showTab('reports', this)">📊 Reports</button>
+</div>
 
-    <div id="exam-screen" class="hidden">
-        <header>
-            <b id="mod-header">NIELIT - PR</b>
-            <div style="font-size: 18px; color: var(--red); font-weight: bold;" id="timer">45:00</div>
-            <div id="user-info">User: <b>Guest</b></div>
-        </header>
-
-        <div class="main-container">
-            <div class="q-sidebar">
-                <h4 id="q-title">Question 1</h4>
-                <p id="q-desc"></p>
-                <hr>
-                <b>Question Palette:</b><br>
-                <div id="palette-container">
-                    <div class="p-box active" onclick="jumpTo(0)" id="p0">1</div>
-                    <div class="p-box" onclick="jumpTo(1)" id="p1">2</div>
-                    <div class="p-box" onclick="jumpTo(2)" id="p2">3</div>
-                </div>
+<div class="main">
+    <div id="pos" class="tab-content">
+        <div class="card">
+            <h3>New Sales Invoice</h3>
+            <div class="flex-row">
+                <div class="input-group"><label>Customer Name</label><input type="text" id="sCust" placeholder="Cash"></div>
+                <div class="input-group"><label>WhatsApp Number</label><input type="text" id="sPhone" placeholder="91XXXXXXXXXX"></div>
+                <div class="input-group"><label>Date</label><input type="date" id="sDate"></div>
             </div>
+            <div class="flex-row">
+                <div class="input-group" style="flex:2"><label>Item</label><select id="sItem" onchange="fillSalePrice()"></select></div>
+                <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
+                <div class="input-group"><label>Qty</label><input type="number" id="sQty" value="1"></div>
+                <button class="btn" style="background:var(--accent)" onclick="addToCart('sale')">Add</button>
+            </div>
+            <table>
+                <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
+                <tbody id="saleBody"></tbody>
+            </table>
+            <div style="text-align:right; font-size:24px; font-weight:bold; margin-top:15px">Total: ₹<span id="saleTotal">0.00</span></div>
+            <button class="btn btn-save" onclick="saveTransaction('sale')">Save & Send WhatsApp Bill</button>
+        </div>
+    </div>
 
-            <div class="editor-container">
-                <div class="editor-tools">
-                    <button class="btn btn-blue" onclick="compileCode()">Compile & Run</button>
-                    <button class="btn btn-green" onclick="saveAnswer()">Save Response</button>
-                </div>
-                <textarea id="code-editor" spellcheck="false" placeholder="Write code here..."></textarea>
-                <div class="terminal" id="terminal">Terminal ready... Waiting for Compilation.</div>
+    <div id="purchase" class="tab-content" style="display:none">
+        <div class="card">
+            <h3>Purchase Entry</h3>
+            <div class="flex-row">
+                <div class="input-group"><label>Supplier Name</label><input type="text" id="pParty" placeholder="Vendor"></div>
+                <div class="input-group"><label>Date</label><input type="date" id="pDate"></div>
+            </div>
+            <div class="flex-row">
+                <div class="input-group" style="flex:2"><label>Item</label><select id="pItem"></select></div>
+                <div class="input-group"><label>Rate</label><input type="number" id="pPrice"></div>
+                <div class="input-group"><label>Qty</label><input type="number" id="pQty" value="1"></div>
+                <button class="btn" style="background:var(--warning)" onclick="addToCart('pur')">Add</button>
+            </div>
+            <tbody id="purBody"></tbody>
+            <button class="btn btn-save" style="background:var(--warning)" onclick="saveTransaction('pur')">Save Purchase</button>
+        </div>
+    </div>
+
+    <div id="vouchers" class="tab-content" style="display:none">
+        <div class="card">
+            <h3>Payment & Receipt</h3>
+            <div class="flex-row">
+                <div class="input-group"><label>Type</label><select id="vType"><option value="Receipt">Receipt</option><option value="Payment">Payment</option></select></div>
+                <div class="input-group"><label>Party Name</label><input type="text" id="vParty"></div>
+                <div class="input-group"><label>Amount</label><input type="number" id="vAmt"></div>
+                <button class="btn" style="background:var(--secondary)" onclick="saveVoucher()">Save</button>
             </div>
         </div>
-
-        <footer>
-            <button class="btn btn-blue" onclick="prevQ()">Previous</button>
-            <button class="btn btn-blue" onclick="nextQ()">Next</button>
-            <button class="btn btn-red" onclick="finishExam()">SUBMIT MODULE TEST</button>
-        </footer>
     </div>
 
-    <div id="result-screen" class="hidden" style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:white;">
-        <h1 style="color:var(--nielit-blue)">FINAL RESULT CARD</h1>
-        <div style="border:2px solid #ddd; padding:40px; border-radius:10px; text-align:center; min-width:400px;">
-            <h2 id="res-name"></h2>
-            <p id="res-module"></p>
-            <div style="font-size: 50px; font-weight: bold; margin: 20px 0;" id="res-score">0/100</div>
-            <h3 id="res-grade" style="color:var(--green)"></h3>
-            <button class="btn btn-blue" onclick="location.reload()">EXIT PORTAL</button>
+    <div id="items" class="tab-content" style="display:none">
+        <div class="card">
+            <h3>Add Product</h3>
+            <div class="flex-row">
+                <input type="text" id="itemName" placeholder="Item Name">
+                <input type="number" id="itemPrice" placeholder="Sale Price">
+                <button class="btn" style="background:var(--secondary)" onclick="addNewItem()">Save</button>
+            </div>
         </div>
+        <div class="card"><h3>Stock</h3><table><thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead><tbody id="stockBody"></tbody></table></div>
     </div>
 
-    <script>
-        const bank = {
-            M2: [
-                { q: "Create an HTML Table with 2 rows and border 5px.", k: ["<table", "border=\"5\"", "<tr>"], code: "" },
-                { q: "CSS code to change background to yellow and text to red.", k: ["background-color: yellow", "color: red"], code: "" },
-                { q: "Create an Anchor tag linking to nielit.gov.in.", k: ["<a", "href", "nielit.gov.in"], code: "" }
-            ],
-            M3: [
-                { q: "Write a Python function to check even or odd.", k: ["def", "if", "%", "=="], code: "" },
-                { q: "Python code to print numbers from 1 to 10 using while loop.", k: ["while", "print", "<="], code: "" },
-                { q: "Create a list in Python and append 'NIELIT' to it.", k: ["list", "append(", "'NIELIT'"], code: "" }
-            ],
-            M4: [
-                { q: "Arduino code to initialize Pin 13 as OUTPUT.", k: ["pinMode", "13", "OUTPUT"], code: "" },
-                { q: "Read analog value from Pin A0 and store in variable 'val'.", k: ["analogRead", "A0", "val"], code: "" },
-                { q: "Write Arduino code for a 500ms delay.", k: ["delay", "500"], code: "" }
-            ]
+    <div id="reports" class="tab-content" style="display:none">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="card"><h3>Transactions</h3><table id="historyTable"><thead><tr><th>Date</th><th>Type</th><th>Party</th><th>Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
+        authDomain: "pdf-for-students.firebaseapp.com",
+        projectId: "pdf-for-students",
+        storageBucket: "pdf-for-students.firebasestorage.app",
+        messagingSenderId: "282416295807",
+        appId: "1:282416295807:web:a6113eef2b1e63d17bb44a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let items = [], tempCart = [];
+
+    // --- Core Sync ---
+    onSnapshot(collection(db, "items"), (snap) => {
+        items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderItems();
+    });
+
+    window.showTab = (id, btn) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display='block';
+        if(btn) btn.classList.add('active');
+        if(id === 'reports') loadReports();
+    };
+
+    // --- Inventory & Cart ---
+    window.addNewItem = async () => {
+        const name = document.getElementById('itemName').value;
+        const price = parseFloat(document.getElementById('itemPrice').value);
+        if(name && price) await addDoc(collection(db, "items"), { name, price, stock: 0 });
+    };
+
+    function renderItems() {
+        const opts = '<option value="">-- Select --</option>' + items.map((it, i) => `<option value="${i}">${it.name}</option>`).join('');
+        document.getElementById('sItem').innerHTML = opts;
+        document.getElementById('pItem').innerHTML = opts;
+        document.getElementById('stockBody').innerHTML = items.map(it => `<tr><td>${it.name}</td><td>₹${it.price}</td><td>${it.stock}</td></tr>`).join('');
+    }
+
+    window.fillSalePrice = () => {
+        const idx = document.getElementById('sItem').value;
+        if(idx !== "") document.getElementById('sPrice').value = items[idx].price;
+    };
+
+    window.addToCart = (type) => {
+        const pfx = type === 'sale' ? 's' : 'p';
+        const idx = document.getElementById(pfx+'Item').value;
+        const rate = parseFloat(document.getElementById(pfx+'Price').value);
+        const qty = parseFloat(document.getElementById(pfx+'Qty').value);
+        if(idx==="") return;
+        tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty });
+        renderCart(type);
+    };
+
+    function renderCart(type) {
+        let total = 0;
+        document.getElementById(type+'Body').innerHTML = tempCart.map((c, i) => {
+            total += c.total;
+            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart('${type}')">❌</td></tr>`;
+        }).join('');
+        if(type==='sale') document.getElementById('saleTotal').innerText = total.toFixed(2);
+    }
+
+    // --- PDF & WhatsApp ---
+    async function generatePDF(entry) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(22); doc.text("KAUSHAL VASTRALAYA", 105, 20, { align: 'center' });
+        doc.setFontSize(12); doc.text(`Customer: ${entry.party}`, 20, 40);
+        doc.text(`Date: ${entry.date}`, 150, 40);
+        
+        const body = entry.items.map(i => [i.name, i.rate, i.qty, i.total]);
+        doc.autoTable({ startY: 50, head: [['Item', 'Rate', 'Qty', 'Total']], body: body });
+        doc.text(`Grand Total: Rs. ${entry.total}`, 150, doc.lastAutoTable.finalY + 10);
+        
+        doc.save(`Bill_${entry.party}.pdf`);
+        
+        const phone = document.getElementById('sPhone').value;
+        if(phone) {
+            const msg = window.encodeURIComponent(`नमस्ते ${entry.party}, आपका बिल ₹${entry.total} तैयार है और डाउनलोड हो गया है।`);
+            window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        }
+    }
+
+    window.saveTransaction = async (type) => {
+        if(!tempCart.length) return;
+        const entry = {
+            party: document.getElementById(type==='sale'?'sCust':'pParty').value || "Cash",
+            date: document.getElementById(type==='sale'?'sDate':'pDate').value,
+            total: tempCart.reduce((s,i)=>s+i.total,0),
+            items: [...tempCart],
+            timestamp: serverTimestamp()
         };
-
-        let currentModule = "M2";
-        let qIdx = 0;
-        let score = 0;
-
-        function startExam() {
-            let name = document.getElementById('stuName').value;
-            if(!name) return alert("Please enter name!");
-            currentModule = document.getElementById('moduleSelect').value;
-            
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('exam-screen').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `User: <b>${name}</b>`;
-            document.getElementById('mod-header').innerText = `NIELIT - ${currentModule}-R5 Practical`;
-            
-            loadQuestion();
-            startTimer();
+        await addDoc(collection(db, "transactions"), { ...entry, type });
+        for(let c of tempCart) {
+            const itemRef = doc(db, "items", c.itemId);
+            const cur = items.find(i=>i.id===c.itemId);
+            await updateDoc(itemRef, { stock: type==='sale' ? cur.stock - c.qty : cur.stock + c.qty });
         }
+        if(type==='sale') await generatePDF(entry);
+        alert("Saved!"); tempCart = []; renderCart(type);
+    };
 
-        function loadQuestion() {
-            let q = bank[currentModule][qIdx];
-            document.getElementById('q-title').innerText = "Question " + (qIdx + 1);
-            document.getElementById('q-desc').innerText = q.q;
-            document.getElementById('code-editor').value = q.code;
-            
-            document.querySelectorAll('.p-box').forEach(b => b.classList.remove('active'));
-            document.getElementById('p' + qIdx).classList.add('active');
-            document.getElementById('terminal').innerHTML = "Terminal ready...";
-        }
+    window.saveVoucher = async () => {
+        const v = { type: document.getElementById('vType').value, party: document.getElementById('vParty').value, amt: parseFloat(document.getElementById('vAmt').value), date: new Date().toISOString().split('T')[0] };
+        await addDoc(collection(db, "vouchers"), v);
+        alert("Voucher Saved!");
+    };
 
-        function compileCode() {
-            let code = document.getElementById('code-editor').value;
-            let keys = bank[currentModule][qIdx].k;
-            let term = document.getElementById('terminal');
-            
-            let missing = keys.filter(k => !code.toLowerCase().includes(k.toLowerCase()));
-            
-            if(code.length < 10 || missing.length > 0) {
-                term.innerHTML = `<span style="color:var(--red)">[ERROR] Compilation Failed!</span><br>Missing Logic/Syntax near: ${missing[0] || 'Incomplete code'}.<br>Check your tags/syntax carefully.`;
-            } else {
-                term.innerHTML = `<span style="color:var(--green)">[SUCCESS] Compiled successfully!</span><br>Execution finished without errors.<br>Memory used: 124KB.`;
-            }
-        }
+    async function loadReports() {
+        const tSnap = await getDocs(collection(db, "transactions"));
+        const vSnap = await getDocs(collection(db, "vouchers"));
+        let s=0, p=0, r=0, py=0, html="";
+        tSnap.forEach(d => { 
+            const data=d.data(); 
+            if(data.type==='sale') s+=data.total; else p+=data.total;
+            html+=`<tr><td>${data.date}</td><td>${data.type.toUpperCase()}</td><td>${data.party}</td><td>₹${data.total}</td></tr>`;
+        });
+        vSnap.forEach(d => { const data=d.data(); if(data.type==='Receipt') r+=data.amt; else py+=data.amt; });
+        document.getElementById('statGrid').innerHTML = `<div class="stat-card" style="background:var(--secondary)">Sales: ₹${s}</div><div class="stat-card" style="background:var(--warning)">Purchase: ₹${p}</div><div class="stat-card" style="background:var(--accent)">Receipt: ₹${r}</div><div class="stat-card" style="background:var(--danger)">Payment: ₹${py}</div>`;
+        document.getElementById('historyBody').innerHTML = html;
+    }
 
-        function saveAnswer() {
-            bank[currentModule][qIdx].code = document.getElementById('code-editor').value;
-            document.getElementById('p' + qIdx).classList.add('done');
-            alert("Response Saved!");
-        }
-
-        function jumpTo(i) { qIdx = i; loadQuestion(); }
-        function nextQ() { if(qIdx < 2) { qIdx++; loadQuestion(); } }
-        function prevQ() { if(qIdx > 0) { qIdx--; loadQuestion(); } }
-
-        function finishExam() {
-            if(!confirm("Are you sure? All 3 questions will be submitted.")) return;
-            
-            let finalPoints = 0;
-            bank[currentModule].forEach(q => {
-                let matchCount = q.k.filter(k => q.code.toLowerCase().includes(k.toLowerCase())).length;
-                if(matchCount === q.k.length && q.code.length > 10) finalPoints += 33.33;
-            });
-
-            let total = Math.round(finalPoints);
-            document.getElementById('exam-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('res-name').innerText = "Name: " + document.getElementById('stuName').value;
-            document.getElementById('res-module').innerText = "Module: " + currentModule;
-            document.getElementById('res-score').innerText = total + "/100";
-            document.getElementById('res-grade').innerText = total >= 50 ? "RESULT: PASS (PROVISIONAL)" : "RESULT: FAIL";
-        }
-
-        function startTimer() {
-            let t = 2700;
-            setInterval(() => {
-                t--;
-                let m = Math.floor(t / 60);
-                let s = t % 60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-            }, 1000);
-        }
-    </script>
+    document.getElementById('sDate').valueAsDate = new Date();
+    document.getElementById('pDate').valueAsDate = new Date();
+</script>
 </body>
 </html>
