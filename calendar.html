@@ -21,7 +21,7 @@
             --holiday: #f57c00;
         }
 
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg-light); margin: 0; padding: 10px; display: flex; justify-content: center; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; padding: 10px; display: flex; justify-content: center; overflow-x: hidden; }
 
         #loader { position: fixed; inset: 0; background: white; z-index: 2500; display: flex; align-items: center; justify-content: center; flex-direction: column; font-weight: bold; color: var(--tp-header-red); }
 
@@ -30,27 +30,18 @@
         .header { background: var(--tp-header-red); color: white; padding: 15px; text-align: center; }
         .st-profile-box { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 8px; margin-top: 10px; text-align: left; }
         
-        /* Fixed Photo Styling */
         .st-photo-circle { 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%; 
-            border: 2px solid white; 
-            object-fit: cover; 
-            background: #fff; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; 
+            object-fit: cover; background: #fff;
         }
 
         .nav { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
         .nav h2 { font-size: 1.1rem; margin: 0; color: #333; font-weight: 700; text-transform: capitalize; }
-        .nav button { background: #f0f0f0; border: 1px solid #ddd; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .nav button { background: #f0f0f0; border: 1px solid #ddd; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
 
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #eee; gap: 1px; }
         .day-head { text-align: center; font-size: 12px; font-weight: bold; color: #666; padding: 12px 0; background: #f9f9f9; }
-        .cell { height: 85px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: 0.2s; }
+        .cell { height: 85px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; transition: 0.2s; }
 
         .date-num { font-size: 18px; font-weight: 600; color: #333; z-index: 5; }
         .fest-star-marker { color: var(--star-gold); font-size: 10px; position: absolute; top: 6px; left: 6px; z-index: 10; }
@@ -63,14 +54,14 @@
         .bg-a { background: var(--absent); }
         .bg-l { background: var(--leave); }
 
-        .fest-btn { position: fixed; right: 0; top: 50%; transform: translateY(-50%); background: var(--tp-header-red); color: white; padding: 15px 8px; writing-mode: vertical-rl; text-orientation: mixed; border-radius: 10px 0 0 10px; cursor: pointer; font-weight: bold; z-index: 100; box-shadow: -2px 0 10px rgba(0,0,0,0.2); }
-        .sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100%; background: #fff; box-shadow: -10px 0 30px rgba(0,0,0,0.1); transition: 0.4s; z-index: 2001; display: flex; flex-direction: column; }
+        .fest-btn { position: fixed; right: 0; top: 50%; transform: translateY(-50%); background: var(--tp-header-red); color: white; padding: 15px 8px; writing-mode: vertical-rl; text-orientation: mixed; border-radius: 10px 0 0 10px; cursor: pointer; font-weight: bold; z-index: 100; }
+        .sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100%; background: #fff; box-shadow: -10px 0 30px rgba(0,0,0,0.1); transition: 0.4s; z-index: 2001; }
         .sidebar.active { right: 0; }
         .sidebar-header { background: var(--tp-header-red); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        #fest-list-container { flex: 1; overflow-y: auto; padding: 15px; }
+        #fest-list-container { padding: 15px; overflow-y: auto; height: calc(100% - 80px); }
         .fest-item { background: #fff9f0; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--star-gold); font-size: 14px; }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 2000; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2000; }
         .overlay.active { display: block; }
 
         .footer { padding: 15px; display: flex; justify-content: space-around; font-size: 10px; background: #fff; border-top: 1px solid #eee; flex-wrap: wrap; }
@@ -92,9 +83,10 @@
 </div>
 
 <div class="calendar-card">
-    <div class="header" id="header-box">
+    <div class="header">
         <div style="font-weight: 700; font-size: 1.1rem;">SNT ATTENDANCE PORTAL</div>
-        <div id="profile-area"></div> </div>
+        <div id="profile-area"></div> 
+    </div>
     
     <div class="nav">
         <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
@@ -129,37 +121,40 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
-    let currentUser = null; 
+    let currentStudentKey = null;
+    let studentData = null;
     let displayDate = new Date();
     const today = new Date();
 
-    const holidays = { "2026-01-26": "Republic Day", "2026-03-24": "Holi", "2026-08-15": "Independence Day" };
-    const fixedFestivals = { "2026": { "01-01": "नया साल", "26-01": "गणतंत्र दिवस", "15-02": "महाशिवरात्रि", "04-03": "होली", "14-04": "अम्बेडकर जयंती", "15-08": "स्वतंत्रता दिवस", "25-12": "क्रिसमस" } };
+    const holidays = { "2026-01-26": "Republic Day", "2026-08-15": "Independence Day", "2026-10-02": "Gandhi Jayanti" };
+    const fixedFestivals = { "2026": { "01-01": "नया साल", "14-01": "मकर संक्रांति", "26-01": "गणतंत्र दिवस", "15-08": "स्वतंत्रता दिवस", "25-12": "क्रिसमस" } };
 
-    // Authentication Logic
-    auth.onAuthStateChanged(user => {
+    // --- Dashboard wala Logic (Email se search) ---
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            currentUser = user;
-            
-            // Database se student details fetch karo
-            db.ref('students/' + user.uid).once('value', snap => {
-                const s = snap.val() || {};
-                
-                // Photo Logic: Database -> Google Account -> Default Icon
-                const userPhoto = s.profilePicture || s.profilePic || user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                const userName = s.name || user.displayName || "Student";
+            db.ref('students').orderByChild('email').equalTo(user.email).on('value', (snap) => {
+                if (snap.exists()) {
+                    currentStudentKey = Object.keys(snap.val())[0];
+                    studentData = snap.val()[currentStudentKey];
 
-                document.getElementById('profile-area').innerHTML = `
-                    <div class="st-profile-box">
-                        <img src="${userPhoto}" class="st-photo-circle" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                        <div>
-                            <b style="font-size: 1rem;">${userName}</b><br>
-                            <small style="opacity: 0.8;">ID: ${user.uid.substring(0,8)}</small>
-                        </div>
-                    </div>`;
-                
-                document.getElementById('loader').style.display = 'none';
-                renderCalendar();
+                    // Photo load karne ka logic (Dashboard ki tarah)
+                    const imgUrl = studentData.profilePicture || studentData.profilePic || 'SNT.jpg';
+                    const name = studentData.name || 'Student';
+
+                    document.getElementById('profile-area').innerHTML = `
+                        <div class="st-profile-box">
+                            <img src="${imgUrl}" class="st-photo-circle" onerror="this.src='SNT.jpg'">
+                            <div>
+                                <b style="font-size: 1rem;">${name}</b><br>
+                                <small style="opacity: 0.8;">ID: ${studentData.studentId || 'N/A'}</small>
+                            </div>
+                        </div>`;
+                    
+                    document.getElementById('loader').style.display = 'none';
+                    renderCalendar();
+                } else {
+                    alert("User data not found!");
+                }
             });
         } else {
             window.location.href = "index.html";
@@ -167,7 +162,7 @@
     });
 
     function renderCalendar() {
-        if(!currentUser) return;
+        if(!currentStudentKey) return;
         const body = document.getElementById('calendar-body');
         const year = displayDate.getFullYear(), month = displayDate.getMonth();
         
@@ -186,7 +181,7 @@
                 const monthFmt = String(month + 1).padStart(2, '0');
                 const dayFmt = String(day).padStart(2, '0');
                 const dateKey = `${year}-${monthFmt}-${dayFmt}`; 
-                const recordID = `${currentUser.uid}_${dateKey}`; 
+                const recordID = `${currentStudentKey}_${dateKey}`; // Sync with attendance logic
                 const fKey = `${dayFmt}-${monthFmt}`;
 
                 const isToday = new Date(year, month, day).toDateString() === today.toDateString();
