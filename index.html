@@ -27,8 +27,11 @@
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         
-        .contact-btn { padding: 8px; border-radius: 10px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
-        .qr-card { background: white; color: #1e293b; padding: 20px; border-radius: 24px; text-align: center; width: 280px; position: relative; }
+        /* Contact Buttons Styling */
+        .contact-btn { padding: 12px; border-radius: 14px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; width: 100%; text-transform: uppercase; }
+        .contact-btn:active { transform: scale(0.95); opacity: 0.8; }
+        
+        .qr-card { background: white; color: #1e293b; padding: 24px; border-radius: 30px; text-align: center; width: 300px; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -77,13 +80,41 @@
 
     <div id="info-modal" class="modal-overlay">
         <div class="glass p-8 rounded-3xl w-80 border border-sky-500/30 shadow-2xl relative">
-            <h2 class="text-xl font-black text-center mb-6 uppercase">System Info</h2>
+            <h2 class="text-xl font-black text-center mb-6 uppercase tracking-tight">System Info</h2>
+            
             <div class="space-y-1 mb-6">
                 <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">...</span></div>
                 <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.0.6 Premium</span></div>
                 <div class="info-row border-none"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
             </div>
-            <button onclick="closeInfo()" class="w-full bg-slate-800 text-slate-400 p-3 rounded-xl font-black text-[10px] uppercase">Close</button>
+
+            <div class="space-y-3">
+                <a href="https://wa.me/919129191898" target="_blank" class="contact-btn bg-green-500/20 text-green-400 border border-green-500/30">
+                    <i class="fab fa-whatsapp text-lg"></i> WhatsApp Dev
+                </a>
+                <a href="tel:9129191898" class="contact-btn bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                    <i class="fas fa-phone-alt text-sm"></i> Call Developer
+                </a>
+                <button onclick="openQR()" class="contact-btn bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                    <i class="fas fa-qrcode text-sm"></i> Support Dev (UPI)
+                </button>
+            </div>
+
+            <button onclick="closeInfo()" class="w-full mt-6 bg-slate-800 text-slate-500 p-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Close Panel</button>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="modal-overlay" onclick="closeQR()">
+        <div class="qr-card animate-fade-in" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-black text-slate-900 uppercase text-xs tracking-widest">Scan to Support</h3>
+                <button onclick="closeQR()" class="text-slate-400 hover:text-red-500"><i class="fas fa-times-circle text-xl"></i></button>
+            </div>
+            <div class="bg-slate-100 p-4 rounded-2xl mb-4">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=mandavikaushal913@okaxis&pn=Harshit%20Kaushal&cu=INR" class="mx-auto w-44 h-44 shadow-sm">
+            </div>
+            <p class="text-[10px] font-bold text-slate-500 mb-1">UPI ID:</p>
+            <p class="text-xs font-black text-sky-600 break-all">mandavikaushal913@okaxis</p>
         </div>
     </div>
 
@@ -105,29 +136,22 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // FIXED: Login without duplication logic
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-                const studentsRef = ref(db, 'students');
-                const snapshot = await get(studentsRef);
-                
+                const snapshot = await get(ref(db, 'students'));
                 let existingId = null;
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    // Search if email exists anywhere in the list
-                    existingId = Object.keys(data).find(key => data[key].email === user.email);
+                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
                 }
 
                 if (existingId) {
-                    // Update only last login, don't overwrite user info
                     await update(ref(db, `students/${existingId}`), { 
                         lastLogin: new Date().toLocaleString(),
                         profilePic: user.photoURL 
                     });
                 } else {
-                    // Create new entry ONLY if email is not found
                     await set(ref(db, `students/${user.uid}`), {
                         name: user.displayName,
                         email: user.email,
@@ -147,11 +171,9 @@
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Real-time listener for student data
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        const sData = Object.values(data).find(s => s.email === user.email);
+                        const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
                         if (sData) {
                             document.getElementById('user-name').innerText = sData.name || user.displayName;
                             document.getElementById('user-email').innerText = user.email;
@@ -199,11 +221,15 @@
             }
         };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
+        
+        // Developer Contact Window Handlers
+        window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
+        window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
+        
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
     </script>
 
     <script>
-        // Service Worker Registration for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Fail'));
