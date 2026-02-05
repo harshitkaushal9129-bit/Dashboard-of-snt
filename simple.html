@@ -51,7 +51,10 @@
                 <div class="input-group"><label>Date</label><input type="date" id="sDate"></div>
             </div>
             <div class="flex-row">
-                <div class="input-group" style="flex:2"><label>Item</label><select id="sItem" onchange="fillSalePrice()"></select></div>
+                <div class="input-group" style="flex:2">
+                    <label>Item (Available Stock)</label>
+                    <select id="sItem" onchange="fillSalePrice()"></select>
+                </div>
                 <div class="input-group"><label>Rate</label><input type="number" id="sPrice"></div>
                 <div class="input-group"><label>Qty</label><input type="number" id="sQty" value="1"></div>
                 <button class="btn" style="background:var(--accent)" onclick="addToCart('sale')">Add</button>
@@ -78,7 +81,10 @@
                 <div class="input-group"><label>Qty</label><input type="number" id="pQty" value="1"></div>
                 <button class="btn" style="background:var(--warning)" onclick="addToCart('pur')">Add</button>
             </div>
-            <tbody id="purBody"></tbody>
+            <table class="card">
+                <thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
+                <tbody id="purBody"></tbody>
+            </table>
             <button class="btn btn-save" style="background:var(--warning)" onclick="saveTransaction('pur')">Save Purchase</button>
         </div>
     </div>
@@ -130,7 +136,6 @@
     const db = getFirestore(app);
     let items = [], tempCart = [];
 
-    // --- Core Sync ---
     onSnapshot(collection(db, "items"), (snap) => {
         items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderItems();
@@ -144,18 +149,29 @@
         if(id === 'reports') loadReports();
     };
 
-    // --- Inventory & Cart ---
     window.addNewItem = async () => {
         const name = document.getElementById('itemName').value;
         const price = parseFloat(document.getElementById('itemPrice').value);
         if(name && price) await addDoc(collection(db, "items"), { name, price, stock: 0 });
+        document.getElementById('itemName').value = "";
+        document.getElementById('itemPrice').value = "";
     };
 
     function renderItems() {
-        const opts = '<option value="">-- Select --</option>' + items.map((it, i) => `<option value="${i}">${it.name}</option>`).join('');
+        // Updated POS Dropdown to show STOCK
+        const opts = '<option value="">-- Select Item --</option>' + 
+            items.map((it, i) => `<option value="${i}">${it.name} (Stock: ${it.stock})</option>`).join('');
+        
         document.getElementById('sItem').innerHTML = opts;
         document.getElementById('pItem').innerHTML = opts;
-        document.getElementById('stockBody').innerHTML = items.map(it => `<tr><td>${it.name}</td><td>₹${it.price}</td><td>${it.stock}</td></tr>`).join('');
+        
+        document.getElementById('stockBody').innerHTML = items.map(it => `
+            <tr>
+                <td>${it.name}</td>
+                <td>₹${it.price}</td>
+                <td style="color:${it.stock <= 2 ? 'red' : 'black'}; font-weight:bold">${it.stock}</td>
+            </tr>
+        `).join('');
     }
 
     window.fillSalePrice = () => {
@@ -168,7 +184,15 @@
         const idx = document.getElementById(pfx+'Item').value;
         const rate = parseFloat(document.getElementById(pfx+'Price').value);
         const qty = parseFloat(document.getElementById(pfx+'Qty').value);
+        
         if(idx==="") return;
+
+        // Stock check for Sales
+        if(type === 'sale' && items[idx].stock < qty) {
+            alert("उतना स्टॉक उपलब्ध नहीं है! (Only " + items[idx].stock + " left)");
+            return;
+        }
+
         tempCart.push({ name: items[idx].name, itemId: items[idx].id, rate, qty, total: rate * qty });
         renderCart(type);
     };
@@ -177,12 +201,11 @@
         let total = 0;
         document.getElementById(type+'Body').innerHTML = tempCart.map((c, i) => {
             total += c.total;
-            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart('${type}')">❌</td></tr>`;
+            return `<tr><td>${c.name}</td><td>${c.rate}</td><td>${c.qty}</td><td>${c.total}</td><td onclick="tempCart.splice(${i},1);renderCart('${type}')" style="cursor:pointer">❌</td></tr>`;
         }).join('');
         if(type==='sale') document.getElementById('saleTotal').innerText = total.toFixed(2);
     }
 
-    // --- PDF & WhatsApp ---
     async function generatePDF(entry) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -198,7 +221,7 @@
         
         const phone = document.getElementById('sPhone').value;
         if(phone) {
-            const msg = window.encodeURIComponent(`नमस्ते ${entry.party}, आपका बिल ₹${entry.total} तैयार है और डाउनलोड हो गया है।`);
+            const msg = window.encodeURIComponent(`नमस्ते ${entry.party}, आपका बिल ₹${entry.total} तैयार है।`);
             window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
         }
     }
@@ -219,14 +242,18 @@
             await updateDoc(itemRef, { stock: type==='sale' ? cur.stock - c.qty : cur.stock + c.qty });
         }
         if(type==='sale') await generatePDF(entry);
-        alert("Saved!"); tempCart = []; renderCart(type);
+        alert("Saved Successfully!"); 
+        tempCart = []; 
+        renderCart(type);
     };
 
     window.saveVoucher = async () => {
-        const v = { type: document.getElementById('vType').value, party: document.getElementById('vParty').value, amt: parseFloat(document.getElementById('vAmt').value), date: new Date().toISOString().split('T')[0] };
+        const amt = parseFloat(document.getElementById('vAmt').value);
+        if(!amt) return;
+        const v = { type: document.getElementById('vType').value, party: document.getElementById('vParty').value, amt: amt, date: new Date().toISOString().split('T')[0] };
         await addDoc(collection(db, "vouchers"), v);
         alert("Voucher Saved!");
-    };
+    }
 
     async function loadReports() {
         const tSnap = await getDocs(collection(db, "transactions"));
@@ -237,8 +264,12 @@
             if(data.type==='sale') s+=data.total; else p+=data.total;
             html+=`<tr><td>${data.date}</td><td>${data.type.toUpperCase()}</td><td>${data.party}</td><td>₹${data.total}</td></tr>`;
         });
-        vSnap.forEach(d => { const data=d.data(); if(data.type==='Receipt') r+=data.amt; else py+=data.amt; });
-        document.getElementById('statGrid').innerHTML = `<div class="stat-card" style="background:var(--secondary)">Sales: ₹${s}</div><div class="stat-card" style="background:var(--warning)">Purchase: ₹${p}</div><div class="stat-card" style="background:var(--accent)">Receipt: ₹${r}</div><div class="stat-card" style="background:var(--danger)">Payment: ₹${py}</div>`;
+        vSnap.forEach(d => { const data=d.data(); if(data.type=='Receipt') r+=data.amt; else py+=data.amt; });
+        document.getElementById('statGrid').innerHTML = `
+            <div class="stat-card" style="background:var(--secondary)">Sales: ₹${s}</div>
+            <div class="stat-card" style="background:var(--warning)">Purchase: ₹${p}</div>
+            <div class="stat-card" style="background:var(--accent)">Receipt: ₹${r}</div>
+            <div class="stat-card" style="background:var(--danger)">Payment: ₹${py}</div>`;
         document.getElementById('historyBody').innerHTML = html;
     }
 
