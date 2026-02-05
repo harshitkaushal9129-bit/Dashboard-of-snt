@@ -2,126 +2,90 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>KV Admin Pro - Realtime</title>
+    <title>Kaushal Admin - Inventory</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #ff008a; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; }
+        :root { --primary: #2c3e50; --accent: #ff008a; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
         .sidebar { width: 250px; background: var(--primary); color: white; height: 100vh; position: fixed; padding: 20px; }
-        .main { margin-left: 290px; padding: 20px; width: calc(100% - 310px); }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .input-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; flex: 1; font-size: 14px; }
-        .btn-save { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn-save:disabled { background: #ccc; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+        .main { margin-left: 290px; padding: 20px; width: 100%; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>Kaushal Admin</h2>
-    <p>Realtime Dashboard</p>
+    <h2>Shop Admin</h2>
+    <hr>
+    <p>📦 Product Upload</p>
+    <p>🚚 View Orders</p>
 </div>
 
 <div class="main">
     <div class="card">
-        <h3>🚀 Add Product to Meesho App</h3>
-        <div class="input-row">
-            <input type="text" id="pName" placeholder="Product Name">
-            <input type="number" id="pPrice" placeholder="Price (₹)">
-        </div>
-        <div class="input-row">
-            <label style="font-weight:bold">Select Photo:</label>
-            <input type="file" id="pFile" accept="image/*">
-        </div>
-        <button class="btn-save" id="saveBtn" onclick="publishProduct()">Upload & Publish</button>
-        <p id="status" style="font-size:12px; color:green; margin-top:10px;"></p>
+        <h3>Naya Product Upload Karein</h3>
+        <input type="text" id="pName" placeholder="Product Name">
+        <input type="number" id="pPrice" placeholder="Price (₹)">
+        <input type="file" id="pFile" accept="image/*">
+        <button class="btn" id="upBtn" onclick="upload()">Publish to App</button>
     </div>
 
     <div class="card">
-        <h3>📦 Current Inventory</h3>
-        <table>
+        <h3>Live Stock</h3>
+        <table id="stockTable">
             <thead><tr><th>Photo</th><th>Name</th><th>Price</th><th>Action</th></tr></thead>
-            <tbody id="inventoryBody"></tbody>
+            <tbody id="list"></tbody>
         </table>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
-        authDomain: "pdf-for-students.firebaseapp.com",
+    const firebaseConfig = { 
         databaseURL: "https://pdf-for-students-default-rtdb.firebaseio.com",
-        projectId: "pdf-for-students",
-        storageBucket: "pdf-for-students.appspot.com",
-        appId: "1:282416295807:web:a6113eef2b1e63d17bb44a"
+        storageBucket: "pdf-for-students.appspot.com" 
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const storage = getStorage(app);
 
-    window.publishProduct = async () => {
+    window.upload = async () => {
         const file = document.getElementById('pFile').files[0];
         const name = document.getElementById('pName').value;
         const price = document.getElementById('pPrice').value;
-        const btn = document.getElementById('saveBtn');
-        const status = document.getElementById('status');
 
-        if(!file || !name || !price) return alert("Sab fields bhariye!");
+        if(!file || !name) return alert("Details bhariye!");
 
-        btn.disabled = true;
-        status.innerText = "Processing... Photo uploading.";
+        const imgRef = sRef(storage, 'products/' + Date.now());
+        await uploadBytes(imgRef, file);
+        const url = await getDownloadURL(imgRef);
 
-        try {
-            // 1. Storage Upload
-            const photoRef = sRef(storage, 'meesho/' + Date.now() + "_" + file.name);
-            const uploadTask = await uploadBytes(photoRef, file);
-            const downloadURL = await getDownloadURL(uploadTask.ref);
-
-            // 2. Realtime Database Save
-            const itemRef = ref(db, 'products');
-            const newPostRef = push(itemRef);
-            await set(newPostRef, {
-                name: name,
-                price: parseFloat(price),
-                image: downloadURL,
-                date: new Date().toLocaleDateString()
-            });
-
-            status.innerText = "Success! Product Live on App.";
-            location.reload();
-        } catch (e) {
-            alert("Error: " + e.message);
-            btn.disabled = false;
-        }
+        const newP = push(ref(db, 'products'));
+        await set(newP, { name, price, img: url });
+        alert("Live ho gaya!"); location.reload();
     };
 
-    // Load Inventory
-    onValue(ref(db, 'products'), (snapshot) => {
-        const data = snapshot.val();
+    onValue(ref(db, 'products'), (snap) => {
         let html = "";
-        for(let id in data) {
-            const p = data[id];
+        snap.forEach(c => {
+            const p = c.val();
             html += `<tr>
-                <td><img src="${p.image}" class="thumb"></td>
+                <td><img src="${p.img}" width="50"></td>
                 <td>${p.name}</td>
                 <td>₹${p.price}</td>
-                <td><button onclick="deleteMe('${id}')" style="color:red; border:none; background:none; cursor:pointer;">Remove</button></td>
+                <td><button onclick="removeIt('${c.key}')">❌</button></td>
             </tr>`;
-        }
-        document.getElementById('inventoryBody').innerHTML = html;
+        });
+        document.getElementById('list').innerHTML = html;
     });
 
-    window.deleteMe = (id) => {
-        if(confirm("Hata dein?")) remove(ref(db, 'products/' + id));
-    };
+    window.removeIt = (id) => remove(ref(db, 'products/' + id));
 </script>
 </body>
 </html>
