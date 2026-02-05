@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Kaushal Vastralaya - Admin Panel (Sync Mode)</title>
+    <title>Kaushal Vastralaya - Admin Panel (Realtime Mode)</title>
     <style>
         :root { --primary: #2c3e50; --meesho: #ff008a; --secondary: #27ae60; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--light); }
@@ -32,7 +32,7 @@
 
 <div class="main">
     <div class="card">
-        <h3>Add Product with Image (Meesho Upload)</h3>
+        <h3>Add Product with Image</h3>
         <div class="flex-row">
             <div class="input-group">
                 <label>Item Name</label>
@@ -63,7 +63,7 @@
     </div>
 
     <div class="card">
-        <h3>Current Stock & Price (Sync with Simple.html)</h3>
+        <h3>Live Inventory Management</h3>
         <table>
             <thead>
                 <tr>
@@ -82,40 +82,44 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // Same Config as Simple.html
+    // Config (Same as simple.html)
     const firebaseConfig = {
-        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU",
-        authDomain: "pdf-for-students.firebaseapp.com",
+        databaseURL: "https://pdf-for-students-default-rtdb.firebaseio.com", 
         projectId: "pdf-for-students",
         storageBucket: "pdf-for-students.firebasestorage.app",
-        messagingSenderId: "282416295807",
-        appId: "1:282416295807:web:a6113eef2b1e63d17bb44a"
+        apiKey: "AIzaSyAUtfZ-kMBHGozFOuyB6vuybegUDvAjORU"
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getDatabase(app);
     const storage = getStorage(app);
 
-    // Live Sync: Jo simple.html mein bachega wahi yahan dikhega
-    onSnapshot(collection(db, "items"), (snap) => {
-        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const html = items.map(it => `
-            <tr>
-                <td><img src="${it.img || 'https://via.placeholder.com/60'}" class="thumb-img"></td>
-                <td><b>${it.name}</b></td>
-                <td>${it.category || 'General'}</td>
-                <td>₹${it.price}</td>
-                <td><span class="stock-val">${it.stock || 0}</span></td>
-                <td><button onclick="deleteItem('${it.id}')" style="color:red; cursor:pointer; background:none; border:none;">Del</button></td>
-            </tr>
-        `).join('');
-        document.getElementById('stockBody').innerHTML = html;
+    // --- LIVE SYNC (Realtime Database) ---
+    onValue(ref(db, 'items'), (snapshot) => {
+        const data = snapshot.val();
+        const html = [];
+        if(data) {
+            for(let id in data) {
+                let it = data[id];
+                html.push(`
+                    <tr>
+                        <td><img src="${it.img || 'https://via.placeholder.com/60'}" class="thumb-img"></td>
+                        <td><b>${it.name}</b></td>
+                        <td>${it.category || 'General'}</td>
+                        <td>₹${it.price}</td>
+                        <td><span class="stock-val">${it.stock || 0}</span></td>
+                        <td><button onclick="deleteItem('${id}')" style="color:red; cursor:pointer; background:none; border:none;">Del</button></td>
+                    </tr>
+                `);
+            }
+        }
+        document.getElementById('stockBody').innerHTML = html.join('');
     });
 
-    // Add Item with Image
+    // --- ADD ITEM LOGIC ---
     window.addNewItem = async () => {
         const name = document.getElementById('itemName').value;
         const price = parseFloat(document.getElementById('itemPrice').value);
@@ -123,21 +127,31 @@
         const file = document.getElementById('itemFile').files[0];
         const btn = document.getElementById('upBtn');
 
-        if(!name || !price || !file) return alert("Poori details bharein!");
+        if(!name || isNaN(price)) return alert("Please fill Name and Price!");
 
         btn.disabled = true;
-        btn.innerText = "Uploading...";
+        btn.innerText = "Processing...";
 
         try {
-            const imgRef = sRef(storage, 'products/' + Date.now() + "_" + file.name);
-            const snapshot = await uploadBytes(imgRef, file);
-            const url = await getDownloadURL(snapshot.ref);
+            let url = "";
+            // Agar file select ki hai toh upload karein
+            if(file) {
+                const imgRef = sRef(storage, 'products/' + Date.now() + "_" + file.name);
+                const snapshot = await uploadBytes(imgRef, file);
+                url = await getDownloadURL(snapshot.ref);
+            }
 
-            await addDoc(collection(db, "items"), {
-                name, price, category: cat, img: url, stock: 0, timestamp: serverTimestamp()
+            // Realtime Database Push
+            const newItemRef = push(ref(db, 'items'));
+            await set(newItemRef, {
+                name, 
+                price, 
+                category: cat, 
+                img: url, 
+                stock: 0 
             });
 
-            alert("Product Added!");
+            alert("Product Published Successfully!");
             document.getElementById('itemName').value = "";
             document.getElementById('itemPrice').value = "";
             document.getElementById('itemFile').value = "";
@@ -149,8 +163,10 @@
         }
     };
 
-    window.deleteItem = async (id) => {
-        if(confirm("Kya aap ise hatana chahte hain?")) await deleteDoc(doc(db, "items", id));
+    window.deleteItem = (id) => {
+        if(confirm("Are you sure?")) {
+            remove(ref(db, 'items/' + id));
+        }
     };
 </script>
 </body>
