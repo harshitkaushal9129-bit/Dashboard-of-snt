@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/sitemap.xml
