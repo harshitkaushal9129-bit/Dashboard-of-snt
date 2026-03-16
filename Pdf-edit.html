@@ -3,57 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload PDF - SNT Institute</title>
+    <title>Manage PDF - SNT Institute</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        :root { --primary: #6366f1; --bg: #0f172a; --danger: #ef4444; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .card { background: #1e293b; padding: 2rem; border-radius: 15px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        
+        /* Tab Styling */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: #334155; color: white; font-weight: 600; }
+        .tab-btn.active { background: var(--primary); }
+        .tab-content { display: none; width: 100%; max-width: 600px; }
+        .tab-content.active { display: block; }
+
         .form-group { margin-bottom: 1.2rem; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #94a3b8; }
         input, textarea, select { width: 100%; padding: 12px; border: 2px solid #334155; border-radius: 8px; box-sizing: border-box; background: #0f172a; color: white; outline: none; }
-        input:focus, select:focus { border-color: var(--primary); }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:disabled { background: #475569; cursor: not-allowed; }
-        #status { margin-top: 15px; font-size: 0.85rem; color: #6366f1; display: none; font-weight: bold; }
-        h2 { margin-bottom: 1.5rem; color: #f8fafc; }
+        
+        /* List Styling */
+        .pdf-item { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
+        .pdf-info { text-align: left; }
+        .pdf-info span { display: block; font-size: 0.8rem; color: #94a3b8; }
+        .del-btn { background: var(--danger); width: auto; padding: 8px 15px; font-size: 0.8rem; margin-top: 0; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>📄 PDF Uploader</h2>
-        <form id="pdfForm">
-            <div class="form-group">
-                <label>Course Select Karein</label>
-                <select id="pdfCategory" required>
-                    <option value="" disabled selected>Course chunein...</option>
-                    <option value="Computer Basics">Computer Basics</option>
-                    <option value="Computer Foundation">Computer Foundation</option>
-                    <option value="C++ Language">C++ Language</option>
-                    <option value="Java">Java</option>
-                    <option value="DCA & ADCA">DCA & ADCA</option>
-                    <option value="CCC">CCC</option>
-                    <option value="'O' Level">'O' Level</option>
-                    <option value="Web Design">Web Design</option>
-                    <option value="Python">Python</option>
-                    <option value="Tally ERP 9">Tally ERP 9</option>
-                    <option value="Adv. Excel">Adv. Excel</option>
-                    <option value="Hardware & Net.">Hardware & Net.</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>PDF Select Karein (Max 4MB)</label>
-                <input type="file" id="pdfFile" accept="application/pdf" required>
-            </div>
-            <div class="form-group">
-                <label>Short Description</label>
-                <textarea id="pdfDesc" rows="2" placeholder="Notes ke baare mein likhein..." required></textarea>
-            </div>
-            <button type="submit" id="submitBtn">Save Karein</button>
-            <div id="status">Processing... Database mein save ho raha hai...</div>
-        </form>
-        <a href="pdf.html" style="display:block; margin-top:15px; text-decoration:none; color:#64748b; font-size:0.9rem;">View Library →</a>
+
+    <h2>🎓 SNT PDF Manager</h2>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('uploadTab')">Upload PDF</button>
+        <button class="tab-btn" onclick="openTab('manageTab'); loadPDFs();">Manage PDFs</button>
+    </div>
+
+    <div id="uploadTab" class="tab-content active">
+        <div class="card">
+            <h3>📄 Naya PDF Upload Karein</h3>
+            <form id="pdfForm">
+                <div class="form-group">
+                    <label>Course Select Karein</label>
+                    <select id="pdfCategory" required>
+                        <option value="" disabled selected>Course chunein...</option>
+                        <option value="Computer Basics">Computer Basics</option>
+                        <option value="C++ Language">C++ Language</option>
+                        <option value="Java">Java</option>
+                        <option value="DCA & ADCA">DCA & ADCA</option>
+                        <option value="Python">Python</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PDF Select (Max 4MB)</label>
+                    <input type="file" id="pdfFile" accept="application/pdf" required>
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <textarea id="pdfDesc" rows="2" placeholder="Notes ke baare mein likhein..." required></textarea>
+                </div>
+                <button type="submit" id="submitBtn">Save Karein</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="manageTab" class="tab-content">
+        <h3>🗑️ PDF Delete Karein</h3>
+        <div id="pdfList">
+            <p style="text-align:center;">Loading...</p>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -72,43 +91,70 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Tab Switch Logic
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Upload Logic
         document.getElementById('pdfForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const status = document.getElementById('status');
             const file = document.getElementById('pdfFile').files[0];
-            const desc = document.getElementById('pdfDesc').value;
-            const category = document.getElementById('pdfCategory').value;
-
-            if(file.size > 4194304) { 
-                alert("File size 4MB se zyada hai! Please choti file upload karein."); 
-                return; 
-            }
-
-            btn.disabled = true;
-            status.style.display = "block";
-
             const reader = new FileReader();
+            
+            if(file.size > 4194304) { alert("File size 4MB se zyada hai!"); return; }
+
             reader.onload = function(event) {
                 const newData = {
                     name: file.name,
                     pdf: event.target.result, 
-                    desc: desc,
-                    category: category, 
+                    desc: document.getElementById('pdfDesc').value,
+                    category: document.getElementById('pdfCategory').value, 
                     date: new Date().toLocaleString()
                 };
-
                 database.ref('myPDFs').push(newData).then(() => {
-                    alert('Badhai ho! PDF Category (' + category + ') mein save ho gaya!');
+                    alert('PDF Save ho gaya!');
                     location.reload();
-                }).catch((error) => {
-                    alert('Error: ' + error.message);
-                    btn.disabled = false;
-                    status.style.display = "none";
                 });
             };
             reader.readAsDataURL(file);
         });
+
+        // Load & Delete Logic
+        function loadPDFs() {
+            const listDiv = document.getElementById('pdfList');
+            database.ref('myPDFs').on('value', (snapshot) => {
+                listDiv.innerHTML = "";
+                const data = snapshot.val();
+                if (!data) {
+                    listDiv.innerHTML = "<p>Koi PDF nahi mila.</p>";
+                    return;
+                }
+                for (let id in data) {
+                    const item = data[id];
+                    listDiv.innerHTML += `
+                        <div class="pdf-item">
+                            <div class="pdf-info">
+                                <strong>${item.name}</strong>
+                                <span>${item.category} | ${item.date}</span>
+                            </div>
+                            <button class="del-btn" onclick="deletePDF('${id}')">Delete</button>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function deletePDF(id) {
+            if(confirm("Kya aap ise delete karna chahte hain?")) {
+                database.ref('myPDFs/' + id).remove()
+                .then(() => alert("PDF delete ho gaya!"))
+                .catch(err => alert("Error: " + err.message));
+            }
+        }
     </script>
 </body>
 </html>
