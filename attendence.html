@@ -20,7 +20,7 @@
         .btn-lock { color: #64748b; border: 1.5px solid #334155; background: rgba(51, 65, 85, 0.1); opacity: 0.5; cursor: not-allowed; }
 
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; text-align: center; display: inline-block; min-width: 70px; }
-        #admin-controls { display: none; } /* Shuru mein chhupa rahega */
+        #admin-controls { display: none; }
     </style>
 </head>
 <body class="pb-10">
@@ -33,25 +33,28 @@
 
     <div id="admin-panel" class="px-4 max-w-2xl mx-auto mb-6">
         <div id="admin-controls" class="glass p-5 rounded-[2rem] border-l-4 border-amber-500 shadow-xl">
-            <h3 class="text-[10px] font-black uppercase text-amber-500 mb-3 tracking-widest"><i class="fas fa-calendar-plus mr-1"></i> Admin: Chhutti Set Karein</h3>
+            <h3 class="text-[10px] font-black uppercase text-amber-500 mb-3 tracking-widest"><i class="fas fa-calendar-plus mr-1"></i> Admin: Holiday Details</h3>
             <div class="flex flex-col gap-3">
                 <input type="date" id="holiday-picker" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
-                <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95">Confirm Holiday</button>
-                <button onclick="document.getElementById('admin-controls').style.display='none'" class="text-slate-500 text-[8px] font-bold uppercase tracking-widest mt-1">Close Panel</button>
+                <input type="text" id="holiday-reason" placeholder="Kyun chhutti hai? (e.g. Holi, Sunday)" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
+                <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95">Declare Holiday</button>
+                <button onclick="document.getElementById('admin-controls').style.display='none'" class="text-slate-500 text-[8px] font-bold uppercase tracking-widest mt-1 text-center">Close Panel</button>
             </div>
         </div>
     </div>
 
     <div class="px-4 max-w-2xl mx-auto mb-6">
-        <div class="glass p-6 rounded-[2.5rem] border-t-4 border-sky-500 shadow-2xl relative overflow-hidden">
+        <div class="glass p-6 rounded-[2.5rem] border-t-4 border-sky-500 shadow-2xl relative">
             <p id="today-date-display" class="text-sky-400 font-black text-xs uppercase tracking-widest mb-1"></p>
-            <h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2>
-            <div id="action-buttons" class="flex gap-2">
-                <button onclick="markAttendance('Present')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-p active:scale-95 transition-all">P (PRESENT)</button>
-                <button onclick="markAttendance('Absent')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-a active:scale-95 transition-all">A (ABSENT)</button>
-                <button onclick="markAttendance('Leave')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-l active:scale-95 transition-all">L (LEAVE)</button>
+            <div id="action-area">
+                <h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2>
+                <div id="action-buttons" class="flex gap-2">
+                    <button onclick="markAttendance('Present')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-p active:scale-95 transition-all">P (PRESENT)</button>
+                    <button onclick="markAttendance('Absent')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-a active:scale-95 transition-all">A (ABSENT)</button>
+                    <button onclick="markAttendance('Leave')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-l active:scale-95 transition-all">L (LEAVE)</button>
+                </div>
             </div>
-            <p id="status-msg" class="mt-3 text-[10px] font-bold text-center text-slate-500 uppercase tracking-tighter"></p>
+            <p id="status-msg" class="mt-3 text-[10px] font-bold text-center text-slate-500 uppercase"></p>
         </div>
     </div>
 
@@ -59,7 +62,7 @@
         <div class="glass rounded-[2rem] overflow-hidden border border-slate-800">
             <div class="row-item bg-slate-800/50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                 <div>Date</div>
-                <div class="text-center">Details</div>
+                <div class="text-center">Reason / Day</div>
                 <div class="text-right">Record</div>
             </div>
             <div id="register-list"></div>
@@ -99,14 +102,11 @@
             }
         });
 
-        // Password Unlock Function
         window.unlockAdmin = () => {
-            const pass = prompt("Enter Admin PIN to manage holidays:");
+            const pass = prompt("Enter Admin PIN:");
             if (pass === "912919") {
                 document.getElementById('admin-controls').style.display = 'block';
-            } else if (pass !== null) {
-                alert("Galat Password!");
-            }
+            } else if (pass !== null) alert("Galat Password!");
         };
 
         function loadData() {
@@ -121,37 +121,34 @@
 
         window.setAdminHoliday = () => {
             const date = document.getElementById('holiday-picker').value;
-            if(!date) return alert("Date select karein!");
+            const reason = document.getElementById('holiday-reason').value || "OFFICIAL HOLIDAY";
+            if(!date) return alert("Date toh select karo!");
 
             set(ref(db, 'admin_holidays/' + date), {
                 status: "Holiday",
+                reason: reason,
                 timestamp: Date.now()
             }).then(() => {
-                alert("Date " + date + " ko chhutti set ho gayi hai!");
+                alert("Holiday set: " + reason);
+                document.getElementById('holiday-reason').value = "";
                 document.getElementById('admin-controls').style.display = 'none';
             });
         };
 
         function renderUI(data) {
             const list = document.getElementById('register-list');
-            const actionBtnDiv = document.getElementById('action-buttons');
+            const actionArea = document.getElementById('action-area');
             
             const isSun = now.getDay() === 0;
-            const isHol = adminHolidays[todayStr];
+            const holToday = adminHolidays[todayStr];
             const attID = currentUser.uid + "_" + todayStr;
 
-            if(isSun || isHol) {
-                actionBtnDiv.innerHTML = `<div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic uppercase">Aaj Chhutti Hai (${isSun ? 'Sunday' : 'OFFICIAL'})</div>`;
+            if(isSun || holToday) {
+                const r = holToday ? holToday.reason : "SUNDAY (WEEKLY OFF)";
+                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4">Aaj Chhutti Hai:</h2><div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic uppercase tracking-tighter">${r}</div>`;
             } else if(data[attID]) {
                 const s = data[attID].status;
-                actionBtnDiv.innerHTML = `<div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30 uppercase text-[10px] tracking-widest"><i class="fas fa-check-circle mr-1"></i> RECORD SAVED (${s})</div>`;
-            } else {
-                // Reset buttons if no record and no holiday
-                actionBtnDiv.innerHTML = `
-                    <button onclick="markAttendance('Present')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-p active:scale-95 transition-all">P (PRESENT)</button>
-                    <button onclick="markAttendance('Absent')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-a active:scale-95 transition-all">A (ABSENT)</button>
-                    <button onclick="markAttendance('Leave')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-l active:scale-95 transition-all">L (LEAVE)</button>
-                `;
+                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2><div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30 uppercase text-[10px] tracking-widest"><i class="fas fa-check-circle mr-1"></i> RECORD SAVED (${s})</div>`;
             }
 
             let html = '';
@@ -163,17 +160,24 @@
                 const record = Object.values(data).find(r => r.email === currentUser.email && r.date === dayDateStr);
 
                 let badge = '<span class="status-badge btn-lock">No Data</span>';
+                let reasonText = dateObj.toLocaleDateString('en-US', {weekday:'long'});
+
                 if(record) {
                     if(record.status === 'Present') badge = '<span class="status-badge btn-p">Present</span>';
                     else if(record.status === 'Absent') badge = '<span class="status-badge btn-a">Absent</span>';
                     else if(record.status === 'Leave') badge = '<span class="status-badge btn-l">Leave</span>';
-                } else if(sun) badge = '<span class="status-badge btn-h">Sunday</span>';
-                else if(hol) badge = '<span class="status-badge btn-h">Holiday</span>';
+                } else if(sun) {
+                    badge = '<span class="status-badge btn-h">Sunday</span>';
+                    reasonText = "Weekly Off";
+                } else if(hol) {
+                    badge = '<span class="status-badge btn-h">Holiday</span>';
+                    reasonText = hol.reason;
+                }
 
                 html += `
                     <div class="row-item">
                         <div class="font-bold text-xs text-slate-300">${d} ${dateObj.toLocaleString('default', { month: 'short' })}</div>
-                        <div class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">${hol ? 'Closed' : dateObj.toLocaleDateString('en-US', {weekday:'long'})}</div>
+                        <div class="text-center text-[9px] font-bold text-slate-500 uppercase tracking-tighter italic overflow-hidden whitespace-nowrap px-1">${reasonText}</div>
                         <div class="text-right">${badge}</div>
                     </div>`;
             }
