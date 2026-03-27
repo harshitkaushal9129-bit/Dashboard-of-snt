@@ -28,7 +28,9 @@
     <div class="p-4 max-w-2xl mx-auto flex items-center justify-between sticky top-0 bg-[#0f172a] z-50">
         <button onclick="history.back()" class="text-sky-400 text-xl w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
         <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Register</span></h1>
-        <button onclick="unlockAdmin()" class="text-slate-600 text-xs w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-lock"></i></button>
+        <button id="admin-toggle-btn" onclick="handleAdminToggle()" class="text-slate-400 text-sm w-10 h-10 glass rounded-full flex items-center justify-center transition-all duration-300">
+            <i id="admin-icon" class="fas fa-lock"></i>
+        </button>
     </div>
 
     <div id="admin-panel" class="px-4 max-w-2xl mx-auto mb-6">
@@ -36,9 +38,8 @@
             <h3 class="text-[10px] font-black uppercase text-amber-500 mb-3 tracking-widest"><i class="fas fa-calendar-plus mr-1"></i> Admin: Holiday Details</h3>
             <div class="flex flex-col gap-3">
                 <input type="date" id="holiday-picker" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
-                <input type="text" id="holiday-reason" placeholder="Kyun chhutti hai? (e.g. Holi, Sunday)" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
+                <input type="text" id="holiday-reason" placeholder="Kyun chhutti hai? (Barna confirm nahi hoga)" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
                 <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95">Declare Holiday</button>
-                <button onclick="document.getElementById('admin-controls').style.display='none'" class="text-slate-500 text-[8px] font-bold uppercase tracking-widest mt-1 text-center">Close Panel</button>
             </div>
         </div>
     </div>
@@ -102,11 +103,28 @@
             }
         });
 
-        window.unlockAdmin = () => {
-            const pass = prompt("Enter Admin PIN:");
-            if (pass === "912919") {
-                document.getElementById('admin-controls').style.display = 'block';
-            } else if (pass !== null) alert("Galat Password!");
+        // Toggle Function logic
+        window.handleAdminToggle = () => {
+            const controls = document.getElementById('admin-controls');
+            const icon = document.getElementById('admin-icon');
+            const btn = document.getElementById('admin-toggle-btn');
+
+            if (controls.style.display === 'block') {
+                // If already open, close it without password
+                controls.style.display = 'none';
+                icon.className = 'fas fa-lock';
+                btn.classList.remove('text-amber-500', 'border-amber-500');
+            } else {
+                // If closed, ask for password
+                const pass = prompt("Enter Admin PIN:");
+                if (pass === "912919") {
+                    controls.style.display = 'block';
+                    icon.className = 'fas fa-times'; // Change to X
+                    btn.classList.add('text-amber-500', 'border', 'border-amber-500/50');
+                } else if (pass !== null) {
+                    alert("Galat Password!");
+                }
+            }
         };
 
         function loadData() {
@@ -121,17 +139,22 @@
 
         window.setAdminHoliday = () => {
             const date = document.getElementById('holiday-picker').value;
-            const reason = document.getElementById('holiday-reason').value || "OFFICIAL HOLIDAY";
-            if(!date) return alert("Date toh select karo!");
+            const reason = document.getElementById('holiday-reason').value;
+
+            if(!date) return alert("Pehle date select karein!");
+            if(!reason || reason.trim() === "") return alert("Please Holiday Reason likhein! Bina wajah chhutti nahi ho sakti.");
 
             set(ref(db, 'admin_holidays/' + date), {
                 status: "Holiday",
                 reason: reason,
                 timestamp: Date.now()
             }).then(() => {
-                alert("Holiday set: " + reason);
+                alert("Confirmed: " + reason);
                 document.getElementById('holiday-reason').value = "";
+                // Automatically close and reset icon
                 document.getElementById('admin-controls').style.display = 'none';
+                document.getElementById('admin-icon').className = 'fas fa-lock';
+                document.getElementById('admin-toggle-btn').classList.remove('text-amber-500', 'border-amber-500');
             });
         };
 
