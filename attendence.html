@@ -21,6 +21,10 @@
 
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; text-align: center; display: inline-block; min-width: 70px; }
         #admin-controls { display: none; }
+        
+        /* Logo Styling */
+        .snt-logo-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; items-center; justify-center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .snt-logo-btn img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body class="pb-10">
@@ -28,9 +32,13 @@
     <div class="p-4 max-w-2xl mx-auto flex items-center justify-between sticky top-0 bg-[#0f172a] z-50">
         <button onclick="history.back()" class="text-sky-400 text-xl w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
         <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Register</span></h1>
-        <button id="admin-toggle-btn" onclick="handleAdminToggle()" class="text-slate-400 text-sm w-10 h-10 glass rounded-full flex items-center justify-center transition-all duration-300">
-            <i id="admin-icon" class="fas fa-lock"></i>
-        </button>
+        
+        <div id="admin-toggle-btn" onclick="handleAdminToggle()" class="snt-logo-btn glass">
+            <div id="icon-container" class="flex items-center justify-center w-full h-full">
+                <img id="snt-img" src="https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png" alt="SNT Logo">
+                <i id="close-icon" class="fas fa-times text-amber-500 hidden text-lg"></i>
+            </div>
+        </div>
     </div>
 
     <div id="admin-panel" class="px-4 max-w-2xl mx-auto mb-6">
@@ -39,7 +47,7 @@
             <div class="flex flex-col gap-3">
                 <input type="date" id="holiday-picker" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
                 <input type="text" id="holiday-reason" placeholder="Kyun chhutti hai? (Barna confirm nahi hoga)" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500 text-white">
-                <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95">Declare Holiday</button>
+                <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95 shadow-lg shadow-amber-500/20">Declare Holiday</button>
             </div>
         </div>
     </div>
@@ -48,7 +56,7 @@
         <div class="glass p-6 rounded-[2.5rem] border-t-4 border-sky-500 shadow-2xl relative">
             <p id="today-date-display" class="text-sky-400 font-black text-xs uppercase tracking-widest mb-1"></p>
             <div id="action-area">
-                <h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2>
+                <h2 class="text-xl font-bold mb-4 italic">Aaj ki Attendance:</h2>
                 <div id="action-buttons" class="flex gap-2">
                     <button onclick="markAttendance('Present')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-p active:scale-95 transition-all">P (PRESENT)</button>
                     <button onclick="markAttendance('Absent')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-a active:scale-95 transition-all">A (ABSENT)</button>
@@ -103,24 +111,22 @@
             }
         });
 
-        // Toggle Function logic
+        // Toggle Function with Logo swap
         window.handleAdminToggle = () => {
             const controls = document.getElementById('admin-controls');
-            const icon = document.getElementById('admin-icon');
-            const btn = document.getElementById('admin-toggle-btn');
+            const sntImg = document.getElementById('snt-img');
+            const closeIcon = document.getElementById('close-icon');
 
             if (controls.style.display === 'block') {
-                // If already open, close it without password
                 controls.style.display = 'none';
-                icon.className = 'fas fa-lock';
-                btn.classList.remove('text-amber-500', 'border-amber-500');
+                sntImg.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
             } else {
-                // If closed, ask for password
                 const pass = prompt("Enter Admin PIN:");
                 if (pass === "912919") {
                     controls.style.display = 'block';
-                    icon.className = 'fas fa-times'; // Change to X
-                    btn.classList.add('text-amber-500', 'border', 'border-amber-500/50');
+                    sntImg.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
                 } else if (pass !== null) {
                     alert("Galat Password!");
                 }
@@ -142,36 +148,35 @@
             const reason = document.getElementById('holiday-reason').value;
 
             if(!date) return alert("Pehle date select karein!");
-            if(!reason || reason.trim() === "") return alert("Please Holiday Reason likhein! Bina wajah chhutti nahi ho sakti.");
+            if(!reason || reason.trim() === "") return alert("Chhutti ka reason zaroori hai!");
 
             set(ref(db, 'admin_holidays/' + date), {
                 status: "Holiday",
                 reason: reason,
                 timestamp: Date.now()
             }).then(() => {
-                alert("Confirmed: " + reason);
+                alert("Holiday set ho gaya!");
                 document.getElementById('holiday-reason').value = "";
-                // Automatically close and reset icon
+                // Reset UI to default
                 document.getElementById('admin-controls').style.display = 'none';
-                document.getElementById('admin-icon').className = 'fas fa-lock';
-                document.getElementById('admin-toggle-btn').classList.remove('text-amber-500', 'border-amber-500');
+                document.getElementById('snt-img').classList.remove('hidden');
+                document.getElementById('close-icon').classList.add('hidden');
             });
         };
 
         function renderUI(data) {
             const list = document.getElementById('register-list');
             const actionArea = document.getElementById('action-area');
-            
             const isSun = now.getDay() === 0;
             const holToday = adminHolidays[todayStr];
             const attID = currentUser.uid + "_" + todayStr;
 
             if(isSun || holToday) {
                 const r = holToday ? holToday.reason : "SUNDAY (WEEKLY OFF)";
-                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4">Aaj Chhutti Hai:</h2><div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic uppercase tracking-tighter">${r}</div>`;
+                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4 italic">Aaj Chhutti Hai:</h2><div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic uppercase tracking-tighter">${r}</div>`;
             } else if(data[attID]) {
                 const s = data[attID].status;
-                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2><div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30 uppercase text-[10px] tracking-widest"><i class="fas fa-check-circle mr-1"></i> RECORD SAVED (${s})</div>`;
+                actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4 italic">Aaj ki Attendance:</h2><div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30 uppercase text-[10px] tracking-widest"><i class="fas fa-check-circle mr-1"></i> RECORD SAVED (${s})</div>`;
             }
 
             let html = '';
@@ -215,8 +220,6 @@
                 date: todayStr,
                 status: status,
                 timestamp: Date.now()
-            }).then(() => {
-                document.getElementById('status-msg').innerText = "Saved Successfully!";
             });
         };
     </script>
