@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload PDF - SNT Institute</title>
+    <title>SNT Institute - Media Upload</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; }
@@ -17,42 +17,50 @@
         button:disabled { background: #475569; cursor: not-allowed; }
         #status { margin-top: 15px; font-size: 0.85rem; color: #6366f1; display: none; font-weight: bold; }
         h2 { margin-bottom: 1.5rem; color: #f8fafc; }
+        .upload-type { display: flex; gap: 10px; margin-bottom: 20px; }
+        .type-btn { flex: 1; padding: 10px; background: #334155; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .active-type { background: var(--primary); }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📄 PDF Uploader</h2>
-        <form id="pdfForm">
-            <div class="form-group">
+        <h2 id="mainTitle">📄 Media Uploader</h2>
+        
+        <div class="upload-type">
+            <div id="pdfTab" class="type-btn active-type" onclick="switchMode('pdf')">PDF Upload</div>
+            <div id="imgTab" class="type-btn" onclick="switchMode('image')">Image Upload</div>
+        </div>
+
+        <form id="uploadForm">
+            <div class="form-group" id="courseContainer">
                 <label>Course Select Karein</label>
-                <select id="pdfCategory" required>
+                <select id="category" required>
                     <option value="" disabled selected>Course chunein...</option>
                     <option value="Computer Basics">Computer Basics</option>
-                    <option value="Computer Foundation">Computer Foundation</option>
                     <option value="C++ Language">C++ Language</option>
                     <option value="Java">Java</option>
                     <option value="DCA & ADCA">DCA & ADCA</option>
                     <option value="CCC">CCC</option>
-                    <option value="'O' Level">'O' Level</option>
-                    <option value="Web Design">Web Design</option>
                     <option value="Python">Python</option>
                     <option value="Tally ERP 9">Tally ERP 9</option>
-                    <option value="Adv. Excel">Adv. Excel</option>
-                    <option value="Hardware & Net.">Hardware & Net.</option>
                     <option value="Other">Other</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label>PDF Select Karein (Max 4MB)</label>
-                <input type="file" id="pdfFile" accept="application/pdf" required>
+                <label id="fileLabel">PDF Select Karein (Max 4MB)</label>
+                <input type="file" id="mediaFile" accept="application/pdf" required>
             </div>
+
             <div class="form-group">
-                <label>Short Description</label>
-                <textarea id="pdfDesc" rows="2" placeholder="Notes ke baare mein likhein..." required></textarea>
+                <label>Description</label>
+                <textarea id="mediaDesc" rows="2" placeholder="Kuch jaankari likhein..." required></textarea>
             </div>
+
             <button type="submit" id="submitBtn">Save Karein</button>
-            <div id="status">Processing... Database mein save ho raha hai...</div>
+            <div id="status">Database mein save ho raha hai...</div>
         </form>
+        
         <a href="pdf.html" style="display:block; margin-top:15px; text-decoration:none; color:#64748b; font-size:0.9rem;">View Library →</a>
     </div>
 
@@ -60,6 +68,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
     <script>
+        // Firebase Config (Same as yours)
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -72,17 +81,46 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        document.getElementById('pdfForm').addEventListener('submit', function(e) {
+        let currentMode = 'pdf';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const courseCont = document.getElementById('courseContainer');
+            const fileInput = document.getElementById('mediaFile');
+            const fileLabel = document.getElementById('fileLabel');
+            const title = document.getElementById('mainTitle');
+            
+            document.getElementById('pdfTab').classList.toggle('active-type', mode === 'pdf');
+            document.getElementById('imgTab').classList.toggle('active-type', mode === 'image');
+
+            if(mode === 'pdf') {
+                title.innerText = "📄 PDF Uploader";
+                courseCont.style.display = "block";
+                fileInput.accept = "application/pdf";
+                fileLabel.innerText = "PDF Select Karein (Max 4MB)";
+                document.getElementById('category').required = true;
+            } else {
+                title.innerText = "🖼️ Image Uploader";
+                courseCont.style.display = "none";
+                fileInput.accept = "image/*";
+                fileLabel.innerText = "Image Select Karein (Max 2MB)";
+                document.getElementById('category').required = false;
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
-            const file = document.getElementById('pdfFile').files[0];
-            const desc = document.getElementById('pdfDesc').value;
-            const category = document.getElementById('pdfCategory').value;
+            const file = document.getElementById('mediaFile').files[0];
+            const desc = document.getElementById('mediaDesc').value;
+            const category = document.getElementById('category').value;
 
-            if(file.size > 4194304) { 
-                alert("File size 4MB se zyada hai! Please choti file upload karein."); 
-                return; 
+            // Size limit check
+            const limit = currentMode === 'pdf' ? 4194304 : 2097152; 
+            if(file.size > limit) {
+                alert(`File size bahut badi hai! Max ${currentMode === 'pdf' ? '4MB' : '2MB'} allow hai.`);
+                return;
             }
 
             btn.disabled = true;
@@ -92,14 +130,19 @@
             reader.onload = function(event) {
                 const newData = {
                     name: file.name,
-                    pdf: event.target.result, 
+                    data: event.target.result, 
                     desc: desc,
-                    category: category, 
+                    type: currentMode,
                     date: new Date().toLocaleString()
                 };
 
-                database.ref('myPDFs').push(newData).then(() => {
-                    alert('Badhai ho! PDF Category (' + category + ') mein save ho gaya!');
+                // Agar PDF hai toh category bhi add karein
+                if(currentMode === 'pdf') newData.category = category;
+
+                const dbPath = currentMode === 'pdf' ? 'myPDFs' : 'myImages';
+                
+                database.ref(dbPath).push(newData).then(() => {
+                    alert('Data successfully save ho gaya!');
                     location.reload();
                 }).catch((error) => {
                     alert('Error: ' + error.message);
