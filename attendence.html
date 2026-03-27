@@ -13,7 +13,6 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .row-item { display: grid; grid-template-columns: 1fr 2fr 1.5fr; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* Status Colors */
         .btn-p { color: #4ade80; border: 1.5px solid #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-a { color: #f87171; border: 1.5px solid #ef4444; background: rgba(239, 68, 68, 0.1); }
         .btn-l { color: #fbbf24; border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.1); }
@@ -21,26 +20,40 @@
         .btn-lock { color: #64748b; border: 1.5px solid #334155; background: rgba(51, 65, 85, 0.1); opacity: 0.5; cursor: not-allowed; }
 
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; text-align: center; display: inline-block; min-width: 70px; }
+        #admin-panel { display: none; } /* Default Hidden */
     </style>
 </head>
 <body class="pb-10">
 
     <div class="p-4 max-w-2xl mx-auto flex items-center justify-between sticky top-0 bg-[#0f172a] z-50">
         <button onclick="history.back()" class="text-sky-400 text-xl w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-        <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">Attendance <span class="text-sky-500">Portal</span></h1>
+        <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Register</span></h1>
         <div class="w-10"></div>
     </div>
 
+    <div id="admin-panel" class="px-4 max-w-2xl mx-auto mb-6">
+        <div class="glass p-5 rounded-[2rem] border-l-4 border-amber-500 shadow-xl">
+            <h3 class="text-[10px] font-black uppercase text-amber-500 mb-3 tracking-widest"><i class="fas fa-crown mr-1"></i> Admin: Holiday Control</h3>
+            <div class="flex flex-col gap-3">
+                <input type="date" id="holiday-picker" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-amber-500">
+                <div class="flex gap-2">
+                    <input type="password" id="admin-pass" placeholder="Enter Secret PIN" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs flex-1 outline-none">
+                    <button onclick="setAdminHoliday()" class="bg-amber-500 text-slate-950 px-6 rounded-xl font-black text-[10px] uppercase transition-all active:scale-95">Set Holiday</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="px-4 max-w-2xl mx-auto mb-6">
-        <div class="glass p-6 rounded-[2rem] border-t-4 border-sky-500 shadow-2xl">
+        <div class="glass p-6 rounded-[2.5rem] border-t-4 border-sky-500 shadow-2xl relative overflow-hidden">
             <p id="today-date-display" class="text-sky-400 font-black text-xs uppercase tracking-widest mb-1"></p>
-            <h2 class="text-xl font-bold mb-4">Aaj ki Attendance/Leave:</h2>
+            <h2 class="text-xl font-bold mb-4">Aaj ki Attendance:</h2>
             <div id="action-buttons" class="flex gap-2">
                 <button onclick="markAttendance('Present')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-p active:scale-95 transition-all">P (PRESENT)</button>
                 <button onclick="markAttendance('Absent')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-a active:scale-95 transition-all">A (ABSENT)</button>
                 <button onclick="markAttendance('Leave')" class="flex-1 py-4 rounded-xl text-[10px] font-black btn-l active:scale-95 transition-all">L (LEAVE)</button>
             </div>
-            <p id="status-msg" class="mt-3 text-[10px] font-bold text-center text-slate-500"></p>
+            <p id="status-msg" class="mt-3 text-[10px] font-bold text-center text-slate-500 uppercase tracking-tighter"></p>
         </div>
     </div>
 
@@ -51,8 +64,7 @@
                 <div class="text-center">Details</div>
                 <div class="text-right">Record</div>
             </div>
-            <div id="register-list">
-                </div>
+            <div id="register-list"></div>
         </div>
     </div>
 
@@ -74,98 +86,108 @@
         const db = getDatabase(app);
 
         let currentUser = null;
-        const holidays = { "2026-01-26": "Republic Day", "2026-03-24": "Holi", "2026-08-15": "Independence Day" };
-
+        let adminHolidays = {};
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
+
         document.getElementById('today-date-display').innerText = now.toDateString();
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                loadRegister();
+                // Admin Panel Check
+                if(user.email === 'harshitkaushal9129@gmail.com') {
+                    document.getElementById('admin-panel').style.display = 'block';
+                }
+                loadData();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        function loadRegister() {
-            const attendRef = ref(db, 'attendance');
-            onValue(attendRef, (snapshot) => {
-                const data = snapshot.val() || {};
-                renderList(data);
-                checkTodayStatus(data);
+        function loadData() {
+            // Load Admin Holidays first
+            onValue(ref(db, 'admin_holidays'), (holSnapshot) => {
+                adminHolidays = holSnapshot.val() || {};
+                
+                // Then Load Attendance
+                onValue(ref(db, 'attendance'), (attSnapshot) => {
+                    const data = attSnapshot.val() || {};
+                    renderUI(data);
+                });
             });
         }
 
-        function checkTodayStatus(data) {
-            const attendanceID = currentUser.uid + "_" + todayStr;
-            if(data[attendanceID]) {
-                const s = data[attendanceID].status;
-                document.getElementById('action-buttons').innerHTML = `
-                    <div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30">
-                        <i class="fas fa-check-circle mr-2"></i> RECORD LAG GAYI (${s.toUpperCase()})
+        window.setAdminHoliday = () => {
+            const date = document.getElementById('holiday-picker').value;
+            const pass = document.getElementById('admin-pass').value;
+
+            if(!date) return alert("Bhai, date toh select karo!");
+            if(pass !== "912919") return alert("Galat Password! Sirf Harshit hi chhutti kar sakta hai.");
+
+            set(ref(db, 'admin_holidays/' + date), {
+                status: "Holiday",
+                markedBy: "Harshit Kaushal"
+            }).then(() => {
+                alert("Holiday Marked Successfully!");
+                document.getElementById('admin-pass').value = "";
+            });
+        };
+
+        function renderUI(data) {
+            const list = document.getElementById('register-list');
+            const actionBtnDiv = document.getElementById('action-buttons');
+            
+            // Check Today's status (Sunday/Holiday/Already Marked)
+            const isSun = now.getDay() === 0;
+            const isHol = adminHolidays[todayStr];
+            const attID = currentUser.uid + "_" + todayStr;
+
+            if(isSun || isHol) {
+                actionBtnDiv.innerHTML = `<div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic tracking-tighter uppercase">Aaj Chhutti Hai (${isSun ? 'Sunday' : 'Institute Holiday'})</div>`;
+            } else if(data[attID]) {
+                actionBtnDiv.innerHTML = `<div class="w-full py-4 glass text-sky-400 font-black text-center rounded-2xl border border-sky-500/30 uppercase tracking-widest text-[10px]"><i class="fas fa-check-circle mr-1"></i> AAJ KI ATTENDANCE LAG GAYI HAI</div>`;
+            }
+
+            // Render List
+            let html = '';
+            for (let d = now.getDate(); d >= 1; d--) {
+                const dayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateObj = new Date(dayDateStr);
+                const sun = dateObj.getDay() === 0;
+                const hol = adminHolidays[dayDateStr];
+                const record = Object.values(data).find(r => r.email === currentUser.email && r.date === dayDateStr);
+
+                let badge = '<span class="status-badge btn-lock">No Data</span>';
+                if(record) {
+                    if(record.status === 'Present') badge = '<span class="status-badge btn-p">Present</span>';
+                    else if(record.status === 'Absent') badge = '<span class="status-badge btn-a">Absent</span>';
+                    else if(record.status === 'Leave') badge = '<span class="status-badge btn-l">Leave</span>';
+                } else if(sun) badge = '<span class="status-badge btn-h">Sunday</span>';
+                else if(hol) badge = '<span class="status-badge btn-h">Holiday</span>';
+
+                html += `
+                    <div class="row-item">
+                        <div class="font-bold text-xs text-slate-300">${d} ${dateObj.toLocaleString('default', { month: 'short' })}</div>
+                        <div class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-tighter">${hol ? 'Closed' : dateObj.toLocaleDateString('en-US', {weekday:'long'})}</div>
+                        <div class="text-right">${badge}</div>
                     </div>`;
             }
+            list.innerHTML = html;
         }
 
         window.markAttendance = (status) => {
-            if(new Date().getDay() === 0) return alert("Sunday ko chhutti hoti hai!");
-            if(status === 'Leave' && !confirm("Kya aap aaj Leave mark karna chahte hain?")) return;
-
-            const attendanceID = currentUser.uid + "_" + todayStr;
-            set(ref(db, 'attendance/' + attendanceID), {
+            const attID = currentUser.uid + "_" + todayStr;
+            set(ref(db, 'attendance/' + attID), {
                 email: currentUser.email,
                 name: currentUser.displayName || "Student",
                 date: todayStr,
                 status: status,
                 timestamp: Date.now()
             }).then(() => {
-                document.getElementById('status-msg').innerText = "Successfully Saved!";
-            }).catch((err) => alert("Error: " + err.message));
+                document.getElementById('status-msg').innerText = "Record Saved Successfully!";
+            });
         };
-
-        function renderList(data) {
-            const list = document.getElementById('register-list');
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth(); // 0-indexed
-            
-            // Get total days in current month
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
-            let html = '';
-            // Loop from today backwards to the start of the month
-            for (let d = now.getDate(); d >= 1; d--) {
-                const dayDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dateObj = new Date(dayDateStr);
-                
-                const isSun = dateObj.getDay() === 0;
-                const holName = holidays[dayDateStr];
-                
-                // Optimized search for the current user's record on this date
-                const record = Object.values(data).find(r => r.email === currentUser.email && r.date === dayDateStr);
-
-                let badge = '<span class="status-badge btn-lock">No Data</span>';
-                if(record) {
-                    const s = record.status;
-                    if(s === 'Present') badge = '<span class="status-badge btn-p">Present</span>';
-                    else if(s === 'Absent') badge = '<span class="status-badge btn-a">Absent</span>';
-                    else if(s === 'Leave') badge = '<span class="status-badge btn-l">Leave</span>';
-                } else if(isSun) {
-                    badge = '<span class="status-badge btn-h">Sunday</span>';
-                } else if(holName) {
-                    badge = `<span class="status-badge btn-h">Holiday</span>`;
-                }
-
-                html += `
-                    <div class="row-item">
-                        <div class="font-bold text-sm text-slate-300">${d} ${dateObj.toLocaleString('default', { month: 'short' })}</div>
-                        <div class="text-center text-[10px] font-bold text-slate-500">${holName || dateObj.toLocaleDateString('en-US', {weekday:'long'})}</div>
-                        <div class="text-right">${badge}</div>
-                    </div>`;
-            }
-            list.innerHTML = html;
-        }
     </script>
 </body>
 </html>
