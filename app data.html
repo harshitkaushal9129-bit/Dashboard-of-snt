@@ -12,7 +12,6 @@
         body { background: #010409; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(56, 189, 248, 0.1); }
         
-        /* --- PRO ADMIN AUTH STYLES --- */
         .auth-container {
             background: radial-gradient(circle at top, #1e293b 0%, #020617 100%);
             border: 1px solid rgba(56, 189, 248, 0.2);
@@ -40,7 +39,6 @@
             letter-spacing: 2px; font-weight: 900;
         }
 
-        /* Scanning Animation */
         .scan-line {
             width: 100%; height: 2px; background: rgba(14, 165, 233, 0.5);
             position: absolute; top: 0; left: 0;
@@ -49,7 +47,6 @@
         }
         @keyframes scan { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        /* Error Shake & Red Flash */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -62,7 +59,6 @@
             pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 6000;
         }
 
-        /* UI Decor */
         .stats-card { background: #0d1117; border-left: 4px solid #0ea5e9; transition: 0.3s; border-radius: 2rem; }
         .avatar-img { border-radius: 14px; object-fit: cover; border: 2px solid #1e293b; transition: 0.3s; cursor: pointer; }
         .secure-blur { filter: blur(30px) scale(1.1); pointer-events: none; }
@@ -250,10 +246,14 @@
         };
 
         window.deleteStudent = (key) => {
-            if(confirm("Are you sure? This node will be purged forever!")) {
+            const verify = prompt("CRITICAL: Enter Admin PIN to authorize node purge:");
+            if(verify === ADMIN_PIN) {
                 remove(ref(db, 'students/' + key))
                 .then(() => { alert("Node Purged Successfully."); })
                 .catch((e) => { alert("Purge Failed: " + e); });
+            } else if (verify !== null) {
+                document.getElementById('beep-error').play();
+                alert("AUTHORIZATION FAILED: Invalid PIN.");
             }
         };
 
@@ -269,8 +269,6 @@
                 }
 
                 const data = Object.entries(snapshot.val());
-                
-                // Optimized Stats Calculation
                 const total = data.length;
                 const active = data.filter(([k, s]) => s.registrationStatus === "Active").length;
                 const pending = total - active;
