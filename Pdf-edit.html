@@ -7,17 +7,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; flex-direction: column; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; flex-direction: column; padding: 20px 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .stats-box { background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); }
         .form-group { margin-bottom: 1.2rem; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #94a3b8; }
         input, textarea, select { width: 100%; padding: 12px; border: 2px solid #334155; border-radius: 8px; box-sizing: border-box; background: #0f172a; color: white; outline: none; }
         input:focus, select:focus { border-color: var(--primary); }
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:hover { background: #4f46e5; }
+        
+        /* New Styles for PDF List */
+        .library-card { background: #1e293b; padding: 1.5rem; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+        .pdf-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .pdf-info { font-size: 0.8rem; overflow: hidden; }
+        .pdf-info b { display: block; color: #f8fafc; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .view-link { color: #6366f1; text-decoration: none; font-size: 0.8rem; font-weight: bold; border: 1px solid #6366f1; padding: 4px 8px; border-radius: 4px; }
+        
         #status { margin-top: 15px; font-size: 0.85rem; color: #6366f1; display: none; font-weight: bold; }
-        h2 { margin-bottom: 1.5rem; color: #f8fafc; }
+        h2, h3 { color: #f8fafc; margin-top: 0; }
         .upload-type { display: flex; gap: 10px; margin-bottom: 20px; }
         .type-btn { flex: 1; padding: 10px; background: #334155; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
         .active-type { background: var(--primary); }
@@ -29,8 +36,8 @@
         <h2 id="mainTitle">📄 Media Uploader</h2>
         
         <div class="stats-box">
-            <span style="font-size: 0.9rem; color: #94a3b8;">Total PDFs Uploaded: </span>
-            <span id="pdfCount" style="font-weight: bold; color: #6366f1;">Loading...</span>
+            <span style="font-size: 0.9rem; color: #94a3b8;">Total PDFs: </span>
+            <span id="pdfCount" style="font-weight: bold; color: #6366f1;">0</span>
         </div>
 
         <div class="upload-type">
@@ -67,8 +74,11 @@
             <button type="submit" id="submitBtn">Save Karein</button>
             <div id="status">Database mein save ho raha hai...</div>
         </form>
-        
-        <a href="pdf.html" style="display:block; margin-top:15px; text-decoration:none; color:#64748b; font-size:0.9rem;">View Library →</a>
+    </div>
+
+    <div class="library-card">
+        <h3>📚 Recent PDFs</h3>
+        <div id="pdfList">Aapke PDFs yahan dikhenge...</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -87,14 +97,34 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- PDF Counter Logic ---
-        function updateCounter() {
+        // --- Fetch and Display PDFs ---
+        function loadPDFs() {
             database.ref('myPDFs').on('value', (snapshot) => {
-                const count = snapshot.numChildren(); 
-                document.getElementById('pdfCount').innerText = count;
+                const listDiv = document.getElementById('pdfList');
+                const countSpan = document.getElementById('pdfCount');
+                listDiv.innerHTML = "";
+                
+                if(snapshot.exists()) {
+                    countSpan.innerText = snapshot.numChildren();
+                    snapshot.forEach((child) => {
+                        const data = child.val();
+                        listDiv.innerHTML += `
+                            <div class="pdf-item">
+                                <div class="pdf-info">
+                                    <b>${data.name}</b>
+                                    <span>${data.category || 'N/A'}</span>
+                                </div>
+                                <a href="${data.data}" target="_blank" class="view-link">View</a>
+                            </div>
+                        `;
+                    });
+                } else {
+                    listDiv.innerHTML = "Koi PDF nahi mili.";
+                    countSpan.innerText = "0";
+                }
             });
         }
-        updateCounter(); // Page load par counter update karein
+        loadPDFs();
 
         let currentMode = 'pdf';
 
@@ -133,7 +163,7 @@
 
             const limit = currentMode === 'pdf' ? 4194304 : 2097152; 
             if(file.size > limit) {
-                alert(`File size bahut badi hai! Max ${currentMode === 'pdf' ? '4MB' : '2MB'} allow hai.`);
+                alert(`File size bahut badi hai!`);
                 return;
             }
 
@@ -155,8 +185,10 @@
                 const dbPath = currentMode === 'pdf' ? 'myPDFs' : 'myImages';
                 
                 database.ref(dbPath).push(newData).then(() => {
-                    alert('Data successfully save ho gaya!');
-                    location.reload();
+                    alert('Data save ho gaya!');
+                    btn.disabled = false;
+                    status.style.display = "none";
+                    document.getElementById('uploadForm').reset();
                 }).catch((error) => {
                     alert('Error: ' + error.message);
                     btn.disabled = false;
