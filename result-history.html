@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT Result History | Official Portal</title>
+    <title>SNT Result Analytics | Official Portal</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root { --snt-blue: #0f172a; --snt-sky: #38bdf8; --bg: #0f172a; }
@@ -19,12 +20,17 @@
 
         .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
         
+        /* Analytics Card */
+        .analytics-card { background: rgba(30, 41, 59, 0.6); border-radius: 24px; padding: 20px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.1); }
+        .chart-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        select { background: #1e293b; color: white; border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 8px; font-size: 12px; outline: none; }
+
         .profile-strip { background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 20px; display: none; align-items: center; gap: 15px; margin-bottom: 25px; border: 1px solid rgba(56, 189, 248, 0.2); }
         #u-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--snt-sky); object-fit: cover; }
         .student-info h3 { margin: 0; font-size: 1.1rem; }
         .student-info p { margin: 2px 0 0; font-size: 12px; color: #94a3b8; }
 
-        .result-card { background: rgba(30, 41, 59, 0.4); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .result-card { background: rgba(30, 41, 59, 0.4); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .res-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
         .res-title { font-weight: 800; color: var(--snt-sky); font-size: 0.9rem; text-transform: uppercase; }
         .res-date { font-size: 10px; color: #64748b; }
@@ -41,7 +47,7 @@
 <body>
 
 <header>
-    <span style="font-weight:900; tracking-tighter: -1px;">SNT <span style="color:var(--snt-sky)">HISTORY</span></span>
+    <span style="font-weight:900;">SNT <span style="color:var(--snt-sky)">ANALYTICS</span></span>
     <a href="index.html" class="back-btn"><i class="fa-solid fa-house"></i> Home</a>
 </header>
 
@@ -52,6 +58,18 @@
             <h3 id="u-name">...</h3>
             <p id="u-id">Authenticating...</p>
         </div>
+    </div>
+
+    <div class="analytics-card" id="chart-sec" style="display:none;">
+        <div class="chart-controls">
+            <span style="font-size:12px; font-weight:800; color:#94a3b8;">PERFORMANCE GRAPH</span>
+            <select id="chartType" onchange="updateChart()">
+                <option value="line">Line Chart</option>
+                <option value="bar">Bar Chart</option>
+                <option value="radar">Radar View</option>
+            </select>
+        </div>
+        <canvas id="performanceChart" style="max-height: 250px;"></canvas>
     </div>
 
     <div id="results-container">
@@ -71,19 +89,19 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// Securely monitor login status
+let myChart = null;
+let globalLabels = [];
+let globalData = [];
+
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // User login hai, email se fetch karo
         fetchStudentAndResults(user.email, user.photoURL);
     } else {
-        // Login nahi hai toh portal par bhej do
         window.location.href = "index.html";
     }
 });
 
 function fetchStudentAndResults(email, photo) {
-    // 1. Fetch Student Info based on Google Email
     db.ref('students').on('value', snap => {
         const students = snap.val();
         let currentStudent = null;
@@ -102,8 +120,6 @@ function fetchStudentAndResults(email, photo) {
             document.getElementById('u-id').innerHTML = `ID: ${sId || 'GUEST'}`;
             document.getElementById('u-img').src = currentStudent.profilePic || photo || './SNT.jpg';
             document.getElementById('profile-sec').style.display = 'flex';
-            
-            // 2. Now Fetch Results using this ID
             if(sId) loadResults(sId);
             else showNoData();
         } else {
@@ -116,14 +132,21 @@ function loadResults(sId) {
     db.ref('exam_results').orderByChild('studentId').equalTo(sId).on('value', snap => {
         const container = document.getElementById('results-container');
         container.innerHTML = ""; 
-        
         const data = snap.val();
+        
         if (!data) {
             showNoData();
             return;
         }
 
-        Object.values(data).reverse().forEach(res => {
+        const results = Object.values(data);
+        globalLabels = results.map(r => r.date.split(',')[0]); // Dates for chart
+        globalData = results.map(r => Math.round((r.score / r.totalQuestions) * 100)); // Percentages
+
+        document.getElementById('chart-sec').style.display = 'block';
+        updateChart(); // Initialize Chart
+
+        results.reverse().forEach(res => {
             const percentage = Math.round((res.score / res.totalQuestions) * 100);
             const card = document.createElement('div');
             card.className = "result-card";
@@ -139,6 +162,37 @@ function loadResults(sId) {
             `;
             container.appendChild(card);
         });
+    });
+}
+
+function updateChart() {
+    const type = document.getElementById('chartType').value;
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+
+    if (myChart) myChart.destroy();
+
+    myChart = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: globalLabels,
+            datasets: [{
+                label: 'Score Percentage (%)',
+                data: globalData,
+                borderColor: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+        }
     });
 }
 
