@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT Result History | Official Portal</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --snt-blue: #1b365d; --snt-orange: #f39200; --bg: #f3f4f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: var(--bg); color: #333; user-select: none; }
+        
+        header { background: var(--snt-blue); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .back-btn { color: white; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 6px; transition: 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
+        
+        .profile-strip { background: white; padding: 20px; border-radius: 16px; display: none; align-items: center; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-bottom: 4px solid var(--snt-orange); }
+        #u-img { width: 65px; height: 65px; border-radius: 50%; border: 3px solid #eee; object-fit: cover; }
+        .student-info h3 { margin: 0; color: var(--snt-blue); font-size: 1.2rem; }
+        .student-info p { margin: 2px 0 0; font-size: 13px; color: #666; }
+
+        .result-card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid var(--snt-blue); position: relative; overflow: hidden; animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .res-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .res-title { font-weight: bold; color: var(--snt-blue); font-size: 1.1rem; display: block; }
+        .res-date { font-size: 11px; color: #888; display: block; margin-top: 2px; }
+        .res-score-badge { background: var(--snt-blue); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        
+        .stats-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 500; }
+        .progress-bg { background: #e5e7eb; height: 8px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--snt-blue), #3b82f6); border-radius: 10px; width: 0; transition: width 1.5s ease-in-out; }
+
+        .no-data { text-align: center; padding: 60px 20px; color: #999; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--snt-orange); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 40px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <img src="https://harshitkaushal9129-bit.github.io/snt-institute/SNT.jpg" width="35" style="border-radius:50%; border:1px solid white;">
+        <span style="font-weight:bold;">SNT RESULT PORTAL</span>
+    </div>
+    <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+</header>
+
+<div class="container">
+    <div class="profile-strip" id="profile-sec">
+        <img id="u-img" src="https://via.placeholder.com/65" alt="Student">
+        <div class="student-info">
+            <h3 id="u-name">...</h3>
+            <p id="u-id">Verifying Session...</p>
+        </div>
+    </div>
+
+    <div id="results-container">
+        <div class="loader" id="main-loader"></div>
+    </div>
+</div>
+
+<script>
+// Firebase Config
+const firebaseConfig = { 
+    apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", 
+    authDomain: "snt-computer-institute.firebaseapp.com", 
+    databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com/", 
+    projectId: "snt-computer-institute", 
+    appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" 
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// SECURE SESSION CHECK: Firebase se direct student ID verify karna
+function checkSecureSession() {
+    // Note: Hum abhi bhi local ID le rahe hain lekin ise DB se cross-verify karenge
+    const sId = localStorage.getItem('snt_student_id');
+
+    if (!sId) {
+        window.location.href = "index.html"; 
+        return;
+    }
+
+    // 1. Database se Student existence confirm karo
+    db.ref('students').orderByChild('studentId').equalTo(sId).once('value', snap => {
+        const data = snap.val();
+        if (data) {
+            const student = Object.values(data)[0];
+            updateProfileUI(student);
+            fetchResults(sId);
+        } else {
+            // Agar DB mein ye ID nahi hai toh turant Logout
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    });
+}
+
+function updateProfileUI(student) {
+    document.getElementById('u-name').innerText = student.name;
+    document.getElementById('u-id').innerHTML = `<i class="fa-solid fa-id-badge"></i> ID: ${student.studentId}`;
+    if(student.profilePicture) document.getElementById('u-img').src = student.profilePicture;
+    document.getElementById('profile-sec').style.display = 'flex';
+}
+
+function fetchResults(sId) {
+    // Only fetch results belonging to THIS student ID
+    db.ref('exam_results').orderByChild('studentId').equalTo(sId).on('value', snap => {
+        const container = document.getElementById('results-container');
+        container.innerHTML = ""; 
+        
+        const data = snap.val();
+        if (!data) {
+            container.innerHTML = `<div class="no-data"><i class="fa-solid fa-ghost"></i><br>No records found. Take a test first!</div>`;
+            return;
+        }
+
+        const results = Object.values(data).reverse();
+
+        results.forEach(res => {
+            const percentage = Math.round((res.score / res.totalQuestions) * 100);
+            const card = document.createElement('div');
+            card.className = "result-card";
+            card.innerHTML = `
+                <div class="res-header">
+                    <div>
+                        <span class="res-title">${res.courseName || 'Computer Test'}</span>
+                        <span class="res-date"><i class="fa-regular fa-calendar"></i> ${res.date}</span>
+                    </div>
+                    <div class="res-score-badge">${res.score} / ${res.totalQuestions}</div>
+                </div>
+                <div class="stats-row">
+                    <span>Accuracy</span>
+                    <span>${percentage}%</span>
+                </div>
+                <div class="progress-bg">
+                    <div class="progress-fill" id="prog-${res.date.replace(/[/ :]/g, '')}"></div>
+                </div>
+            `;
+            container.appendChild(card);
+
+            // Trigger Animation
+            setTimeout(() => {
+                const bar = card.querySelector('.progress-fill');
+                if(bar) bar.style.width = percentage + "%";
+            }, 200);
+        });
+    });
+}
+
+// Start Security Check
+checkSecureSession();
+
+</script>
+</body>
+</html>
