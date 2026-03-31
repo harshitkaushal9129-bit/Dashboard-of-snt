@@ -3,27 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT PDF VAULT - Course Wise Access</title>
+    <title>SNT PDF VAULT - Slider Mode</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 15px; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .pdf-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; border-radius: 20px; padding: 20px; position: relative; }
-        .pdf-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        
+        /* Slider Styling */
+        .pdf-slider { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 15px; 
+            padding: 10px 5px 20px 5px; 
+            scrollbar-width: none; /* Firefox */
+        }
+        .pdf-slider::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+        
+        .pdf-card { 
+            min-width: 260px; 
+            max-width: 260px; 
+            background: rgba(30, 41, 59, 0.6); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            transition: 0.3s; 
+            border-radius: 24px; 
+            padding: 20px; 
+            flex-shrink: 0;
+        }
+        .pdf-card:active { transform: scale(0.95); }
+        
         .course-badge { background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(56, 189, 248, 0.2); }
-        .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; transition: 0.2s; }
-        .btn-view:active { transform: scale(0.95); }
+        .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; }
         
         .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; scrollbar-width: none; }
-        .gallery-container::-webkit-scrollbar { display: none; }
-        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .img-item img { width: 100%; height: 90px; object-fit: cover; }
-        
-        .course-header { border-left: 4px solid var(--primary); padding-left: 12px; margin: 30px 0 15px 0; }
+        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .course-header { border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -49,13 +66,11 @@
             <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <i class="fas fa-bullhorn text-sky-400"></i> Recent Updates
             </h3>
-            <div id="image-gallery" class="gallery-container">
-                <p class="text-slate-500 text-xs">Loading updates...</p>
-            </div>
+            <div id="image-gallery" class="gallery-container"></div>
         </div>
 
         <div id="course-wise-container">
-            <p class="text-slate-500 text-xs">Organizing notes by course...</p>
+            <p class="text-slate-500 text-xs">Loading course materials...</p>
         </div>
 
         <div id="no-data" class="hidden text-center py-20">
@@ -82,25 +97,19 @@
         const db = firebase.database();
 
         function viewPDF(base64Data) {
-            if(!base64Data) return alert("File data corrupt or missing!");
+            if(!base64Data) return alert("File missing!");
             try {
                 const parts = base64Data.split(';base64,');
                 const raw = window.atob(parts[1] || parts[0]);
-                const rawLength = raw.length;
-                const uInt8Array = new Uint8Array(rawLength);
-                for (let i = 0; i < rawLength; ++i) {
-                    uInt8Array[i] = raw.charCodeAt(i);
-                }
+                const uInt8Array = new Uint8Array(raw.length);
+                for (let i = 0; i < raw.length; ++i) uInt8Array[i] = raw.charCodeAt(i);
                 const blob = new Blob([uInt8Array], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            } catch (e) {
-                alert("PDF open karne mein dikkat aa rahi hai.");
-            }
+                window.open(URL.createObjectURL(blob), '_blank');
+            } catch (e) { alert("Error opening PDF"); }
         }
 
         function loadAllContent() {
-            // Load Images
+            // Images Slider
             db.ref('myImages').on('value', (snap) => {
                 const gallery = document.getElementById('image-gallery');
                 gallery.innerHTML = '';
@@ -109,15 +118,13 @@
                     const img = data[key];
                     gallery.innerHTML += `
                         <div class="img-item flex-shrink-0" onclick="window.open('${img.data}', '_blank')">
-                            <img src="${img.data}">
-                            <div class="p-2">
-                                <p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p>
-                            </div>
+                            <img src="${img.data}" class="w-full h-24 object-cover">
+                            <div class="p-2"><p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p></div>
                         </div>`;
                 });
             });
 
-            // Load & Group PDFs by Category
+            // PDFs Sliding Categories
             db.ref('myPDFs').on('value', (snap) => {
                 const container = document.getElementById('course-wise-container');
                 const noData = document.getElementById('no-data');
@@ -126,48 +133,40 @@
                 const data = snap.val() || {};
                 const keys = Object.keys(data).reverse();
 
-                if (keys.length === 0) {
-                    noData.classList.remove('hidden');
-                    return;
-                }
-                
+                if (keys.length === 0) { noData.classList.remove('hidden'); return; }
                 noData.classList.add('hidden');
 
-                // Logic: Grouping data
+                // Grouping
                 const groups = {};
                 keys.forEach(key => {
                     const pdf = data[key];
-                    const category = pdf.category || 'General Notes';
-                    if (!groups[category]) groups[category] = [];
-                    groups[category].push(pdf);
+                    const cat = pdf.category || 'General';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(pdf);
                 });
 
-                // Logic: Displaying Sections
-                for (const category in groups) {
+                // Render each category as a horizontal slider
+                for (const cat in groups) {
                     const section = document.createElement('div');
-                    section.className = 'mb-10 animate-fade-in';
-                    
+                    section.className = 'mb-8';
                     section.innerHTML = `
-                        <div class="course-header flex justify-between items-end">
-                            <div>
-                                <h4 class="text-lg font-black uppercase tracking-tighter text-white">${category}</h4>
-                                <p class="text-[9px] text-sky-400 font-bold uppercase tracking-widest">Available Materials</p>
-                            </div>
-                            <span class="text-[10px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full font-bold border border-sky-500/20">
-                                ${groups[category].length} FILES
-                            </span>
+                        <div class="course-header flex justify-between items-center pr-4">
+                            <h4 class="text-sm font-black uppercase tracking-widest text-white">${cat}</h4>
+                            <span class="text-[9px] text-slate-500 font-bold italic">Swipe <i class="fas fa-arrow-right ml-1"></i></span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            ${groups[category].map(pdf => `
-                                <div class="pdf-card">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <span class="course-badge">${pdf.category || 'Notes'}</span>
-                                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        <div class="pdf-slider">
+                            ${groups[cat].map(pdf => `
+                                <div class="pdf-card glass">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-file-pdf text-red-500 text-lg"></i>
+                                        </div>
+                                        <span class="course-badge">${cat}</span>
                                     </div>
-                                    <h3 class="font-bold text-sm mb-1 truncate">${pdf.name}</h3>
-                                    <p class="text-[10px] text-slate-400 line-clamp-2 h-7 mb-2">${pdf.desc || 'No description available for this file.'}</p>
+                                    <h3 class="font-bold text-sm mb-1 truncate text-white">${pdf.name}</h3>
+                                    <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description available.'}</p>
                                     <button onclick="viewPDF('${pdf.data}')" class="btn-view">
-                                        <i class="fas fa-eye mr-2"></i> VIEW NOTES
+                                        VIEW NOTES
                                     </button>
                                 </div>
                             `).join('')}
@@ -177,7 +176,6 @@
                 }
             });
         }
-
         window.onload = loadAllContent;
     </script>
 </body>
