@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT PDF VAULT - Pro Search</title>
+    <title>SNT PDF VAULT - Premium Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,101 +14,117 @@
             background: #020617;
             color: #f8fafc;
             overflow-x: hidden;
+            user-select: none;
         }
 
         .glass-card {
             background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .glass-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px);
             border-color: #38bdf8;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(56 189 248 / 0.2);
+            box-shadow: 0 15px 30px -10px rgba(56, 189, 248, 0.3);
         }
 
-        .search-glow:focus {
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        .search-container:focus-within {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
             border-color: #38bdf8;
         }
 
-        .animated-gradient {
+        .animated-btn {
             background: linear-gradient(-45deg, #0ea5e9, #6366f1, #a855f7, #0ea5e9);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background-size: 300% 300%;
+            animation: gradientMove 5s ease infinite;
         }
 
-        @keyframes gradient {
+        @keyframes gradientMove {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* Smooth reveal animation */
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease out forwards;
+        .fade-in {
+            animation: fadeInUp 0.5s ease-out forwards;
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
+        .chip-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
         }
-        @keyframes shimmer { 100% { background-position: -200% 0; } }
+
+        .chip-btn:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        /* Scrollbar Hidden */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="min-h-screen">
 
-    <nav class="sticky top-0 z-50 px-6 py-4 backdrop-blur-md border-b border-white/5 bg-slate-950/50">
+    <nav class="sticky top-0 z-50 px-6 py-4 backdrop-blur-xl border-b border-white/5 bg-slate-950/70">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tighter italic">SNT <span class="text-sky-400">VAULT</span></h1>
-            <a href="https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/" class="text-xs font-bold px-4 py-2 rounded-full border border-sky-500/30 text-sky-400 hover:bg-sky-500/10 transition">OFFICIAL PORTAL</a>
+            <h1 class="text-2xl font-black tracking-tighter italic">SNT <span class="text-sky-400">VAULT</span></h1>
+            <a href="https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/" class="text-[10px] font-bold px-4 py-2 rounded-xl border border-sky-500/30 text-sky-400 hover:bg-sky-500/10 transition tracking-widest">OFFICIAL PORTAL</a>
         </div>
     </nav>
 
-    <header class="max-w-4xl mx-auto px-6 pt-12 pb-6 text-center">
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
+    <header class="max-w-4xl mx-auto px-6 pt-16 pb-8 text-center">
+        <h2 class="text-4xl md:text-6xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">
             Smart Search Portal
         </h2>
-        <p class="text-slate-400 text-sm max-w-md mx-auto mb-10">Search your course (e.g. ADCA, CCC, Tally) to unlock high-quality premium notes instantly.</p>
+        <p class="text-slate-400 text-sm mb-10 opacity-70">SNT Computer Institute Official Learning Resource</p>
 
-        <div class="relative max-w-xl mx-auto group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i class="fas fa-search text-sky-400 group-focus-within:scale-110 transition-transform"></i>
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+            <button onclick="quickSearch('ADCA')" class="chip-btn px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider">ADCA</button>
+            <button onclick="quickSearch('CCC')" class="chip-btn px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider">CCC</button>
+            <button onclick="quickSearch('TALLY')" class="chip-btn px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider">Tally Prime</button>
+            <button onclick="quickSearch('DCA')" class="chip-btn px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider">DCA</button>
+            <button onclick="quickSearch('MS OFFICE')" class="chip-btn px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider">Office</button>
+        </div>
+
+        <div class="relative max-w-xl mx-auto group search-container rounded-2xl transition-all">
+            <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <i class="fas fa-search text-sky-400"></i>
             </div>
             <input type="text" id="courseSearch" onkeyup="filterPDFs()" 
-                   placeholder="Enter Course Name (Ex: ADCA)..." 
-                   class="w-full bg-slate-900/80 border border-white/10 py-5 pl-12 pr-6 rounded-2xl text-white outline-none focus:ring-2 focus:ring-sky-500/50 search-glow transition-all text-lg font-medium">
-            <div class="absolute right-3 top-3">
-                <span class="bg-sky-500/10 text-sky-400 text-[10px] font-black px-3 py-2 rounded-lg border border-sky-500/20 uppercase tracking-widest">Premium Access</span>
+                   placeholder="Search Course (Ex: ADCA, CCC)..." 
+                   class="w-full bg-slate-900/50 border border-white/10 py-5 pl-14 pr-6 rounded-2xl text-white outline-none focus:ring-1 focus:ring-sky-500/50 text-lg transition-all">
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 hidden md:block">
+                <i class="fas fa-bolt text-sky-400/30 text-xl"></i>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6">
+    <main class="max-w-6xl mx-auto px-6 pb-20">
         
-        <div id="resultsCount" class="mb-6 text-slate-500 text-xs font-bold uppercase tracking-widest hidden"></div>
+        <div id="resultsCount" class="mb-8 text-center text-slate-500 text-[11px] font-bold uppercase tracking-[0.3em] hidden"></div>
 
-        <div id="pdfGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div id="loadingState" class="col-span-full text-center py-20">
-                <div class="inline-block p-6 rounded-full bg-slate-900 mb-4">
-                    <i class="fas fa-laptop-code text-4xl text-sky-500 animate-pulse"></i>
-                </div>
-                <h3 class="text-slate-400 font-medium">Awaiting Search Input...</h3>
+        <div id="pdfGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="loadingState" class="col-span-full text-center py-10">
+                <div class="w-16 h-16 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-slate-500 text-sm font-medium">Connecting to SNT Vault...</p>
             </div>
         </div>
 
-        <div id="noResult" class="hidden text-center py-20">
-            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" class="w-32 mx-auto opacity-20 grayscale mb-4">
-            <h3 class="text-xl font-bold text-slate-400">Oops! Course Not Found</h3>
-            <p class="text-slate-600 text-sm">Please check the spelling or try another keyword.</p>
+        <div id="noResult" class="hidden text-center py-20 fade-in">
+            <div class="bg-slate-900/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-slate-700 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-300">Course Not Found</h3>
+            <p class="text-slate-500 text-sm mt-2">Try searching with a different keyword like 'Office' or 'Notes'.</p>
         </div>
     </main>
 
@@ -130,7 +146,7 @@
         const db = firebase.database();
         let allPDFs = [];
 
-        // Load data from Firebase
+        // Database listener
         function initData() {
             db.ref('myPDFs').on('value', (snap) => {
                 const data = snap.val() || {};
@@ -138,66 +154,86 @@
                     id: key,
                     ...data[key]
                 })).reverse();
+                
+                // Refresh search if already typing
+                const current = document.getElementById('courseSearch').value;
+                if(current) filterPDFs();
+                else showInitialState();
             });
+        }
+
+        function showInitialState() {
+            const grid = document.getElementById('pdfGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-10 opacity-40">
+                    <i class="fas fa-keyboard text-4xl mb-4 block"></i>
+                    <p class="text-sm font-bold uppercase tracking-widest">Type to search notes</p>
+                </div>
+            `;
+        }
+
+        function quickSearch(term) {
+            document.getElementById('courseSearch').value = term;
+            filterPDFs();
+            window.scrollTo({ top: 400, behavior: 'smooth' });
         }
 
         function filterPDFs() {
             const query = document.getElementById('courseSearch').value.toLowerCase().trim();
             const grid = document.getElementById('pdfGrid');
             const noResult = document.getElementById('noResult');
-            const resultsCount = document.getElementById('resultsCount');
-            const loadingState = document.getElementById('loadingState');
+            const resultsLabel = document.getElementById('resultsCount');
 
             if (query === "") {
-                grid.innerHTML = '';
-                grid.appendChild(loadingState);
-                resultsCount.classList.add('hidden');
+                showInitialState();
+                resultsLabel.classList.add('hidden');
                 noResult.classList.add('hidden');
                 return;
             }
 
-            const filtered = allPDFs.filter(pdf => 
-                pdf.name.toLowerCase().includes(query) || 
-                (pdf.category && pdf.category.toLowerCase().includes(query))
-            );
+            // Logic to find matches in Name or Category
+            const filtered = allPDFs.filter(pdf => {
+                const name = (pdf.name || "").toLowerCase();
+                const cat = (pdf.category || "").toLowerCase();
+                return name.includes(query) || cat.includes(query);
+            });
 
-            loadingState.remove();
             grid.innerHTML = '';
 
             if (filtered.length === 0) {
                 noResult.classList.remove('hidden');
-                resultsCount.classList.add('hidden');
+                resultsLabel.classList.add('hidden');
             } else {
                 noResult.classList.add('hidden');
-                resultsCount.classList.remove('hidden');
-                resultsCount.innerText = `Found ${filtered.length} Material(s) for "${query}"`;
+                resultsLabel.classList.remove('hidden');
+                resultsLabel.innerHTML = `Found <span class="text-sky-400">${filtered.length}</span> Premium Files`;
 
                 filtered.forEach((pdf, index) => {
                     const card = document.createElement('div');
-                    card.className = "fade-in-up glass-card p-6 rounded-[2rem] relative overflow-hidden group";
-                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.className = "fade-in glass-card p-6 rounded-[2.5rem] relative overflow-hidden group";
+                    card.style.animationDelay = `${index * 0.05}s`;
                     
                     card.innerHTML = `
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-bl-[5rem] -mr-10 -mt-10 group-hover:bg-sky-500/20 transition-all"></div>
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-sky-500/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
                         
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/20">
-                                <i class="fas fa-file-pdf text-2xl text-white"></i>
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+                                <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
                             </div>
-                            <div>
-                                <span class="bg-sky-500/10 text-sky-400 text-[10px] font-black px-2 py-1 rounded-md uppercase border border-sky-500/20">
-                                    ${pdf.category || 'Course'}
-                                </span>
-                                <h3 class="text-white font-bold text-lg mt-1 group-hover:text-sky-400 transition-colors">${pdf.name}</h3>
-                            </div>
+                            <span class="text-[9px] font-black px-3 py-1 bg-sky-500/10 text-sky-400 rounded-lg border border-sky-500/20 uppercase tracking-tighter">
+                                ${pdf.category || 'COURSE'}
+                            </span>
                         </div>
 
-                        <p class="text-slate-400 text-xs mb-6 leading-relaxed line-clamp-2">
-                            ${pdf.desc || 'Premium high-quality study notes provided by SNT Computer Institute for better learning experience.'}
+                        <h3 class="text-white font-bold text-lg leading-tight mb-2 group-hover:text-sky-400 transition-colors">
+                            ${pdf.name}
+                        </h3>
+                        <p class="text-slate-500 text-xs mb-8 line-clamp-2 italic">
+                            ${pdf.desc || 'Premium SNT study material for successful career growth.'}
                         </p>
 
-                        <button onclick="viewPDF('${pdf.data}')" class="w-full animated-gradient py-4 rounded-xl text-slate-950 font-black text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-sky-900/20">
-                            Download / View PDF
+                        <button onclick="viewPDF('${pdf.data}')" class="w-full animated-btn py-4 rounded-2xl text-slate-950 font-black text-xs tracking-[0.2em] uppercase hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all">
+                            OPEN NOTES
                         </button>
                     `;
                     grid.appendChild(card);
@@ -206,15 +242,20 @@
         }
 
         function viewPDF(base64Data) {
-            if(!base64Data) return alert("File missing!");
+            if(!base64Data) return alert("Error: File data is empty!");
             try {
-                const parts = base64Data.split(';base64,');
-                const raw = window.atob(parts[1] || parts[0]);
-                const uInt8Array = new Uint8Array(raw.length);
-                for (let i = 0; i < raw.length; ++i) uInt8Array[i] = raw.charCodeAt(i);
-                const blob = new Blob([uInt8Array], { type: 'application/pdf' });
-                window.open(URL.createObjectURL(blob), '_blank');
-            } catch (e) { alert("Error opening PDF"); }
+                // If it's a full base64 string or just the raw part
+                let source = base64Data;
+                if(!source.includes('data:application/pdf;base64,')) {
+                    source = 'data:application/pdf;base64,' + base64Data;
+                }
+                
+                const win = window.open();
+                win.document.write('<iframe src="' + source + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
+            } catch (e) { 
+                console.error(e);
+                alert("Could not open PDF. Please check file format."); 
+            }
         }
 
         window.onload = initData;
