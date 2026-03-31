@@ -16,51 +16,35 @@
         .pdf-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         .course-badge { background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(56, 189, 248, 0.2); }
         .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; transition: 0.2s; }
-        .btn-view:active { transform: scale(0.95); opacity: 0.9; }
-
         .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 10px; scrollbar-width: none; }
-        .gallery-container::-webkit-scrollbar { display: none; }
-        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .img-item img { width: 100%; height: 90px; object-fit: cover; }
+        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .img-item img { width: 100%; height: 90px; object-fit: cover; cursor: pointer; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-6">
-            <a href="index.html" class="w-10 h-10 glass rounded-full flex items-center justify-center text-sky-400">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h1 class="text-xl font-black italic tracking-tighter">SNT <span class="text-sky-500">PDF VAULT</span></h1>
-            <div class="w-10"></div> </header>
+            <a href="index.html" class="w-10 h-10 glass rounded-full flex items-center justify-center text-sky-400"><i class="fas fa-arrow-left"></i></a>
+            <h1 class="text-xl font-black italic">SNT <span class="text-sky-500">PDF VAULT</span></h1>
+            <div class="w-10"></div>
+        </header>
 
         <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
             <img id="user-img" src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
             <div>
-                <h2 id="welcome-msg" class="text-lg font-black leading-tight">Loading Profile...</h2>
-                <p id="course-msg" class="text-sky-400 text-[10px] font-bold uppercase tracking-widest mt-1">Checking Courses...</p>
+                <h2 id="welcome-msg" class="text-lg font-black">Loading...</h2>
+                <p id="course-msg" class="text-sky-400 text-[10px] font-bold uppercase tracking-widest">Checking Access...</p>
             </div>
         </div>
 
-        <div class="mb-8">
-            <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <i class="fas fa-image text-sky-400"></i> Latest Updates
-            </h3>
-            <div id="image-gallery" class="gallery-container"></div>
-        </div>
+        <h3 class="text-xs font-bold mb-3 uppercase text-slate-400"><i class="fas fa-image text-sky-400 mr-2"></i>Updates</h3>
+        <div id="image-gallery" class="gallery-container mb-8"></div>
 
-        <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <i class="fas fa-file-pdf text-red-500"></i> Study Notes
-        </h3>
+        <h3 class="text-xs font-bold mb-3 uppercase text-slate-400"><i class="fas fa-file-pdf text-red-500 mr-2"></i>Your Study Notes</h3>
         <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-
-        <div id="no-access" class="hidden text-center py-20">
-            <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-file-circle-xmark text-slate-600 text-3xl"></i>
-            </div>
-            <h3 class="text-slate-400 font-bold">Koi PDF nahi mili</h3>
-            <p class="text-slate-500 text-xs mt-1">Aapke selected courses ke notes jald hi upload honge.</p>
-        </div>
+        
+        <div id="no-access" class="hidden text-center py-10 text-slate-500 text-sm">No notes found for your course.</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -74,131 +58,79 @@
             databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
             projectId: "snt-computer-institute",
             storageBucket: "snt-computer-institute.firebasestorage.app",
-            messagingSenderId: "117580784781",
             appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
 
-        function viewPDF(base64Data) {
-            if(!base64Data) return alert("PDF file nahi mili!");
-            try {
-                const blob = base64ToBlob(base64Data, 'application/pdf');
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            } catch (e) {
-                alert("PDF open karne mein error: " + e.message);
-            }
-        }
-
-        function viewImg(base64Data) {
-            const win = window.open();
-            win.document.write(`<body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center;"><img src="${base64Data}" style="max-width:100%; height:auto;"></body>`);
-        }
-
-        function base64ToBlob(base64, type) {
-            const parts = base64.split(';base64,');
+        function base64ToBlob(b64, type) {
+            const parts = b64.split(';base64,');
             const raw = window.atob(parts[1] || parts[0]);
-            const rawLength = raw.length;
-            const uInt8Array = new Uint8Array(rawLength);
-            for (let i = 0; i < rawLength; ++i) {
-                uInt8Array[i] = raw.charCodeAt(i);
-            }
-            return new Blob([uInt8Array], { type: type });
+            const uint8 = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; i++) uint8[i] = raw.charCodeAt(i);
+            return new Blob([uint8], { type: type });
         }
 
-        auth.onAuthStateChanged((user) => {
+        function viewPDF(data) {
+            const url = URL.createObjectURL(base64ToBlob(data, 'application/pdf'));
+            window.open(url, '_blank');
+        }
+
+        auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
                 loadImages();
-                db.ref('students/' + user.uid).on('value', (snapshot) => {
-                    const studentData = snapshot.val();
-                    if (studentData) {
-                        const name = studentData.name || user.displayName;
-                        const courses = studentData.courses || studentData.course || [];
-                        document.getElementById('welcome-msg').innerText = name;
-                        const courseList = Array.isArray(courses) ? courses.join(", ") : (courses || "N/A");
-                        document.getElementById('course-msg').innerText = "Courses: " + courseList;
+                db.ref('students/' + user.uid).on('value', snap => {
+                    const data = snap.val();
+                    if(data) {
+                        document.getElementById('welcome-msg').innerText = data.name;
+                        const courses = data.courses || data.course || [];
+                        document.getElementById('course-msg').innerText = "Courses: " + (Array.isArray(courses) ? courses.join(", ") : courses);
                         loadPDFs(courses);
-                    } else {
-                        checkByEmail(user);
                     }
                 });
-            } else {
-                window.location.href = "index.html";
-            }
+            } else { location.href = "index.html"; }
         });
 
         function loadImages() {
-            db.ref('myImages').on('value', (snap) => {
+            db.ref('myImages').on('value', snap => {
                 const gallery = document.getElementById('image-gallery');
                 gallery.innerHTML = '';
                 const data = snap.val() || {};
-                Object.keys(data).reverse().forEach(key => {
-                    const img = data[key];
-                    const div = document.createElement('div');
-                    div.className = 'img-item flex-shrink-0';
-                    div.onclick = () => viewImg(img.data);
-                    div.innerHTML = `<img src="${img.data}"><div class="p-2"><p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p></div>`;
-                    gallery.appendChild(div);
+                Object.keys(data).reverse().forEach(k => {
+                    const img = data[k];
+                    gallery.innerHTML += `<div class="img-item flex-shrink-0"><img src="${img.data}" onclick="window.open('${img.data}')"></div>`;
                 });
-            });
-        }
-
-        function checkByEmail(user) {
-            db.ref('students').orderByChild('email').equalTo(user.email).once('value', (snap) => {
-                if(snap.exists()){
-                    const data = Object.values(snap.val())[0];
-                    loadPDFs(data.courses || data.course || []);
-                } else {
-                    document.getElementById('welcome-msg').innerText = "Guest User";
-                    loadPDFs([]);
-                }
             });
         }
 
         function loadPDFs(studentCourses) {
-            // Courses ko array mein convert karna aur clean karna
-            let coursesArray = Array.isArray(studentCourses) ? studentCourses : [studentCourses];
-            coursesArray = coursesArray.map(c => c.toString().toLowerCase().trim());
-            
-            db.ref('myPDFs').on('value', (snap) => {
+            // SYNC FIX: Normalizing course strings
+            let sCourses = (Array.isArray(studentCourses) ? studentCourses : [studentCourses])
+                           .map(c => c.toString().toLowerCase().replace(/['" ]/g, ''));
+
+            db.ref('myPDFs').on('value', snap => {
                 const grid = document.getElementById('grid');
-                const noAccess = document.getElementById('no-access');
                 grid.innerHTML = '';
+                let count = 0;
                 const data = snap.val() || {};
-                let found = 0;
-
-                Object.keys(data).reverse().forEach(key => {
-                    const pdf = data[key];
-                    const cat = (pdf.category || "").toLowerCase().trim();
-
-                    // Agar student ka course match kare ya category 'other' ya 'all' ho
-                    const isMatch = coursesArray.includes(cat) || cat === "other" || cat === "all";
-
-                    if (isMatch) {
-                        found++;
-                        const div = document.createElement('div');
-                        div.className = 'pdf-card animate-fade-in';
-                        div.innerHTML = `
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="course-badge">${pdf.category || 'Notes'}</span>
-                                <i class="fas fa-file-pdf text-red-500 text-xl"></i>
-                            </div>
-                            <h3 class="font-black text-sm mb-1 truncate">${pdf.name}</h3>
-                            <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || ''}</p>
-                            <button onclick="viewPDF('${pdf.data}')" class="btn-view">
-                                <i class="fas fa-eye mr-2"></i> VIEW NOTES
-                            </button>
-                        `;
-                        grid.appendChild(div);
+                
+                Object.keys(data).reverse().forEach(k => {
+                    const pdf = data[k];
+                    const pCat = (pdf.category || "").toLowerCase().replace(/['" ]/g, '');
+                    
+                    if(sCourses.includes(pCat) || pCat === 'all' || pCat === 'other') {
+                        count++;
+                        grid.innerHTML += `
+                        <div class="pdf-card">
+                            <span class="course-badge">${pdf.category}</span>
+                            <h3 class="font-black text-sm mt-3 truncate">${pdf.name}</h3>
+                            <button onclick="viewPDF('${pdf.data}')" class="btn-view">VIEW NOTES</button>
+                        </div>`;
                     }
                 });
-
-                if (found === 0) noAccess.classList.remove('hidden');
-                else noAccess.classList.add('hidden');
+                document.getElementById('no-access').style.display = count === 0 ? 'block' : 'none';
             });
         }
     </script>
