@@ -18,7 +18,7 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         
-        /* Dashboard App Card (Waisa hi jaisa pehle tha) */
+        /* Dashboard Grid Layout (Square) */
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; }
         .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
         
@@ -26,14 +26,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         
-        /* Info Panel Styling (Jaisa Image mein hai) */
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        /* Info Row Style: Title on Left, Icon/Value on Right */
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         
-        /* Connect buttons horizontal layout style */
-        .contact-btn { padding: 14px; border-radius: 16px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.2s; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
-        .contact-btn:active { transform: scale(0.95); opacity: 0.8; }
+        /* Social Icons Style inside Row */
+        .social-link-icon { font-size: 20px; transition: 0.2s; cursor: pointer; }
+        .social-link-icon:active { transform: scale(0.8); opacity: 0.7; }
         
         .qr-card { background: white; color: #1e293b; padding: 24px; border-radius: 30px; text-align: center; width: 300px; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
 
@@ -91,33 +91,39 @@
     </div>
 
     <div id="info-modal" class="modal-overlay">
-        <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative">
             <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white">System Info</h2>
             
-            <div class="space-y-1 mb-8 px-2">
+            <div class="space-y-0 px-2">
                 <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">...</span></div>
                 <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.0.7 Pro</span></div>
-                <div class="info-row border-none"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
-            </div>
+                <div class="info-row"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
+                
+                <div class="info-row">
+                    <span class="info-label">Instagram</span>
+                    <a href="https://www.instagram.com/invites/contact/?igsh=vucokp5w5lf4&utm_content=gji134o" target="_blank" class="text-pink-500 social-link-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">YouTube</span>
+                    <a href="https://youtube.com/@programmingby-kaushalji?si=OuViX3t9PwjNHUMB" target="_blank" class="text-red-500 social-link-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">WhatsApp</span>
+                    <a href="https://wa.me/919129191898" target="_blank" class="text-green-500 social-link-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
 
-            <div class="space-y-3">
-                <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center mb-4 opacity-70">Connect with Dev</p>
-                
-                <a href="https://youtube.com/@programmingby-kaushalji?si=OuViX3t9PwjNHUMB" target="_blank" class="contact-btn bg-[#451a1a] text-[#ff4d4d] border border-red-500/20">
-                    <i class="fab fa-youtube text-xl"></i> Youtube
-                </a>
-                
-                <a href="https://www.instagram.com/invites/contact/?igsh=vucokp5w5lf4&utm_content=gji134o" target="_blank" class="contact-btn bg-[#3b1a30] text-[#ff4db2] border border-pink-500/20">
-                    <i class="fab fa-instagram text-xl"></i> Instagram
-                </a>
-                
-                <a href="https://wa.me/919129191898" target="_blank" class="contact-btn bg-[#1a3b2a] text-[#4dff91] border border-green-500/20">
-                    <i class="fab fa-whatsapp text-xl"></i> Whatsapp
-                </a>
-                
-                <button onclick="openQR()" class="contact-btn bg-[#1a2e3b] text-[#4dc3ff] border border-sky-500/20">
-                    <i class="fas fa-qrcode text-lg"></i> Support (UPI)
-                </button>
+                <div class="info-row border-none">
+                    <span class="info-label">Support UPI</span>
+                    <i onclick="openQR()" class="fas fa-qrcode text-sky-400 social-link-icon"></i>
+                </div>
             </div>
 
             <button onclick="closeInfo()" class="w-full mt-8 bg-slate-800/50 text-slate-400 p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-white/5 active:scale-95 transition-all">Close Panel</button>
@@ -189,11 +195,9 @@
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                
                 const hr = new Date().getHours();
                 const greet = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
                 document.getElementById('greeting-msg').innerText = greet;
-
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
@@ -202,7 +206,6 @@
                             document.getElementById('user-email').innerText = user.email;
                             document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
-                            
                             const statusEl = document.getElementById('user-status-badge');
                             const status = sData.registrationStatus || "Guest User";
                             statusEl.innerText = status;
@@ -231,7 +234,6 @@
                 { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
                 { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
             ];
-
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `
                 <div class="app-card p-4" onclick="location.href='${item.url}'">
@@ -239,7 +241,6 @@
                     <p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p>
                 </div>
             `).join('');
-
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
                 const cards = document.querySelectorAll('.app-card');
