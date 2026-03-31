@@ -3,83 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT Institute - Media Upload</title>
+    <title>SNT Admin - Media Upload</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; flex-direction: column; padding: 20px 0; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .stats-box { background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); }
-        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        :root { --primary: #38bdf8; --bg: #0f172a; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: white; flex-direction: column; padding: 20px; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 20px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .form-group { margin-bottom: 1.2rem; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #94a3b8; }
-        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #334155; border-radius: 8px; box-sizing: border-box; background: #0f172a; color: white; outline: none; }
+        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; color: white; outline: none; box-sizing: border-box; }
         input:focus, select:focus { border-color: var(--primary); }
-        button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        
-        .library-card { background: #1e293b; padding: 1.5rem; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
-        .pdf-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-        .pdf-info { font-size: 0.8rem; overflow: hidden; }
-        .pdf-info b { display: block; color: #f8fafc; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-        .view-link { color: #6366f1; text-decoration: none; font-size: 0.8rem; font-weight: bold; border: 1px solid #6366f1; padding: 4px 8px; border-radius: 4px; }
-        
-        #status { margin-top: 15px; font-size: 0.85rem; color: #6366f1; display: none; font-weight: bold; }
-        h2, h3 { color: #f8fafc; margin-top: 0; }
-        .upload-type { display: flex; gap: 10px; margin-bottom: 20px; }
-        .type-btn { flex: 1; padding: 10px; background: #334155; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-        .active-type { background: var(--primary); }
+        button { width: 100%; background: var(--primary); color: #0f172a; border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        #status { margin-top: 15px; font-size: 0.85rem; color: var(--primary); display: none; text-align: center; }
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; background: #334155; border-radius: 10px; text-align: center; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .active-tab { background: var(--primary); color: #0f172a; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2 id="mainTitle">📄 Media Uploader</h2>
+        <h2 id="title" style="margin-top:0; text-align:center;">📄 PDF Uploader</h2>
         
-        <div class="stats-box">
-            <span style="font-size: 0.9rem; color: #94a3b8;">Total PDFs: </span>
-            <span id="pdfCount" style="font-weight: bold; color: #6366f1;">0</span>
-        </div>
-
-        <div class="upload-type">
-            <div id="pdfTab" class="type-btn active-type" onclick="switchMode('pdf')">PDF Upload</div>
-            <div id="imgTab" class="type-btn" onclick="switchMode('image')">Image Upload</div>
+        <div class="tab-menu">
+            <div id="pdfBtn" class="tab active-tab" onclick="setMode('pdf')">Upload PDF</div>
+            <div id="imgBtn" class="tab" onclick="setMode('image')">Upload Image</div>
         </div>
 
         <form id="uploadForm">
-            <div class="form-group" id="courseContainer">
-                <label>Course Select Karein</label>
-                <select id="category" required>
-                    <option value="" disabled selected>Course chunein...</option>
+            <div class="form-group" id="courseBox">
+                <label>Course Category</label>
+                <select id="category">
                     <option value="O Level">O Level</option>
-                    <option value="Computer Basics">Computer Basics</option>
-                    <option value="C++ Language">C++ Language</option>
-                    <option value="Java">Java</option>
-                    <option value="DCA & ADCA">DCA & ADCA</option>
                     <option value="CCC">CCC</option>
-                    <option value="Python">Python</option>
+                    <option value="DCA & ADCA">DCA & ADCA</option>
                     <option value="Tally ERP 9">Tally ERP 9</option>
                     <option value="UPSSSC">UPSSSC</option>
                     <option value="Other">Other</option>
+                    <option value="All">All Students</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label id="fileLabel">PDF Select Karein (Max 4MB)</label>
+                <label id="fileLabel">Select PDF File</label>
                 <input type="file" id="mediaFile" required>
             </div>
 
             <div class="form-group">
-                <label>Description</label>
-                <textarea id="mediaDesc" rows="2" placeholder="Kuch jaankari likhein..." required></textarea>
+                <label>File Name / Title</label>
+                <input type="text" id="fileName" placeholder="E.g. Python Notes" required>
             </div>
 
-            <button type="submit" id="submitBtn">Save Karein</button>
-            <div id="status">Database mein save ho raha hai...</div>
-        </form>
-    </div>
+            <div class="form-group">
+                <label>Short Description</label>
+                <textarea id="mediaDesc" rows="2" placeholder="Brief details..."></textarea>
+            </div>
 
-    <div class="library-card">
-        <h3>📚 Recent PDFs</h3>
-        <div id="pdfList">Aapke PDFs yahan dikhenge...</div>
+            <button type="submit" id="submitBtn">UPLOAD TO DATABASE</button>
+            <div id="status">Uploading... Please wait...</div>
+        </form>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -92,115 +74,52 @@
             databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
             projectId: "snt-computer-institute",
             storageBucket: "snt-computer-institute.firebasestorage.app",
-            messagingSenderId: "117580784781",
             appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        function loadPDFs() {
-            database.ref('myPDFs').on('value', (snapshot) => {
-                const listDiv = document.getElementById('pdfList');
-                const countSpan = document.getElementById('pdfCount');
-                listDiv.innerHTML = "";
-                
-                if(snapshot.exists()) {
-                    countSpan.innerText = snapshot.numChildren();
-                    snapshot.forEach((child) => {
-                        const data = child.val();
-                        listDiv.innerHTML += `
-                            <div class="pdf-item">
-                                <div class="pdf-info">
-                                    <b>${data.name}</b>
-                                    <span>${data.category || 'N/A'}</span>
-                                </div>
-                                <a href="${data.data}" target="_blank" class="view-link">View</a>
-                            </div>
-                        `;
-                    });
-                } else {
-                    listDiv.innerHTML = "Koi PDF nahi mili.";
-                    countSpan.innerText = "0";
-                }
-            });
-        }
-        loadPDFs();
+        let mode = 'pdf';
 
-        let currentMode = 'pdf';
-        switchMode('pdf'); // Set initial state
-
-        function switchMode(mode) {
-            currentMode = mode;
-            const courseCont = document.getElementById('courseContainer');
-            const fileInput = document.getElementById('mediaFile');
-            const fileLabel = document.getElementById('fileLabel');
-            const title = document.getElementById('mainTitle');
-            
-            document.getElementById('pdfTab').classList.toggle('active-type', mode === 'pdf');
-            document.getElementById('imgTab').classList.toggle('active-type', mode === 'image');
-
-            if(mode === 'pdf') {
-                title.innerText = "📄 PDF Uploader";
-                courseCont.style.display = "block";
-                fileInput.accept = "application/pdf";
-                fileLabel.innerText = "PDF Select Karein (Max 4MB)";
-                document.getElementById('category').required = true;
-            } else {
-                title.innerText = "🖼️ Image Uploader";
-                courseCont.style.display = "none";
-                fileInput.accept = "image/*";
-                fileLabel.innerText = "Image Select Karein (Max 2MB)";
-                document.getElementById('category').required = false;
-            }
+        function setMode(m) {
+            mode = m;
+            document.getElementById('pdfBtn').className = m === 'pdf' ? 'tab active-tab' : 'tab';
+            document.getElementById('imgBtn').className = m === 'image' ? 'tab active-tab' : 'tab';
+            document.getElementById('courseBox').style.display = m === 'pdf' ? 'block' : 'none';
+            document.getElementById('fileLabel').innerText = m === 'pdf' ? 'Select PDF File' : 'Select Image File';
+            document.getElementById('title').innerText = m === 'pdf' ? '📄 PDF Uploader' : '🖼️ Image Uploader';
         }
 
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        document.getElementById('uploadForm').onsubmit = function(e) {
             e.preventDefault();
+            const file = document.getElementById('mediaFile').files[0];
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
-            const file = document.getElementById('mediaFile').files[0];
-            const desc = document.getElementById('mediaDesc').value;
-            const category = document.getElementById('category').value;
 
-            if(!file) return alert("File chunein!");
-
-            const limit = currentMode === 'pdf' ? 4194304 : 2097152; 
-            if(file.size > limit) {
-                alert(`File size bahut badi hai! Maximum: ${limit/(1024*1024)}MB`);
-                return;
-            }
-
+            if(!file) return;
+            
             btn.disabled = true;
             status.style.display = "block";
 
             const reader = new FileReader();
             reader.onload = function(event) {
-                const newData = {
-                    name: file.name,
-                    data: event.target.result, 
-                    desc: desc,
-                    type: currentMode,
-                    date: new Date().toLocaleString()
+                const dataObj = {
+                    name: document.getElementById('fileName').value,
+                    data: event.target.result,
+                    desc: document.getElementById('mediaDesc').value,
+                    date: new Date().toISOString()
                 };
 
-                if(currentMode === 'pdf') newData.category = category;
+                if(mode === 'pdf') dataObj.category = document.getElementById('category').value;
 
-                const dbPath = currentMode === 'pdf' ? 'myPDFs' : 'myImages';
-                
-                database.ref(dbPath).push(newData).then(() => {
-                    alert('Data save ho gaya!');
-                    btn.disabled = false;
-                    status.style.display = "none";
-                    document.getElementById('uploadForm').reset();
-                    switchMode(currentMode); // Reset labels
-                }).catch((error) => {
-                    alert('Error: ' + error.message);
-                    btn.disabled = false;
-                    status.style.display = "none";
+                const path = mode === 'pdf' ? 'myPDFs' : 'myImages';
+                db.ref(path).push(dataObj).then(() => {
+                    alert("Success!");
+                    location.reload();
                 });
             };
             reader.readAsDataURL(file);
-        });
+        };
     </script>
 </body>
 </html>
