@@ -46,6 +46,7 @@
                     <option value="Computer Basics">Computer Basics</option>
                     <option value="C++ Language">C++ Language</option>
                     <option value="Java">Java</option>
+                    <option value="O Level">O Level</option>
                     <option value="DCA & ADCA">DCA & ADCA</option>
                     <option value="CCC">CCC</option>
                     <option value="Python">Python</option>
@@ -87,14 +88,13 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- PDF Counter Logic ---
         function updateCounter() {
             database.ref('myPDFs').on('value', (snapshot) => {
                 const count = snapshot.numChildren(); 
                 document.getElementById('pdfCount').innerText = count;
             });
         }
-        updateCounter(); // Page load par counter update karein
+        updateCounter();
 
         let currentMode = 'pdf';
 
