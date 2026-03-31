@@ -3,81 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT PDF VAULT - Slider Mode</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>SNT PDF VAULT - Pro Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #38bdf8; --bg: #0f172a; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 15px; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* Slider Styling */
-        .pdf-slider { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 15px; 
-            padding: 10px 5px 20px 5px; 
-            scrollbar-width: none; /* Firefox */
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
         }
-        .pdf-slider::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
-        
-        .pdf-card { 
-            min-width: 260px; 
-            max-width: 260px; 
-            background: rgba(30, 41, 59, 0.6); 
-            border: 1px solid rgba(255,255,255,0.08); 
-            transition: 0.3s; 
-            border-radius: 24px; 
-            padding: 20px; 
-            flex-shrink: 0;
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .pdf-card:active { transform: scale(0.95); }
-        
-        .course-badge { background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(56, 189, 248, 0.2); }
-        .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; }
-        
-        .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; scrollbar-width: none; }
-        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .course-header { border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 10px; }
+
+        .glass-card:hover {
+            transform: translateY(-10px);
+            border-color: #38bdf8;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(56 189 248 / 0.2);
+        }
+
+        .search-glow:focus {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            border-color: #38bdf8;
+        }
+
+        .animated-gradient {
+            background: linear-gradient(-45deg, #0ea5e9, #6366f1, #a855f7, #0ea5e9);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Smooth reveal animation */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body>
+<body class="min-h-screen pb-10">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-6">
-            <a href="index.html" class="w-10 h-10 glass rounded-full flex items-center justify-center text-sky-400">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h1 class="text-xl font-black italic tracking-tighter">SNT <span class="text-sky-500">PDF VAULT</span></h1>
-            <div class="w-10"></div> 
-        </header>
+    <nav class="sticky top-0 z-50 px-6 py-4 backdrop-blur-md border-b border-white/5 bg-slate-950/50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tighter italic">SNT <span class="text-sky-400">VAULT</span></h1>
+            <a href="https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/" class="text-xs font-bold px-4 py-2 rounded-full border border-sky-500/30 text-sky-400 hover:bg-sky-500/10 transition">OFFICIAL PORTAL</a>
+        </div>
+    </nav>
 
-        <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
-            <img src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover" onerror="this.src='https://via.placeholder.com/100'">
-            <div>
-                <h2 class="text-lg font-black leading-tight">Study Material Portal</h2>
-                <p class="text-sky-400 text-[10px] font-bold uppercase tracking-widest mt-1">SNT Computer Institute Official</p>
+    <header class="max-w-4xl mx-auto px-6 pt-12 pb-6 text-center">
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
+            Smart Search Portal
+        </h2>
+        <p class="text-slate-400 text-sm max-w-md mx-auto mb-10">Search your course (e.g. ADCA, CCC, Tally) to unlock high-quality premium notes instantly.</p>
+
+        <div class="relative max-w-xl mx-auto group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-search text-sky-400 group-focus-within:scale-110 transition-transform"></i>
+            </div>
+            <input type="text" id="courseSearch" onkeyup="filterPDFs()" 
+                   placeholder="Enter Course Name (Ex: ADCA)..." 
+                   class="w-full bg-slate-900/80 border border-white/10 py-5 pl-12 pr-6 rounded-2xl text-white outline-none focus:ring-2 focus:ring-sky-500/50 search-glow transition-all text-lg font-medium">
+            <div class="absolute right-3 top-3">
+                <span class="bg-sky-500/10 text-sky-400 text-[10px] font-black px-3 py-2 rounded-lg border border-sky-500/20 uppercase tracking-widest">Premium Access</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6">
+        
+        <div id="resultsCount" class="mb-6 text-slate-500 text-xs font-bold uppercase tracking-widest hidden"></div>
+
+        <div id="pdfGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="loadingState" class="col-span-full text-center py-20">
+                <div class="inline-block p-6 rounded-full bg-slate-900 mb-4">
+                    <i class="fas fa-laptop-code text-4xl text-sky-500 animate-pulse"></i>
+                </div>
+                <h3 class="text-slate-400 font-medium">Awaiting Search Input...</h3>
             </div>
         </div>
 
-        <div class="mb-8">
-            <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <i class="fas fa-bullhorn text-sky-400"></i> Recent Updates
-            </h3>
-            <div id="image-gallery" class="gallery-container"></div>
+        <div id="noResult" class="hidden text-center py-20">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" class="w-32 mx-auto opacity-20 grayscale mb-4">
+            <h3 class="text-xl font-bold text-slate-400">Oops! Course Not Found</h3>
+            <p class="text-slate-600 text-sm">Please check the spelling or try another keyword.</p>
         </div>
-
-        <div id="course-wise-container">
-            <p class="text-slate-500 text-xs">Loading course materials...</p>
-        </div>
-
-        <div id="no-data" class="hidden text-center py-20">
-            <i class="fas fa-box-open text-slate-600 text-4xl mb-3"></i>
-            <h3 class="text-slate-400 font-bold">No Files Found</h3>
-        </div>
-    </div>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -95,6 +128,82 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        let allPDFs = [];
+
+        // Load data from Firebase
+        function initData() {
+            db.ref('myPDFs').on('value', (snap) => {
+                const data = snap.val() || {};
+                allPDFs = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                })).reverse();
+            });
+        }
+
+        function filterPDFs() {
+            const query = document.getElementById('courseSearch').value.toLowerCase().trim();
+            const grid = document.getElementById('pdfGrid');
+            const noResult = document.getElementById('noResult');
+            const resultsCount = document.getElementById('resultsCount');
+            const loadingState = document.getElementById('loadingState');
+
+            if (query === "") {
+                grid.innerHTML = '';
+                grid.appendChild(loadingState);
+                resultsCount.classList.add('hidden');
+                noResult.classList.add('hidden');
+                return;
+            }
+
+            const filtered = allPDFs.filter(pdf => 
+                pdf.name.toLowerCase().includes(query) || 
+                (pdf.category && pdf.category.toLowerCase().includes(query))
+            );
+
+            loadingState.remove();
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                noResult.classList.remove('hidden');
+                resultsCount.classList.add('hidden');
+            } else {
+                noResult.classList.add('hidden');
+                resultsCount.classList.remove('hidden');
+                resultsCount.innerText = `Found ${filtered.length} Material(s) for "${query}"`;
+
+                filtered.forEach((pdf, index) => {
+                    const card = document.createElement('div');
+                    card.className = "fade-in-up glass-card p-6 rounded-[2rem] relative overflow-hidden group";
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    
+                    card.innerHTML = `
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-bl-[5rem] -mr-10 -mt-10 group-hover:bg-sky-500/20 transition-all"></div>
+                        
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/20">
+                                <i class="fas fa-file-pdf text-2xl text-white"></i>
+                            </div>
+                            <div>
+                                <span class="bg-sky-500/10 text-sky-400 text-[10px] font-black px-2 py-1 rounded-md uppercase border border-sky-500/20">
+                                    ${pdf.category || 'Course'}
+                                </span>
+                                <h3 class="text-white font-bold text-lg mt-1 group-hover:text-sky-400 transition-colors">${pdf.name}</h3>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-400 text-xs mb-6 leading-relaxed line-clamp-2">
+                            ${pdf.desc || 'Premium high-quality study notes provided by SNT Computer Institute for better learning experience.'}
+                        </p>
+
+                        <button onclick="viewPDF('${pdf.data}')" class="w-full animated-gradient py-4 rounded-xl text-slate-950 font-black text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-sky-900/20">
+                            Download / View PDF
+                        </button>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
 
         function viewPDF(base64Data) {
             if(!base64Data) return alert("File missing!");
@@ -108,75 +217,7 @@
             } catch (e) { alert("Error opening PDF"); }
         }
 
-        function loadAllContent() {
-            // Images Slider
-            db.ref('myImages').on('value', (snap) => {
-                const gallery = document.getElementById('image-gallery');
-                gallery.innerHTML = '';
-                const data = snap.val() || {};
-                Object.keys(data).reverse().forEach(key => {
-                    const img = data[key];
-                    gallery.innerHTML += `
-                        <div class="img-item flex-shrink-0" onclick="window.open('${img.data}', '_blank')">
-                            <img src="${img.data}" class="w-full h-24 object-cover">
-                            <div class="p-2"><p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p></div>
-                        </div>`;
-                });
-            });
-
-            // PDFs Sliding Categories
-            db.ref('myPDFs').on('value', (snap) => {
-                const container = document.getElementById('course-wise-container');
-                const noData = document.getElementById('no-data');
-                container.innerHTML = '';
-                
-                const data = snap.val() || {};
-                const keys = Object.keys(data).reverse();
-
-                if (keys.length === 0) { noData.classList.remove('hidden'); return; }
-                noData.classList.add('hidden');
-
-                // Grouping
-                const groups = {};
-                keys.forEach(key => {
-                    const pdf = data[key];
-                    const cat = pdf.category || 'General';
-                    if (!groups[cat]) groups[cat] = [];
-                    groups[cat].push(pdf);
-                });
-
-                // Render each category as a horizontal slider
-                for (const cat in groups) {
-                    const section = document.createElement('div');
-                    section.className = 'mb-8';
-                    section.innerHTML = `
-                        <div class="course-header flex justify-between items-center pr-4">
-                            <h4 class="text-sm font-black uppercase tracking-widest text-white">${cat}</h4>
-                            <span class="text-[9px] text-slate-500 font-bold italic">Swipe <i class="fas fa-arrow-right ml-1"></i></span>
-                        </div>
-                        <div class="pdf-slider">
-                            ${groups[cat].map(pdf => `
-                                <div class="pdf-card glass">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-file-pdf text-red-500 text-lg"></i>
-                                        </div>
-                                        <span class="course-badge">${cat}</span>
-                                    </div>
-                                    <h3 class="font-bold text-sm mb-1 truncate text-white">${pdf.name}</h3>
-                                    <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description available.'}</p>
-                                    <button onclick="viewPDF('${pdf.data}')" class="btn-view">
-                                        VIEW NOTES
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    container.appendChild(section);
-                }
-            });
-        }
-        window.onload = loadAllContent;
+        window.onload = initData;
     </script>
 </body>
 </html>
