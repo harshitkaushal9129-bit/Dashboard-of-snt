@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My PDF Vault - SNT Institute</title>
+    <title>SNT PDF VAULT - Open Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,43 +12,60 @@
         :root { --primary: #38bdf8; --bg: #0f172a; }
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 15px; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .pdf-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; border-radius: 20px; padding: 20px; }
+        .pdf-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; border-radius: 20px; padding: 20px; position: relative; }
         .pdf-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         .course-badge { background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(56, 189, 248, 0.2); }
         .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; transition: 0.2s; }
-        .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 10px; scrollbar-width: none; }
-        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .img-item img { width: 100%; height: 90px; object-fit: cover; cursor: pointer; }
+        .btn-view:active { transform: scale(0.95); }
+        
+        .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px; scrollbar-width: none; }
+        .gallery-container::-webkit-scrollbar { display: none; }
+        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .img-item img { width: 100%; height: 90px; object-fit: cover; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-6">
-            <a href="index.html" class="w-10 h-10 glass rounded-full flex items-center justify-center text-sky-400"><i class="fas fa-arrow-left"></i></a>
-            <h1 class="text-xl font-black italic">SNT <span class="text-sky-500">PDF VAULT</span></h1>
-            <div class="w-10"></div>
+            <a href="index.html" class="w-10 h-10 glass rounded-full flex items-center justify-center text-sky-400">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-xl font-black italic tracking-tighter">SNT <span class="text-sky-500">PDF VAULT</span></h1>
+            <div class="w-10"></div> 
         </header>
 
         <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
-            <img id="user-img" src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
+            <img src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
             <div>
-                <h2 id="welcome-msg" class="text-lg font-black">Loading...</h2>
-                <p id="course-msg" class="text-sky-400 text-[10px] font-bold uppercase tracking-widest">Checking Access...</p>
+                <h2 class="text-lg font-black leading-tight">Study Material Portal</h2>
+                <p class="text-sky-400 text-[10px] font-bold uppercase tracking-widest mt-1">SNT Computer Institute Official</p>
             </div>
         </div>
 
-        <h3 class="text-xs font-bold mb-3 uppercase text-slate-400"><i class="fas fa-image text-sky-400 mr-2"></i>Updates</h3>
-        <div id="image-gallery" class="gallery-container mb-8"></div>
+        <div class="mb-8">
+            <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <i class="fas fa-bullhorn text-sky-400"></i> Recent Updates
+            </h3>
+            <div id="image-gallery" class="gallery-container">
+                <p class="text-slate-500 text-xs">Loading updates...</p>
+            </div>
+        </div>
 
-        <h3 class="text-xs font-bold mb-3 uppercase text-slate-400"><i class="fas fa-file-pdf text-red-500 mr-2"></i>Your Study Notes</h3>
-        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-        
-        <div id="no-access" class="hidden text-center py-10 text-slate-500 text-sm">No notes found for your course.</div>
+        <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
+            <i class="fas fa-file-pdf text-red-500"></i> All Study Notes
+        </h3>
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <p class="text-slate-500 text-xs col-span-full">Fetching notes from library...</p>
+        </div>
+
+        <div id="no-data" class="hidden text-center py-20">
+            <i class="fas fa-box-open text-slate-600 text-4xl mb-3"></i>
+            <h3 class="text-slate-400 font-bold">Files not found</h3>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
     <script>
@@ -58,81 +75,87 @@
             databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
             projectId: "snt-computer-institute",
             storageBucket: "snt-computer-institute.firebasestorage.app",
+            messagingSenderId: "117580784781",
             appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth();
 
-        function base64ToBlob(b64, type) {
-            const parts = b64.split(';base64,');
-            const raw = window.atob(parts[1] || parts[0]);
-            const uint8 = new Uint8Array(raw.length);
-            for (let i = 0; i < raw.length; i++) uint8[i] = raw.charCodeAt(i);
-            return new Blob([uint8], { type: type });
+        // PDF View Logic (Blob handling)
+        function viewPDF(base64Data) {
+            if(!base64Data) return alert("File data corrupt or missing!");
+            try {
+                const parts = base64Data.split(';base64,');
+                const raw = window.atob(parts[1] || parts[0]);
+                const rawLength = raw.length;
+                const uInt8Array = new Uint8Array(rawLength);
+                for (let i = 0; i < rawLength; ++i) {
+                    uInt8Array[i] = raw.charCodeAt(i);
+                }
+                const blob = new Blob([uInt8Array], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            } catch (e) {
+                alert("PDF open karne mein dikkat aa rahi hai.");
+            }
         }
 
-        function viewPDF(data) {
-            const url = URL.createObjectURL(base64ToBlob(data, 'application/pdf'));
-            window.open(url, '_blank');
-        }
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
-                loadImages();
-                db.ref('students/' + user.uid).on('value', snap => {
-                    const data = snap.val();
-                    if(data) {
-                        document.getElementById('welcome-msg').innerText = data.name;
-                        const courses = data.courses || data.course || [];
-                        document.getElementById('course-msg').innerText = "Courses: " + (Array.isArray(courses) ? courses.join(", ") : courses);
-                        loadPDFs(courses);
-                    }
-                });
-            } else { location.href = "index.html"; }
-        });
-
-        function loadImages() {
-            db.ref('myImages').on('value', snap => {
+        // Load Everything (No Filter)
+        function loadAllContent() {
+            // Load Images
+            db.ref('myImages').on('value', (snap) => {
                 const gallery = document.getElementById('image-gallery');
                 gallery.innerHTML = '';
                 const data = snap.val() || {};
-                Object.keys(data).reverse().forEach(k => {
-                    const img = data[k];
-                    gallery.innerHTML += `<div class="img-item flex-shrink-0"><img src="${img.data}" onclick="window.open('${img.data}')"></div>`;
-                });
-            });
-        }
-
-        function loadPDFs(studentCourses) {
-            // SYNC FIX: Normalizing course strings
-            let sCourses = (Array.isArray(studentCourses) ? studentCourses : [studentCourses])
-                           .map(c => c.toString().toLowerCase().replace(/['" ]/g, ''));
-
-            db.ref('myPDFs').on('value', snap => {
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
-                let count = 0;
-                const data = snap.val() || {};
-                
-                Object.keys(data).reverse().forEach(k => {
-                    const pdf = data[k];
-                    const pCat = (pdf.category || "").toLowerCase().replace(/['" ]/g, '');
-                    
-                    if(sCourses.includes(pCat) || pCat === 'all' || pCat === 'other') {
-                        count++;
-                        grid.innerHTML += `
-                        <div class="pdf-card">
-                            <span class="course-badge">${pdf.category}</span>
-                            <h3 class="font-black text-sm mt-3 truncate">${pdf.name}</h3>
-                            <button onclick="viewPDF('${pdf.data}')" class="btn-view">VIEW NOTES</button>
+                Object.keys(data).reverse().forEach(key => {
+                    const img = data[key];
+                    gallery.innerHTML += `
+                        <div class="img-item flex-shrink-0" onclick="window.open('${img.data}', '_blank')">
+                            <img src="${img.data}">
+                            <div class="p-2">
+                                <p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p>
+                            </div>
                         </div>`;
-                    }
                 });
-                document.getElementById('no-access').style.display = count === 0 ? 'block' : 'none';
+            });
+
+            // Load All PDFs
+            db.ref('myPDFs').on('value', (snap) => {
+                const grid = document.getElementById('grid');
+                const noData = document.getElementById('no-data');
+                grid.innerHTML = '';
+                const data = snap.val() || {};
+                const keys = Object.keys(data).reverse();
+
+                if (keys.length === 0) {
+                    noData.classList.remove('hidden');
+                    return;
+                }
+                
+                noData.classList.add('hidden');
+                keys.forEach(key => {
+                    const pdf = data[key];
+                    const div = document.createElement('div');
+                    div.className = 'pdf-card animate-fade-in';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="course-badge">${pdf.category || 'General'}</span>
+                            <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-black text-sm mb-1 truncate">${pdf.name}</h3>
+                        <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description.'}</p>
+                        <button onclick="viewPDF('${pdf.data}')" class="btn-view">
+                            <i class="fas fa-eye mr-2"></i> VIEW NOTES
+                        </button>
+                    `;
+                    grid.appendChild(div);
+                });
             });
         }
+
+        // Start loading on page load
+        window.onload = loadAllContent;
     </script>
 </body>
 </html>
