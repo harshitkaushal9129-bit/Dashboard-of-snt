@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNT PDF VAULT - Open Access</title>
+    <title>SNT PDF VAULT - Course Wise Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -22,6 +22,8 @@
         .gallery-container::-webkit-scrollbar { display: none; }
         .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .img-item img { width: 100%; height: 90px; object-fit: cover; }
+        
+        .course-header { border-left: 4px solid var(--primary); padding-left: 12px; margin: 30px 0 15px 0; }
     </style>
 </head>
 <body>
@@ -36,7 +38,7 @@
         </header>
 
         <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
-            <img src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
+            <img src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover" onerror="this.src='https://via.placeholder.com/100'">
             <div>
                 <h2 class="text-lg font-black leading-tight">Study Material Portal</h2>
                 <p class="text-sky-400 text-[10px] font-bold uppercase tracking-widest mt-1">SNT Computer Institute Official</p>
@@ -52,16 +54,13 @@
             </div>
         </div>
 
-        <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <i class="fas fa-file-pdf text-red-500"></i> All Study Notes
-        </h3>
-        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <p class="text-slate-500 text-xs col-span-full">Fetching notes from library...</p>
+        <div id="course-wise-container">
+            <p class="text-slate-500 text-xs">Organizing notes by course...</p>
         </div>
 
         <div id="no-data" class="hidden text-center py-20">
             <i class="fas fa-box-open text-slate-600 text-4xl mb-3"></i>
-            <h3 class="text-slate-400 font-bold">Files not found</h3>
+            <h3 class="text-slate-400 font-bold">No Files Found</h3>
         </div>
     </div>
 
@@ -82,7 +81,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // PDF View Logic (Blob handling)
         function viewPDF(base64Data) {
             if(!base64Data) return alert("File data corrupt or missing!");
             try {
@@ -101,7 +99,6 @@
             }
         }
 
-        // Load Everything (No Filter)
         function loadAllContent() {
             // Load Images
             db.ref('myImages').on('value', (snap) => {
@@ -120,11 +117,12 @@
                 });
             });
 
-            // Load All PDFs
+            // Load & Group PDFs by Category
             db.ref('myPDFs').on('value', (snap) => {
-                const grid = document.getElementById('grid');
+                const container = document.getElementById('course-wise-container');
                 const noData = document.getElementById('no-data');
-                grid.innerHTML = '';
+                container.innerHTML = '';
+                
                 const data = snap.val() || {};
                 const keys = Object.keys(data).reverse();
 
@@ -134,27 +132,52 @@
                 }
                 
                 noData.classList.add('hidden');
+
+                // Logic: Grouping data
+                const groups = {};
                 keys.forEach(key => {
                     const pdf = data[key];
-                    const div = document.createElement('div');
-                    div.className = 'pdf-card animate-fade-in';
-                    div.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="course-badge">${pdf.category || 'General'}</span>
-                            <i class="fas fa-file-pdf text-red-500 text-xl"></i>
-                        </div>
-                        <h3 class="font-black text-sm mb-1 truncate">${pdf.name}</h3>
-                        <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description.'}</p>
-                        <button onclick="viewPDF('${pdf.data}')" class="btn-view">
-                            <i class="fas fa-eye mr-2"></i> VIEW NOTES
-                        </button>
-                    `;
-                    grid.appendChild(div);
+                    const category = pdf.category || 'General Notes';
+                    if (!groups[category]) groups[category] = [];
+                    groups[category].push(pdf);
                 });
+
+                // Logic: Displaying Sections
+                for (const category in groups) {
+                    const section = document.createElement('div');
+                    section.className = 'mb-10 animate-fade-in';
+                    
+                    section.innerHTML = `
+                        <div class="course-header flex justify-between items-end">
+                            <div>
+                                <h4 class="text-lg font-black uppercase tracking-tighter text-white">${category}</h4>
+                                <p class="text-[9px] text-sky-400 font-bold uppercase tracking-widest">Available Materials</p>
+                            </div>
+                            <span class="text-[10px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full font-bold border border-sky-500/20">
+                                ${groups[category].length} FILES
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            ${groups[category].map(pdf => `
+                                <div class="pdf-card">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="course-badge">${pdf.category || 'Notes'}</span>
+                                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                                    </div>
+                                    <h3 class="font-bold text-sm mb-1 truncate">${pdf.name}</h3>
+                                    <p class="text-[10px] text-slate-400 line-clamp-2 h-7 mb-2">${pdf.desc || 'No description available for this file.'}</p>
+                                    <button onclick="viewPDF('${pdf.data}')" class="btn-view">
+                                        <i class="fas fa-eye mr-2"></i> VIEW NOTES
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    container.appendChild(section);
+                }
             });
         }
 
-        // Start loading on page load
         window.onload = loadAllContent;
     </script>
 </body>
