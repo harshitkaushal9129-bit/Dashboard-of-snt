@@ -14,7 +14,11 @@
   <style>
     :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #facc15; }
     body { font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); margin: 0; padding: 15px; user-select: none; }
-    
+   #u-id, #u-id-top {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+ 
     header { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
     header h1 { font-size: 18px; margin: 0; color: var(--accent); font-weight: 800; text-transform: uppercase; }
 
