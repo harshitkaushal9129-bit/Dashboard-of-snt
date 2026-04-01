@@ -1,0 +1,76 @@
+abcd<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT - Notifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <header class="flex items-center gap-4 mb-8">
+            <button onclick="history.back()" class="w-10 h-10 glass rounded-full flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sky-400"></i>
+            </button>
+            <h1 class="text-xl font-black italic">SNT <span class="text-sky-500">NOTICES</span></h1>
+        </header>
+
+        <div id="notif-list" class="space-y-4">
+            <p class="text-center text-slate-500 text-sm animate-pulse">Checking for updates...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            projectId: "snt-computer-institute",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        onValue(ref(db, 'notifications'), (snapshot) => {
+            const list = document.getElementById('notif-list');
+            list.innerHTML = "";
+            const now = new Date().getTime();
+
+            if (snapshot.exists()) {
+                const notices = Object.values(snapshot.val())
+                    .filter(n => new Date(n.expiry).getTime() > now)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if(notices.length === 0) {
+                    list.innerHTML = "<p class='text-center text-slate-500 py-10'>No active notifications.</p>";
+                    return;
+                }
+
+                notices.forEach(data => {
+                    const div = document.createElement('div');
+                    div.className = "glass p-5 rounded-3xl border-l-4 border-yellow-500";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[9px] font-black text-yellow-500 uppercase tracking-widest">Official Notice</span>
+                            <span class="text-[8px] text-slate-500 font-mono">${new Date(data.timestamp).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-sm font-semibold leading-relaxed">${data.message}</p>
+                    `;
+                    list.appendChild(div);
+                });
+            } else {
+                list.innerHTML = "<p class='text-center text-slate-500 py-10'>No notifications found.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
