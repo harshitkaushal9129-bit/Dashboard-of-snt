@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT - Student Rankings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .rank-1 { border-left: 4px solid #fbbf24; background: rgba(251, 191, 36, 0.1); } /* Gold */
+        .rank-2 { border-left: 4px solid #94a3b8; background: rgba(148, 163, 184, 0.1); } /* Silver */
+        .rank-3 { border-left: 4px solid #b45309; background: rgba(180, 83, 9, 0.1); }    /* Bronze */
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-2xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <button onclick="history.back()" class="text-sky-400"><i class="fas fa-arrow-left text-xl"></i></button>
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">SNT <span class="text-sky-500">LEADERBOARD</span></h1>
+            <i class="fas fa-trophy text-yellow-400 text-2xl"></i>
+        </div>
+
+        <div id="podium" class="flex justify-around items-end mb-10 h-40">
+            </div>
+
+        <div id="rank-list" class="space-y-3">
+            <div class="text-center opacity-50 py-10">Loading Rankings...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
+            authDomain: "snt-computer-institute.firebaseapp.com",
+            projectId: "snt-computer-institute",
+            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Fetch Rankings
+        onValue(ref(db, 'students'), (snapshot) => {
+            if (snapshot.exists()) {
+                const students = Object.values(snapshot.val());
+                
+                // 1. Sort by Score (Assuming you have a 'quizScore' or 'totalMarks' field)
+                // If the field name is different, change 'quizScore' below
+                const rankedStudents = students
+                    .filter(s => s.quizScore !== undefined) // Sirf unko dikhao jinhone quiz khela
+                    .sort((a, b) => b.quizScore - a.quizScore);
+
+                renderRankings(rankedStudents);
+            }
+        });
+
+        function renderRankings(list) {
+            const listContainer = document.getElementById('rank-list');
+            const podiumContainer = document.getElementById('podium');
+            
+            listContainer.innerHTML = "";
+            podiumContainer.innerHTML = "";
+
+            list.forEach((student, index) => {
+                const rank = index + 1;
+                let rankClass = "glass";
+                let medal = "";
+
+                if (rank === 1) { rankClass = "rank-1"; medal = "🥇"; }
+                else if (rank === 2) { rankClass = "rank-2"; medal = "🥈"; }
+                else if (rank === 3) { rankClass = "rank-3"; medal = "🥉"; }
+
+                // Full List Item
+                listContainer.innerHTML += `
+                    <div class="${rankClass} p-4 rounded-2xl flex items-center gap-4 animate-fade-in">
+                        <span class="w-8 font-black text-lg text-slate-500">#${rank}</span>
+                        <img src="${student.profilePic || './SNT.jpg'}" class="w-12 h-12 rounded-full border border-white/10">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm uppercase">${student.name}</h4>
+                            <p class="text-[10px] text-slate-400 font-mono">ID: ${student.studentId || 'N/A'}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sky-400 font-black text-xl">${student.quizScore || 0}</span>
+                            <p class="text-[8px] text-slate-500 uppercase font-bold">Points</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (list.length === 0) {
+                listContainer.innerHTML = "<p class='text-center opacity-50'>No quiz records found.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
+
