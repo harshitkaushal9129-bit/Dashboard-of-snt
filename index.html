@@ -17,17 +17,23 @@
         body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
+        
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; }
         .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
+        
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
+        
         .social-link-icon { font-size: 20px; transition: 0.2s; cursor: pointer; }
         .qr-card { background: white; color: #1e293b; padding: 24px; border-radius: 30px; text-align: center; width: 300px; position: relative; }
+
         .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; }
+        .search-box:focus-within { border-color: #38bdf8; background: rgba(30, 41, 59, 0.8); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -132,70 +138,39 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // --- NOTIFICATION SYSTEM & SERVICE WORKER ---
+        // 1. Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('SW Registered');
-            });
+                console.log('Service Worker Active');
+            }).catch(err => console.log('SW Registration Failed', err));
         }
 
-        async function requestNotificationAccess() {
-            if (Notification.permission !== 'granted') {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    showWelcomeNotify();
-                }
-            }
-        }
-
-        function showWelcomeNotify() {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification('SNT Portal Active', {
-                    body: 'Namaste Kaushal ji! SNT Institute updates ab yahan dikhenge.',
-                    icon: './SNT.jpg',
-                    vibrate: [200, 100, 200],
-                    badge: './SNT.jpg'
+        // 2. Notification Trigger Function
+        function triggerLockScreenNotification(title, message) {
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.showNotification(title, {
+                        body: message,
+                        icon: './SNT.jpg',
+                        badge: './SNT.jpg',
+                        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
+                        tag: 'snt-instant',
+                        requireInteraction: true // Keeps notification on lock screen until user interacts
+                    });
                 });
-            });
+            }
         }
 
-        // --- CORE LOGIC ---
-        onValue(ref(db, 'notifications'), (snapshot) => {
-            const badge = document.getElementById('notif-badge');
-            if (snapshot.exists()) {
-                const notices = snapshot.val();
-                const now = new Date().getTime();
-                const activeNotices = Object.values(notices).filter(n => new Date(n.expiry).getTime() > now);
-                if (activeNotices.length > 0) badge.classList.remove('hidden');
-                else badge.classList.add('hidden');
-            }
-        });
-
-        window.loginWithGoogle = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                const snapshot = await get(ref(db, 'students'));
-                let existingId = null;
-                if (snapshot.exists()) {
-                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
-                }
-                if (existingId) {
-                    await update(ref(db, `students/${existingId}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
-                } else {
-                    await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" });
-                }
-                requestNotificationAccess();
-            } catch (error) { console.error("Login Error", error); }
-        };
-
+        // 3. Auth Logic with Notification Test
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
+                
                 const hr = new Date().getHours();
                 const greet = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
                 document.getElementById('greeting-msg').innerText = greet;
+
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
@@ -207,15 +182,30 @@
                             const statusEl = document.getElementById('user-status-badge');
                             const status = sData.registrationStatus || "Guest User";
                             statusEl.innerText = status;
-                            statusEl.className = status === "Active" ? "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
+                            statusEl.className = status === "Active" ? 
+                                "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
+                                "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
                         }
                     }
                 });
+
+                // Request Permission and Trigger Notification on Login
+                Notification.requestPermission().then(perm => {
+                    if(perm === 'granted') {
+                        setTimeout(() => {
+                            triggerLockScreenNotification(
+                                "SNT Official Portal", 
+                                "Welcome Kaushal ji! Aapka dashboard active hai."
+                            );
+                        }, 3000);
+                    }
+                });
+
                 renderMenu();
-                requestNotificationAccess();
             }
         });
 
+        // 4. App Grid Logic
         function renderMenu() {
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
@@ -225,7 +215,7 @@
                 { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
                 { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
                 { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
+                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }, 
                 { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
                 { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
                 { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
@@ -245,6 +235,24 @@
             });
         }
 
+        // 5. Global Functions
+        window.loginWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const snapshot = await get(ref(db, 'students'));
+                let existingId = null;
+                if (snapshot.exists()) {
+                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
+                }
+                if (existingId) {
+                    await update(ref(db, `students/${existingId}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
+                } else {
+                    await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" });
+                }
+            } catch (error) { console.error("Login Error", error); }
+        };
+
         window.logout = () => signOut(auth).then(() => location.reload());
         window.openNotifications = () => { location.href = './notifications_view.html'; };
         window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
@@ -252,6 +260,16 @@
         window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
+
+        onValue(ref(db, 'notifications'), (snapshot) => {
+            const badge = document.getElementById('notif-badge');
+            if (snapshot.exists()) {
+                const notices = snapshot.val();
+                const now = new Date().getTime();
+                const activeNotices = Object.values(notices).filter(n => new Date(n.expiry).getTime() > now);
+                badge.classList.toggle('hidden', activeNotices.length === 0);
+            }
+        });
     </script>
 </body>
 </html>
