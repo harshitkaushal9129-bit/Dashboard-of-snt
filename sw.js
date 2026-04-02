@@ -1,38 +1,35 @@
-const CACHE_NAME = 'snt-institute-v1';
-const ASSETS = [
-  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/',
-  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/index.html',
-  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/manifest.json',
-  'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.jpg',
-  'https://cdn.tailwindcss.com'
-];
+// sw.js - Background Services
+self.addEventListener('push', function(event) {
+    let data = { title: 'SNT Institute', body: 'New student update available!' };
+    try {
+        if (event.data) {
+            data = event.data.json();
+        }
+    } catch (e) {
+        data = { title: 'SNT Institute', body: event.data.text() };
+    }
 
-// Install Service Worker and Cache Assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching essential assets');
-      return cache.addAll(ASSETS);
-    })
-  );
+    const options = {
+        body: data.body,
+        icon: './SNT.jpg',
+        badge: './SNT.jpg',
+        vibrate: [100, 50, 100],
+        data: {
+            url: data.url || '/'
+        },
+        actions: [
+            { action: 'open', title: 'View Now' }
+        ]
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
 });
 
-// Activate and Clean Old Caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
-  );
-});
-
-// Fetch Strategy: Network First, Fallback to Cache
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
-  );
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+    );
 });
