@@ -138,14 +138,13 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // 1. Service Worker Registration
+        // 1. Service Worker & Notification Handler
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(reg => {
                 console.log('Service Worker Active');
-            }).catch(err => console.log('SW Registration Failed', err));
+            });
         }
 
-        // 2. Notification Trigger Function
         function triggerLockScreenNotification(title, message) {
             if ('serviceWorker' in navigator && Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(function(registration) {
@@ -154,14 +153,14 @@
                         icon: './SNT.jpg',
                         badge: './SNT.jpg',
                         vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
-                        tag: 'snt-instant',
-                        requireInteraction: true // Keeps notification on lock screen until user interacts
+                        tag: 'snt-dynamic-update',
+                        requireInteraction: true 
                     });
                 });
             }
         }
 
-        // 3. Auth Logic with Notification Test
+        // 2. Main Logic: Auth + Student Name + Database Notification
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
@@ -175,29 +174,42 @@
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
                         if (sData) {
+                            const studentFirstName = sData.name.split(' ')[0];
                             document.getElementById('user-name').innerText = sData.name || user.displayName;
                             document.getElementById('user-email').innerText = user.email;
                             document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
+                            
                             const statusEl = document.getElementById('user-status-badge');
                             const status = sData.registrationStatus || "Guest User";
                             statusEl.innerText = status;
                             statusEl.className = status === "Active" ? 
                                 "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
                                 "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
-                        }
-                    }
-                });
 
-                // Request Permission and Trigger Notification on Login
-                Notification.requestPermission().then(perm => {
-                    if(perm === 'granted') {
-                        setTimeout(() => {
-                            triggerLockScreenNotification(
-                                "SNT Official Portal", 
-                                "Welcome Kaushal ji! Aapka dashboard active hai."
-                            );
-                        }, 3000);
+                            // DYNAMIC NOTIFICATION LISTENER
+                            onValue(ref(db, 'notifications'), (notifSnap) => {
+                                if (notifSnap.exists()) {
+                                    const notices = Object.values(notifSnap.val());
+                                    const latestNotif = notices[notices.length - 1]; // Get latest upload
+                                    
+                                    // Use last_notif_id to prevent repeat popups
+                                    const lastSeenId = localStorage.getItem('last_notif_id');
+                                    
+                                    if (latestNotif.id !== lastSeenId) {
+                                        Notification.requestPermission().then(perm => {
+                                            if (perm === 'granted') {
+                                                triggerLockScreenNotification(
+                                                    `Namaste, ${studentFirstName}!`, 
+                                                    latestNotif.text || latestNotif.message || "SNT Portal par naya update aaya hai."
+                                                );
+                                                localStorage.setItem('last_notif_id', latestNotif.id);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
                     }
                 });
 
@@ -205,7 +217,7 @@
             }
         });
 
-        // 4. App Grid Logic
+        // 3. Grid Menu
         function renderMenu() {
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
@@ -228,14 +240,16 @@
                     <p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p>
                 </div>
             `).join('');
+            
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
-                const cards = document.querySelectorAll('.app-card');
-                cards.forEach(card => card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none');
+                document.querySelectorAll('.app-card').forEach(card => {
+                    card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none';
+                });
             });
         }
 
-        // 5. Global Functions
+        // 4. Utility Functions
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -255,21 +269,17 @@
 
         window.logout = () => signOut(auth).then(() => location.reload());
         window.openNotifications = () => { location.href = './notifications_view.html'; };
-        window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
+        window.openInfo = async () => { 
+            document.getElementById('info-modal').style.display = "flex"; 
+            if (navigator.getBattery) { 
+                const b = await navigator.getBattery(); 
+                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; 
+            } 
+        };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
         window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
-
-        onValue(ref(db, 'notifications'), (snapshot) => {
-            const badge = document.getElementById('notif-badge');
-            if (snapshot.exists()) {
-                const notices = snapshot.val();
-                const now = new Date().getTime();
-                const activeNotices = Object.values(notices).filter(n => new Date(n.expiry).getTime() > now);
-                badge.classList.toggle('hidden', activeNotices.length === 0);
-            }
-        });
     </script>
 </body>
 </html>
