@@ -14,16 +14,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-            /* index.html ke <style> mein ye add karein */
-* {
-    -webkit-user-select: none; /* Chrome/Safari */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE10+ */
-    user-select: none;         /* Standard */
-    -webkit-user-drag: none;   /* Images drag nahi hongi */
-}
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
 
-        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         
@@ -147,11 +146,33 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // 1. Service Worker & Notification Handler
+        let currentStudent = null;
+
+        // --- Analytics Tracking Logic ---
+        async function trackActivity(studentId, studentName, action, details = "") {
+            const activityPath = `analytics/activity_logs/${studentId}/${Date.now()}`;
+            const logData = {
+                name: studentName,
+                action: action,
+                details: details,
+                timestamp: new Date().toLocaleString(),
+                device: navigator.userAgent.includes("Mobi") ? "Mobile" : "Desktop",
+                platform: navigator.platform
+            };
+
+            try {
+                await set(ref(db, activityPath), logData);
+                await update(ref(db, `students/${studentId}`), {
+                    lastSeen: new Date().toLocaleString()
+                });
+            } catch (error) {
+                console.error("Analytics Error:", error);
+            }
+        }
+
+        // Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('Service Worker Active');
-            });
+            navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Active'));
         }
 
         function triggerLockScreenNotification(title, message) {
@@ -161,7 +182,7 @@
                         body: message,
                         icon: './SNT.jpg',
                         badge: './SNT.jpg',
-                        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
+                        vibrate: [200, 100, 200],
                         tag: 'snt-dynamic-update',
                         requireInteraction: true 
                     });
@@ -169,7 +190,7 @@
             }
         }
 
-        // 2. Main Logic: Auth + Student Name + Database Notification
+        // Main Auth State Observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
@@ -183,11 +204,16 @@
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
                         if (sData) {
-                            const studentFirstName = sData.name.split(' ')[0];
+                            currentStudent = sData;
+                            const sId = sData.studentId || user.uid;
+                            
+                            // Track LOGIN Activity
+                            trackActivity(sId, sData.name, "LOGIN", "Student entered dashboard");
+
                             document.getElementById('user-name').innerText = sData.name || user.displayName;
                             document.getElementById('user-email').innerText = user.email;
                             document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
+                            document.getElementById('user-roll').innerText = "ID: " + sId;
                             
                             const statusEl = document.getElementById('user-status-badge');
                             const status = sData.registrationStatus || "Guest User";
@@ -196,22 +222,17 @@
                                 "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
                                 "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
 
-                            // DYNAMIC NOTIFICATION LISTENER
+                            // Dynamic Notification Listener
                             onValue(ref(db, 'notifications'), (notifSnap) => {
                                 if (notifSnap.exists()) {
                                     const notices = Object.values(notifSnap.val());
-                                    const latestNotif = notices[notices.length - 1]; // Get latest upload
-                                    
-                                    // Use last_notif_id to prevent repeat popups
+                                    const latestNotif = notices[notices.length - 1];
                                     const lastSeenId = localStorage.getItem('last_notif_id');
                                     
                                     if (latestNotif.id !== lastSeenId) {
                                         Notification.requestPermission().then(perm => {
                                             if (perm === 'granted') {
-                                                triggerLockScreenNotification(
-                                                    `Namaste, ${studentFirstName}!`, 
-                                                    latestNotif.text || latestNotif.message || "SNT Portal par naya update aaya hai."
-                                                );
+                                                triggerLockScreenNotification(`Namaste, ${sData.name.split(' ')[0]}!`, latestNotif.text || "New Update Available");
                                                 localStorage.setItem('last_notif_id', latestNotif.id);
                                             }
                                         });
@@ -226,7 +247,6 @@
             }
         });
 
-        // 3. Grid Menu
         function renderMenu() {
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
@@ -258,18 +278,17 @@
             });
         }
 
-        // 4. Utility Functions
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 const snapshot = await get(ref(db, 'students'));
-                let existingId = null;
+                let existingKey = null;
                 if (snapshot.exists()) {
-                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
+                    existingKey = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
                 }
-                if (existingId) {
-                    await update(ref(db, `students/${existingId}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
+                if (existingKey) {
+                    await update(ref(db, `students/${existingKey}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
                 } else {
                     await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" });
                 }
@@ -290,76 +309,30 @@
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
     </script>
+
     <script>
-/**
- * SNT PORTAL - MULTI-LAYER SECURITY SHIELD
- * Developer: Harshit Kaushal
- * Purpose: Block DevTools, Inspect Element, and Source View
- */
+    (function() {
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && [85, 83].includes(e.keyCode))) {
+                alert("Security Alert: SNT Portal Restricted Action!");
+                return false;
+            }
+        };
+        document.addEventListener('selectstart', (e) => e.preventDefault());
+        document.addEventListener('dragstart', (e) => e.preventDefault());
+        document.addEventListener('copy', (e) => e.preventDefault());
 
-(function() {
-    // 1. Right-Click Block (Mouse and Touch)
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+        setInterval(() => {
+            const threshold = 160;
+            if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+                window.location.reload();
+            }
+        }, 500);
 
-    // 2. Keyboard Shortcuts Block (F12, Ctrl+Shift+I, J, C, U, S)
-    document.onkeydown = function(e) {
-        if (
-            e.keyCode === 123 || // F12
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I, J, C
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) // Ctrl+U (Source), Ctrl+S (Save)
-        ) {
-            alert("Security Alert: SNT Portal Restricted Action!");
-            return false;
-        }
-    };
-
-    // 3. Selection, Dragging, and Copy-Paste Block
-    document.addEventListener('selectstart', (e) => e.preventDefault());
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-    document.addEventListener('copy', (e) => e.preventDefault());
-
-    // 4. Advanced DevTools Detection & Auto-Reload
-    // Agar koi user browser window ka size chota karke DevTools kholne ki koshish karega
-    const devtoolsDetector = function() {
-        const threshold = 160;
-        const widthDiff = window.outerWidth - window.innerWidth > threshold;
-        const heightDiff = window.outerHeight - window.innerHeight > threshold;
-
-        if (widthDiff || heightDiff) {
-            // DevTools detect hote hi page reload kar do ya alert dikhao
-            window.location.reload();
-            console.clear();
-        }
-    };
-
-    // Har 500ms par check karega
-    setInterval(devtoolsDetector, 500);
-
-    // 5. Console Cleansing
-    // Agar koi kisi tarah console tak pahuch jaye, toh usey kuch dikhega nahi
-    setInterval(() => {
-        console.clear();
-        console.log("%cSTOP! ACCESS DENIED", "color: red; font-size: 30px; font-weight: bold;");
-        console.log("%cSNT Official Portal - Developed by Harshit Kaushal", "color: skyblue; font-size: 14px;");
-    }, 1000);
-
-    // 6. CSS Layer Injection (Selection Shield)
-    const style = document.createElement('style');
-    style.innerHTML = `
-        * {
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            user-select: none !important;
-            -webkit-touch-callout: none !important;
-            -webkit-user-drag: none !important;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    console.log("SNT Security Layer: Active");
-})();
-</script>
+        setInterval(() => { console.clear(); }, 1000);
+    })();
+    </script>
 
 </body>
 </html>
