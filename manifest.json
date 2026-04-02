@@ -1,28 +1,36 @@
 {
-  "name": "SNT Institute Management",
-  "short_name": "SNT App",
-  "start_url": "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/index.html",
+  "name": "SNT Official Portal",
+  "short_name": "SNT Portal",
+  "description": "Official Student Dashboard for SNT Computer Institute",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#38bdf8",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png",
+      "src": "./SNT.jpg",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png",
+      "src": "./SNT.jpg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Attendance",
+      "url": "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html",
+      "icons": [{ "src": "./SNT.jpg", "sizes": "192x192" }]
     },
     {
-      "src": "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "name": "Results",
+      "url": "./result-history.html",
+      "icons": [{ "src": "./SNT.jpg", "sizes": "192x192" }]
     }
   ]
 }
