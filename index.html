@@ -14,14 +14,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-            /* index.html ke <style> mein ye add karein */
-* {
-    -webkit-user-select: none; /* Chrome/Safari */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE10+ */
-    user-select: none;         /* Standard */
-    -webkit-user-drag: none;   /* Images drag nahi hongi */
-}
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
 
         body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
@@ -147,88 +146,66 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // 1. Service Worker & Notification Handler
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('Service Worker Active');
-            });
+            navigator.serviceWorker.register('./sw.js');
         }
 
         function triggerLockScreenNotification(title, message) {
             if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.showNotification(title, {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, {
                         body: message,
                         icon: './SNT.jpg',
                         badge: './SNT.jpg',
-                        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
-                        tag: 'snt-dynamic-update',
-                        requireInteraction: true 
+                        tag: 'snt-dynamic',
+                        requireInteraction: true
                     });
                 });
             }
         }
 
-        // 2. Main Logic: Auth + Student Name + Database Notification
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
                 const hr = new Date().getHours();
-                const greet = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
-                document.getElementById('greeting-msg').innerText = greet;
+                document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
 
-                onValue(ref(db, 'students'), (snapshot) => {
-                    if (snapshot.exists()) {
-                        const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
+                onValue(ref(db, 'students'), (snap) => {
+                    if (snap.exists()) {
+                        const sData = Object.values(snap.val()).find(s => s.email === user.email);
                         if (sData) {
-                            const studentFirstName = sData.name.split(' ')[0];
                             document.getElementById('user-name').innerText = sData.name || user.displayName;
                             document.getElementById('user-email').innerText = user.email;
-                            document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
+                            document.getElementById('user-img').src = sData.profilePic || user.photoURL;
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
                             
-                            const statusEl = document.getElementById('user-status-badge');
-                            const status = sData.registrationStatus || "Guest User";
-                            statusEl.innerText = status;
-                            statusEl.className = status === "Active" ? 
-                                "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
-                                "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
+                            const st = sData.registrationStatus || "Guest User";
+                            const stEl = document.getElementById('user-status-badge');
+                            stEl.innerText = st;
+                            stEl.className = st === "Active" ? "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
 
-                            // DYNAMIC NOTIFICATION LISTENER
-                            onValue(ref(db, 'notifications'), (notifSnap) => {
-                                if (notifSnap.exists()) {
-                                    const notices = Object.values(notifSnap.val());
-                                    const latestNotif = notices[notices.length - 1]; // Get latest upload
-                                    
-                                    // Use last_notif_id to prevent repeat popups
-                                    const lastSeenId = localStorage.getItem('last_notif_id');
-                                    
-                                    if (latestNotif.id !== lastSeenId) {
-                                        Notification.requestPermission().then(perm => {
-                                            if (perm === 'granted') {
-                                                triggerLockScreenNotification(
-                                                    `Namaste, ${studentFirstName}!`, 
-                                                    latestNotif.text || latestNotif.message || "SNT Portal par naya update aaya hai."
-                                                );
-                                                localStorage.setItem('last_notif_id', latestNotif.id);
-                                            }
-                                        });
+                            onValue(ref(db, 'notifications'), (nSnap) => {
+                                if (nSnap.exists()) {
+                                    const latest = Object.values(nSnap.val()).pop();
+                                    const lastId = localStorage.getItem('last_notif_id');
+                                    if (latest.id !== lastId) {
+                                        document.getElementById('notif-badge').classList.remove('hidden');
+                                        triggerLockScreenNotification("SNT Update", latest.text || "Naya message aaya hai.");
+                                        localStorage.setItem('last_notif_id', latest.id);
                                     }
                                 }
                             });
                         }
                     }
                 });
-
                 renderMenu();
             }
         });
 
-        // 3. Grid Menu
         function renderMenu() {
-            const menuItems = [
+            const items = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
                 { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
                 { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
@@ -236,130 +213,37 @@
                 { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
                 { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
                 { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }, 
+                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
                 { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
                 { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
                 { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
-                { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
+                { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' }
             ];
             const grid = document.getElementById('app-grid');
-            grid.innerHTML = menuItems.map(item => `
-                <div class="app-card p-4" onclick="location.href='${item.url}'">
-                    <i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i>
-                    <p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p>
-                </div>
-            `).join('');
+            grid.innerHTML = items.map(i => `<div class="app-card p-4" onclick="location.href='${i.url}'"><i class="fas ${i.icon} text-3xl mb-3 ${i.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${i.name}</p></div>`).join('');
             
-            document.getElementById('appSearch').addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                document.querySelectorAll('.app-card').forEach(card => {
-                    card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none';
-                });
-            });
+            document.getElementById('appSearch').oninput = (e) => {
+                const t = e.target.value.toLowerCase();
+                document.querySelectorAll('.app-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(t) ? 'flex' : 'none');
+            };
         }
 
-        // 4. Utility Functions
-        window.loginWithGoogle = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                const snapshot = await get(ref(db, 'students'));
-                let existingId = null;
-                if (snapshot.exists()) {
-                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
-                }
-                if (existingId) {
-                    await update(ref(db, `students/${existingId}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
-                } else {
-                    await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" });
-                }
-            } catch (error) { console.error("Login Error", error); }
-        };
-
+        window.loginWithGoogle = () => signInWithPopup(auth, provider);
         window.logout = () => signOut(auth).then(() => location.reload());
-        window.openNotifications = () => { location.href = './notifications_view.html'; };
-        window.openInfo = async () => { 
-            document.getElementById('info-modal').style.display = "flex"; 
-            if (navigator.getBattery) { 
-                const b = await navigator.getBattery(); 
-                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; 
-            } 
-        };
-        window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
-        window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
-        window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
-        window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
+        window.openNotifications = () => { document.getElementById('notif-badge').classList.add('hidden'); location.href = './notifications_view.html'; };
+        window.openInfo = async () => { document.getElementById('info-modal').style.display='flex'; if(navigator.getBattery){ const b=await navigator.getBattery(); document.getElementById('info-battery').innerText=Math.round(b.level*100)+"%"; } };
+        window.closeInfo = () => document.getElementById('info-modal').style.display='none';
+        window.openQR = () => document.getElementById('qr-modal').style.display='flex';
+        window.closeQR = () => document.getElementById('qr-modal').style.display='none';
+        window.shareApp = () => navigator.share && navigator.share({title:'SNT Portal', url:location.href});
     </script>
+
     <script>
-/**
- * SNT PORTAL - MULTI-LAYER SECURITY SHIELD
- * Developer: Harshit Kaushal
- * Purpose: Block DevTools, Inspect Element, and Source View
- */
-
-(function() {
-    // 1. Right-Click Block (Mouse and Touch)
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 2. Keyboard Shortcuts Block (F12, Ctrl+Shift+I, J, C, U, S)
-    document.onkeydown = function(e) {
-        if (
-            e.keyCode === 123 || // F12
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I, J, C
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) // Ctrl+U (Source), Ctrl+S (Save)
-        ) {
-            alert("Security Alert: SNT Portal Restricted Action!");
-            return false;
-        }
-    };
-
-    // 3. Selection, Dragging, and Copy-Paste Block
-    document.addEventListener('selectstart', (e) => e.preventDefault());
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-    document.addEventListener('copy', (e) => e.preventDefault());
-
-    // 4. Advanced DevTools Detection & Auto-Reload
-    // Agar koi user browser window ka size chota karke DevTools kholne ki koshish karega
-    const devtoolsDetector = function() {
-        const threshold = 160;
-        const widthDiff = window.outerWidth - window.innerWidth > threshold;
-        const heightDiff = window.outerHeight - window.innerHeight > threshold;
-
-        if (widthDiff || heightDiff) {
-            // DevTools detect hote hi page reload kar do ya alert dikhao
-            window.location.reload();
-            console.clear();
-        }
-    };
-
-    // Har 500ms par check karega
-    setInterval(devtoolsDetector, 500);
-
-    // 5. Console Cleansing
-    // Agar koi kisi tarah console tak pahuch jaye, toh usey kuch dikhega nahi
-    setInterval(() => {
-        console.clear();
-        console.log("%cSTOP! ACCESS DENIED", "color: red; font-size: 30px; font-weight: bold;");
-        console.log("%cSNT Official Portal - Developed by Harshit Kaushal", "color: skyblue; font-size: 14px;");
-    }, 1000);
-
-    // 6. CSS Layer Injection (Selection Shield)
-    const style = document.createElement('style');
-    style.innerHTML = `
-        * {
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            user-select: none !important;
-            -webkit-touch-callout: none !important;
-            -webkit-user-drag: none !important;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    console.log("SNT Security Layer: Active");
-})();
-</script>
-
+        (function(){
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.onkeydown = e => { if(e.keyCode==123 || (e.ctrlKey && e.shiftKey && [73,74,67].includes(e.keyCode)) || (e.ctrlKey && [85,83].includes(e.keyCode))) return false; };
+            setInterval(() => { if(window.outerWidth-window.innerWidth > 160 || window.outerHeight-window.innerHeight > 160) location.reload(); }, 500);
+        })();
+    </script>
 </body>
 </html>
