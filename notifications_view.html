@@ -2,20 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT - Notice Board</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0b0f1a; color: white; font-family: 'Inter', sans-serif; }
+        body { background: #0b0f1a; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
         .new-badge { background: linear-gradient(90deg, #0ea5e9, #2dd4bf); }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card { animation: slideUp 0.5s ease-out forwards; }
     </style>
 </head>
 <body class="p-4 sm:p-6">
     <div class="max-w-md mx-auto">
         <header class="flex justify-between items-center mb-8">
-            <button onclick="history.back()" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-sky-400 active:scale-90 transition-all">
+            <button onclick="window.location.href='./index.html'" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-sky-400 active:scale-90 transition-all">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="text-right">
@@ -46,48 +52,80 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        const notifList = document.getElementById('notif-list');
+
         onValue(ref(db, 'notifications'), (snapshot) => {
-            const list = document.getElementById('notif-list');
-            list.innerHTML = "";
+            notifList.innerHTML = "";
             const now = new Date().getTime();
 
             if (snapshot.exists()) {
-                const notices = Object.values(snapshot.val())
-                    .filter(n => new Date(n.expiry).getTime() > now)
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                // Firebase se data lekar array mein convert karna
+                const dataObj = snapshot.val();
+                const notices = Object.values(dataObj)
+                    .filter(n => {
+                        // Agar expiry mention nahi hai to dikhao, warna date check karo
+                        if (!n.expiry) return true;
+                        const expiryDate = new Date(n.expiry).getTime();
+                        return expiryDate > now;
+                    })
+                    .sort((a, b) => {
+                        // Latest notification hamesha upar rahega
+                        const timeA = new Date(a.timestamp || a.time || 0).getTime();
+                        const timeB = new Date(b.timestamp || b.time || 0).getTime();
+                        return timeB - timeA;
+                    });
 
-                if(notices.length === 0) {
-                    list.innerHTML = `<div class="text-center py-20 opacity-40"><i class="fas fa-bell-slash text-4xl mb-4"></i><p class="text-sm">No new announcements</p></div>`;
+                if (notices.length === 0) {
+                    notifList.innerHTML = `
+                        <div class="text-center py-20 opacity-40">
+                            <i class="fas fa-bell-slash text-4xl mb-4"></i>
+                            <p class="text-sm font-medium">No active announcements</p>
+                        </div>`;
                     return;
                 }
 
                 notices.forEach((data, index) => {
-                    const div = document.createElement('div');
-                    div.className = "glass rounded-[2rem] overflow-hidden shadow-xl animate-in fade-in slide-in-from-bottom duration-500";
-                    
+                    // Sabhi possible field names ko handle karna (message ya text)
+                    const content = data.message || data.text || "Important Update from SNT Institute";
+                    const dateStr = new Date(data.timestamp || data.time || Date.now()).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                    });
+
+                    const card = document.createElement('div');
+                    card.className = "glass rounded-[2rem] overflow-hidden shadow-2xl mb-6 animate-card";
+                    card.style.animationDelay = `${index * 0.1}s`;
+
                     const imgHtml = data.imageUrl ? 
-                        `<div class="relative"><img src="${data.imageUrl}" class="w-full h-52 object-cover border-b border-white/5">
-                         ${index === 0 ? '<span class="absolute top-4 left-4 new-badge text-[9px] font-black px-3 py-1 rounded-full shadow-lg">NEW</span>' : ''}
+                        `<div class="relative">
+                            <img src="${data.imageUrl}" class="w-full h-52 object-cover border-b border-white/5 bg-slate-800">
+                            ${index === 0 ? '<span class="absolute top-4 left-4 new-badge text-[9px] font-black px-3 py-1 rounded-full shadow-lg">NEW</span>' : ''}
                         </div>` : '';
 
-                    div.innerHTML = `
+                    card.innerHTML = `
                         ${imgHtml}
                         <div class="p-6">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-pulse"></div>
+                                    <div class="w-1.5 h-1.5 bg-sky-500 rounded-full ${index === 0 ? 'animate-pulse' : ''}"></div>
                                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Administrator</span>
                                 </div>
-                                <span class="text-[9px] text-slate-600 font-mono">${new Date(data.timestamp).toLocaleDateString()}</span>
+                                <span class="text-[9px] text-slate-600 font-mono font-bold">${dateStr}</span>
                             </div>
-                            <p class="text-[15px] font-medium leading-relaxed text-slate-200">${data.message}</p>
+                            <p class="text-[15px] font-medium leading-relaxed text-slate-100">${content}</p>
                         </div>
                     `;
-                    list.appendChild(div);
+                    notifList.appendChild(card);
                 });
             } else {
-                list.innerHTML = "<p class='text-center text-slate-500 py-10'>Nothing to show.</p>";
+                notifList.innerHTML = `
+                    <div class="text-center py-20 opacity-40">
+                        <i class="fas fa-folder-open text-4xl mb-4"></i>
+                        <p class="text-sm">Database is empty.</p>
+                    </div>`;
             }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            notifList.innerHTML = `<p class="text-center text-red-400 text-xs">Failed to load notifications. Please check connection.</p>`;
         });
     </script>
 </body>
