@@ -1,25 +1,18 @@
-// sw.js - Background Services
+// sw.js
 self.addEventListener('push', function(event) {
-    let data = { title: 'SNT Institute', body: 'New student update available!' };
-    try {
-        if (event.data) {
-            data = event.data.json();
-        }
-    } catch (e) {
-        data = { title: 'SNT Institute', body: event.data.text() };
-    }
-
+    const data = event.data ? event.data.json() : { title: 'SNT Institute', body: 'New Update!' };
+    
     const options = {
         body: data.body,
         icon: './SNT.jpg',
         badge: './SNT.jpg',
-        vibrate: [100, 50, 100],
-        data: {
-            url: data.url || '/'
-        },
-        actions: [
-            { action: 'open', title: 'View Now' }
-        ]
+        vibrate: [200, 100, 200],
+        tag: 'snt-notification', // Unique tag taaki notifications mix na ho
+        renotify: true,
+        data: { url: data.url || '/' },
+        // Android Specific
+        requireInteraction: true, 
+        actions: [{ action: 'open', title: 'Check Now' }]
     };
 
     event.waitUntil(
@@ -27,6 +20,7 @@ self.addEventListener('push', function(event) {
     );
 });
 
+// Jab user notification par click kare
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     event.waitUntil(
