@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNT - Query Box</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        input, textarea { background: rgba(15, 23, 42, 0.5) !important; border: 1px solid rgba(56, 189, 248, 0.2) !important; color: white !important; }
+        input:focus, textarea:focus { border-color: #38bdf8 !important; outline: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-md mx-auto">
+        <header class="flex items-center gap-4 mb-8">
+            <button onclick="history.back()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-arrow-left"></i></button>
+            <h1 class="text-xl font-black tracking-tighter">HELP <span class="text-sky-500">DESK</span></h1>
+        </header>
+
+        <div class="glass p-6 rounded-3xl shadow-2xl border-t-4 border-sky-500">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-sky-400 font-bold mb-6">Send your query to Admin</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Subject</label>
+                    <input type="text" id="query-subject" placeholder="e.g. ID Card Issue" class="w-full p-4 rounded-2xl mt-1 text-sm">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-2">Message</label>
+                    <textarea id="query-msg" rows="5" placeholder="Describe your problem..." class="w-full p-4 rounded-2xl mt-1 text-sm resize-none"></textarea>
+                </div>
+                <button onclick="sendQuery()" id="send-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-white p-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-sky-500/20">
+                    Submit Query
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Same Config as index.html
+        const firebaseConfig = { /* Aapka Config Yahan */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        onAuthStateChanged(auth, (user) => { if(user) currentUser = user; else location.href='index.html'; });
+
+        window.sendQuery = async () => {
+            const subject = document.getElementById('query-subject').value;
+            const msg = document.getElementById('query-msg').value;
+            const btn = document.getElementById('send-btn');
+
+            if(!subject || !msg) return alert("Please fill all fields");
+
+            btn.innerText = "SENDING...";
+            btn.disabled = true;
+
+            try {
+                const queryRef = ref(db, 'queries');
+                const newQuery = push(queryRef);
+                await set(newQuery, {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    name: currentUser.displayName,
+                    subject: subject,
+                    message: msg,
+                    timestamp: new Date().toLocaleString(),
+                    status: "Pending"
+                });
+                alert("Query Sent Successfully!");
+                history.back();
+            } catch(e) { alert("Error sending query"); btn.innerText = "SUBMIT QUERY"; btn.disabled = false; }
+        };
+    </script>
+</body>
+</html>
