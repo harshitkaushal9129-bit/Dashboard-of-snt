@@ -229,22 +229,24 @@
         // 3. Grid Menu
         function renderMenu() {
             const menuItems = [
-                { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
-                { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-                { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
-                { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-                { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
-                { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
-                { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }, 
-                { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
-                { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
-                { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
-                { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
-                { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
-                { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
-                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
+    { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+    { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
+    { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
+    { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
+    { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
+    { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+    { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
+    { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }, 
+    { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
+    { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
+    { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
+    { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
+    { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
+    { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
+    { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
+    { name: 'Admin Inbox', url: 'javascript:if(prompt("Enter Admin PIN")==="912919"){location.href="./admin-queries.html"}else{alert("Wrong PIN")}', icon: 'fa-user-cog', color: 'text-red-500' },
 ];
+
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `
                 <div class="app-card p-4" onclick="location.href='${item.url}'">
