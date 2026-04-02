@@ -14,14 +14,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-            /* index.html ke <style> mein ye add karein */
-* {
-    -webkit-user-select: none; /* Chrome/Safari */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE10+ */
-    user-select: none;         /* Standard */
-    -webkit-user-drag: none;   /* Images drag nahi hongi */
-}
+        /* index.html ke <style> mein ye add karein */
+        * {
+            -webkit-user-select: none; /* Chrome/Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE10+ */
+            user-select: none;         /* Standard */
+            -webkit-user-drag: none;   /* Images drag nahi hongi */
+        }
 
         body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
@@ -228,7 +228,7 @@
 
         // 3. Grid Menu
         function renderMenu() {
-            const menuItems = [
+            let menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
                 { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
                 { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
@@ -244,7 +244,13 @@
                 { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
                 { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
                 { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
-];
+            ];
+
+            // ADMIN ONLY INBOX CHECK
+            if (auth.currentUser && auth.currentUser.email === "harshitkaushal9129@gmail.com") {
+                menuItems.push({ name: 'Admin Inbox', url: './admin-queries.html', icon: 'fa-user-cog', color: 'text-red-500' });
+            }
+
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `
                 <div class="app-card p-4" onclick="location.href='${item.url}'">
@@ -294,75 +300,39 @@
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
     </script>
     <script>
-/**
- * SNT PORTAL - MULTI-LAYER SECURITY SHIELD
- * Developer: Harshit Kaushal
- * Purpose: Block DevTools, Inspect Element, and Source View
- */
+        /**
+         * SNT PORTAL - MULTI-LAYER SECURITY SHIELD
+         * Developer: Harshit Kaushal
+         */
+        (function() {
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.onkeydown = function(e) {
+                if (
+                    e.keyCode === 123 || 
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
+                    (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))
+                ) {
+                    alert("Security Alert: SNT Portal Restricted Action!");
+                    return false;
+                }
+            };
+            document.addEventListener('selectstart', (e) => e.preventDefault());
+            document.addEventListener('dragstart', (e) => e.preventDefault());
+            document.addEventListener('copy', (e) => e.preventDefault());
 
-(function() {
-    // 1. Right-Click Block (Mouse and Touch)
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+            const devtoolsDetector = function() {
+                const threshold = 160;
+                if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+                    window.location.reload();
+                }
+            };
+            setInterval(devtoolsDetector, 500);
+            setInterval(() => { console.clear(); }, 1000);
 
-    // 2. Keyboard Shortcuts Block (F12, Ctrl+Shift+I, J, C, U, S)
-    document.onkeydown = function(e) {
-        if (
-            e.keyCode === 123 || // F12
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I, J, C
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) // Ctrl+U (Source), Ctrl+S (Save)
-        ) {
-            alert("Security Alert: SNT Portal Restricted Action!");
-            return false;
-        }
-    };
-
-    // 3. Selection, Dragging, and Copy-Paste Block
-    document.addEventListener('selectstart', (e) => e.preventDefault());
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-    document.addEventListener('copy', (e) => e.preventDefault());
-
-    // 4. Advanced DevTools Detection & Auto-Reload
-    // Agar koi user browser window ka size chota karke DevTools kholne ki koshish karega
-    const devtoolsDetector = function() {
-        const threshold = 160;
-        const widthDiff = window.outerWidth - window.innerWidth > threshold;
-        const heightDiff = window.outerHeight - window.innerHeight > threshold;
-
-        if (widthDiff || heightDiff) {
-            // DevTools detect hote hi page reload kar do ya alert dikhao
-            window.location.reload();
-            console.clear();
-        }
-    };
-
-    // Har 500ms par check karega
-    setInterval(devtoolsDetector, 500);
-
-    // 5. Console Cleansing
-    // Agar koi kisi tarah console tak pahuch jaye, toh usey kuch dikhega nahi
-    setInterval(() => {
-        console.clear();
-        console.log("%cSTOP! ACCESS DENIED", "color: red; font-size: 30px; font-weight: bold;");
-        console.log("%cSNT Official Portal - Developed by Harshit Kaushal", "color: skyblue; font-size: 14px;");
-    }, 1000);
-
-    // 6. CSS Layer Injection (Selection Shield)
-    const style = document.createElement('style');
-    style.innerHTML = `
-        * {
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            user-select: none !important;
-            -webkit-touch-callout: none !important;
-            -webkit-user-drag: none !important;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    console.log("SNT Security Layer: Active");
-})();
-</script>
-
+            const style = document.createElement('style');
+            style.innerHTML = `* { -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none !important; -webkit-user-drag: none !important; }`;
+            document.head.appendChild(style);
+        })();
+    </script>
 </body>
 </html>
