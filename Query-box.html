@@ -7,15 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         input, textarea { background: rgba(15, 23, 42, 0.5) !important; border: 1px solid rgba(56, 189, 248, 0.2) !important; color: white !important; transition: 0.3s; }
         input:focus, textarea:focus { border-color: #38bdf8 !important; outline: none; background: rgba(15, 23, 42, 0.8) !important; }
         
-        /* Success Animation */
         #success-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .check-icon { font-size: 80px; color: #10b981; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        
+        .query-card { animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -23,47 +25,53 @@
     <div id="success-overlay">
         <i class="fas fa-check-circle check-icon mb-4"></i>
         <h2 class="text-2xl font-black tracking-tighter uppercase">Query Sent!</h2>
-        <p class="text-slate-400 text-xs mt-2 font-bold tracking-widest">REDIRECTING TO DASHBOARD...</p>
+        <p class="text-slate-400 text-xs mt-2 font-bold tracking-widest">UPLOADING SUCCESSFUL...</p>
     </div>
 
-    <div class="max-w-md mx-auto h-screen flex flex-col">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col">
         <header class="flex items-center gap-4 mb-8">
             <button onclick="history.back()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90 transition-all"><i class="fas fa-arrow-left"></i></button>
             <h1 class="text-xl font-black tracking-tighter italic">SNT <span class="text-sky-500">HELP DESK</span></h1>
         </header>
 
-        <div class="glass p-6 rounded-[32px] shadow-2xl border-t-4 border-sky-500 animate-fade-in">
+        <div class="glass p-6 rounded-[32px] shadow-2xl border-t-4 border-sky-500 mb-8">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-1.5 h-6 bg-sky-500 rounded-full"></div>
-                <p class="text-[10px] uppercase tracking-[0.3em] text-sky-400 font-black">Official Admin Query</p>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-sky-400 font-black">Ask Official Admin</p>
             </div>
             
             <div class="space-y-5">
                 <div>
                     <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Subject</label>
-                    <input type="text" id="query-subject" placeholder="e.g. Admission Inquiry" class="w-full p-4 rounded-2xl mt-1 text-sm font-bold tracking-wide">
+                    <input type="text" id="query-subject" placeholder="e.g. Fee Inquiry" class="w-full p-4 rounded-2xl mt-1 text-sm font-bold tracking-wide">
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Your Message</label>
-                    <textarea id="query-msg" rows="6" placeholder="Type your problem here..." class="w-full p-4 rounded-2xl mt-1 text-sm font-semibold resize-none"></textarea>
+                    <textarea id="query-msg" rows="4" placeholder="Type your problem here..." class="w-full p-4 rounded-2xl mt-1 text-sm font-semibold resize-none"></textarea>
                 </div>
                 
-                <button onclick="sendQuery()" id="send-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-slate-900 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2">
+                <button onclick="sendQuery()" id="send-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-slate-900 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2">
                     <i class="fas fa-paper-plane text-sm"></i>
                     <span id="btn-text">Submit Query</span>
                 </button>
             </div>
         </div>
+
+        <div class="mb-10">
+            <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 ml-2">My Recent History</h2>
+            <div id="query-list" class="space-y-4">
+                <p class="text-center py-10 opacity-20 text-[10px] uppercase font-black">Syncing History...</p>
+            </div>
+        </div>
         
-        <p class="mt-auto mb-4 text-center text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em]">Powered by SNT Security Layer</p>
+        <p class="mt-auto mb-4 text-center text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em]">SNT Security Layer Active</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Firebase Config (Don't Change These Unless You Update Firebase Project)
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -77,13 +85,66 @@
         const auth = getAuth(app);
 
         let currentUser = null;
+
         onAuthStateChanged(auth, (user) => { 
             if(user) {
                 currentUser = user; 
+                loadMyQueries();
             } else {
                 location.href='index.html'; 
             }
         });
+
+        // Function to load and show queries
+        function loadMyQueries() {
+            const listRef = ref(db, 'queries');
+            onValue(listRef, (snapshot) => {
+                const listContainer = document.getElementById('query-list');
+                listContainer.innerHTML = '';
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    let hasQueries = false;
+
+                    Object.keys(data).reverse().forEach(key => {
+                        const q = data[key];
+                        // Sirf wahi queries dikhao jo current user ki hain
+                        if(q.uid === currentUser.uid) {
+                            hasQueries = true;
+                            listContainer.innerHTML += `
+                                <div class="glass p-4 rounded-2xl query-card flex justify-between items-center border-l-2 ${q.status === 'Pending' ? 'border-yellow-500' : 'border-emerald-500'}">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[9px] font-black text-slate-500 uppercase">${q.timestamp}</span>
+                                            <span class="text-[8px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full font-black uppercase">${q.status}</span>
+                                        </div>
+                                        <h3 class="text-xs font-black text-white uppercase tracking-tight">${q.subject}</h3>
+                                        <p class="text-[10px] text-slate-400 mt-1 line-clamp-1">${q.message}</p>
+                                    </div>
+                                    <button onclick="window.deleteQuery('${key}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all ml-4">
+                                        <i class="fas fa-trash-alt text-xs"></i>
+                                    </button>
+                                </div>`;
+                        }
+                    });
+                    if(!hasQueries) listContainer.innerHTML = '<p class="text-center py-10 opacity-20 text-[10px] uppercase font-black tracking-widest">No queries found.</p>';
+                } else {
+                    listContainer.innerHTML = '<p class="text-center py-10 opacity-20 text-[10px] uppercase font-black tracking-widest">No queries found.</p>';
+                }
+            });
+        }
+
+        // Global Delete Function
+        window.deleteQuery = async (key) => {
+            if(confirm("Do you want to delete this query?")) {
+                try {
+                    await remove(ref(db, `queries/${key}`));
+                    if(navigator.vibrate) navigator.vibrate(50);
+                } catch(e) {
+                    alert("Delete Failed!");
+                }
+            }
+        };
 
         window.sendQuery = async () => {
             const subject = document.getElementById('query-subject').value.trim();
@@ -96,10 +157,8 @@
                 return alert("Please enter both Subject and Message.");
             }
 
-            // UI Feedback: Disable button and show loading
             btn.disabled = true;
-            btn.classList.replace('bg-sky-500', 'bg-slate-700');
-            btnText.innerText = "UPLOADING TO CLOUD...";
+            btnText.innerText = "UPLOADING...";
 
             try {
                 const queryRef = ref(db, 'queries');
@@ -108,28 +167,29 @@
                 await set(newQuery, {
                     uid: currentUser.uid,
                     email: currentUser.email,
-                    name: currentUser.displayName,
+                    name: currentUser.displayName || "Student",
                     subject: subject,
                     message: msg,
                     timestamp: new Date().toLocaleString(),
                     status: "Pending",
-                    reply: "" // Empty for admin response
+                    reply: "" 
                 });
 
-                // SUCCESS FEEDBACK
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Success vibration
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 document.getElementById('success-overlay').style.display = 'flex';
                 
                 setTimeout(() => {
-                    history.back(); // Redirect back after 2 seconds
-                }, 2000);
+                    document.getElementById('success-overlay').style.display = 'none';
+                    document.getElementById('query-subject').value = '';
+                    document.getElementById('query-msg').value = '';
+                    btn.disabled = false;
+                    btnText.innerText = "Submit Query";
+                }, 1500);
 
             } catch(e) { 
-                console.error(e);
-                alert("Cloud Error: Query failed to upload."); 
+                alert("Cloud Error."); 
                 btn.disabled = false;
-                btn.classList.replace('bg-slate-700', 'bg-sky-500');
-                btnText.innerText = "SUBMIT QUERY"; 
+                btnText.innerText = "Submit Query"; 
             }
         };
     </script>
