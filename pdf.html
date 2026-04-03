@@ -12,17 +12,20 @@
         :root { --primary: #38bdf8; --bg: #0f172a; }
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: white; margin: 0; padding: 15px; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .pdf-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; border-radius: 20px; padding: 20px; }
+        .pdf-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; border-radius: 20px; padding: 20px; position: relative; }
         .pdf-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         .course-badge { background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(56, 189, 248, 0.2); }
         .btn-view { width: 100%; background: var(--primary); color: #0f172a; font-weight: 800; padding: 12px; border-radius: 12px; margin-top: 15px; transition: 0.2s; }
         .btn-view:active { transform: scale(0.95); opacity: 0.9; }
 
-        /* Naya Style Image Gallery ke liye */
         .gallery-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 10px; scrollbar-width: none; }
         .gallery-container::-webkit-scrollbar { display: none; }
-        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .img-item img { width: 100%; height: 90px; object-fit: cover; }
+        .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .img-item img { width: 100%; height: 90px; object-fit: cover; cursor: pointer; }
+        
+        /* Delete Button Style */
+        .delete-btn { color: #64748b; transition: 0.2s; cursor: pointer; }
+        .delete-btn:hover { color: #ef4444; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -33,7 +36,8 @@
                 <i class="fas fa-arrow-left"></i>
             </a>
             <h1 class="text-xl font-black italic tracking-tighter">SNT <span class="text-sky-500">PDF VAULT</span></h1>
-            <div class="w-10"></div> </header>
+            <div class="w-10"></div> 
+        </header>
 
         <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
             <img id="user-img" src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
@@ -47,8 +51,7 @@
             <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <i class="fas fa-image text-sky-400"></i> Latest Updates
             </h3>
-            <div id="image-gallery" class="gallery-container">
-                </div>
+            <div id="image-gallery" class="gallery-container"></div>
         </div>
 
         <h3 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
@@ -84,82 +87,68 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // PDF View Logic
+        // Data Delete Function
+        function deleteData(path, key) {
+            if(confirm("⚠ Kya aap is file ko hamesha ke liye delete karna chahte hain?")) {
+                db.ref(`${path}/${key}`).remove()
+                .then(() => alert("Data safely delete ho gaya!"))
+                .catch((err) => alert("Error: " + err.message));
+            }
+        }
+
         function viewPDF(base64Data) {
             try {
                 const blob = base64ToBlob(base64Data, 'application/pdf');
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
-            } catch (e) {
-                alert("PDF load karne mein dikkat aa rahi hai.");
-            }
+            } catch (e) { alert("PDF load karne mein dikkat aa rahi hai."); }
         }
 
-        // Image View Logic
         function viewImg(base64Data) {
             const win = window.open();
-            win.document.write(`<body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center;"><img src="${base64Data}" style="max-width:100%; height:auto; box-shadow:0 0 20px rgba(0,0,0,0.5);"></body>`);
+            win.document.write(`<body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center;"><img src="${base64Data}" style="max-width:100%; height:auto;"></body>`);
         }
 
         function base64ToBlob(base64, type) {
             const parts = base64.split(';base64,');
             const raw = window.atob(parts[1]);
-            const rawLength = raw.length;
-            const uInt8Array = new Uint8Array(rawLength);
-            for (let i = 0; i < rawLength; ++i) {
-                uInt8Array[i] = raw.charCodeAt(i);
-            }
+            const uInt8Array = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; ++i) uInt8Array[i] = raw.charCodeAt(i);
             return new Blob([uInt8Array], { type: type });
         }
 
-        // Auth Listener
         auth.onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('user-img').src = user.photoURL || "./SNT.jpg";
-                
-                // Common Images load karein
                 loadImages();
-
                 db.ref('students/' + user.uid).on('value', (snapshot) => {
                     const studentData = snapshot.val();
                     if (studentData) {
-                        const name = studentData.name || user.displayName;
+                        document.getElementById('welcome-msg').innerText = studentData.name || user.displayName;
                         const courses = studentData.courses || [];
-                        document.getElementById('welcome-msg').innerText = name;
-                        const courseList = Array.isArray(courses) ? courses.join(", ") : (courses || "N/A");
-                        document.getElementById('course-msg').innerText = "Courses: " + courseList;
+                        document.getElementById('course-msg').innerText = "Courses: " + (Array.isArray(courses) ? courses.join(", ") : courses);
                         loadPDFs(courses);
-                    } else {
-                        checkByEmail(user);
-                    }
+                    } else { checkByEmail(user); }
                 });
-            } else {
-                window.location.href = "index.html";
-            }
+            } else { window.location.href = "index.html"; }
         });
 
-        // Naya: Common Images Fetch karne ke liye function
         function loadImages() {
             db.ref('myImages').on('value', (snap) => {
                 const gallery = document.getElementById('image-gallery');
                 gallery.innerHTML = '';
                 const data = snap.val() || {};
-                const keys = Object.keys(data).reverse();
-
-                if (keys.length === 0) {
-                    gallery.innerHTML = '<p class="text-[10px] text-slate-500 italic">No images yet.</p>';
-                    return;
-                }
-
-                keys.forEach(key => {
+                Object.keys(data).reverse().forEach(key => {
                     const img = data[key];
                     const div = document.createElement('div');
                     div.className = 'img-item flex-shrink-0';
-                    div.onclick = () => viewImg(img.data);
                     div.innerHTML = `
-                        <img src="${img.data}">
+                        <img src="${img.data}" onclick="viewImg('${img.data}')">
                         <div class="p-2">
-                            <p class="text-[9px] font-bold truncate text-sky-400">${img.name || 'Update'}</p>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-[9px] font-bold truncate text-sky-400 w-full">${img.name || 'Update'}</p>
+                                <i class="fas fa-trash-alt delete-btn text-[9px]" onclick="deleteData('myImages', '${key}')"></i>
+                            </div>
                             <p class="text-[8px] text-slate-400 line-clamp-1">${img.desc || ''}</p>
                         </div>
                     `;
@@ -173,29 +162,23 @@
                 if(snap.exists()){
                     const data = Object.values(snap.val())[0];
                     loadPDFs(data.courses || []);
-                } else {
-                    document.getElementById('welcome-msg').innerText = "Guest User";
-                    loadPDFs([]);
-                }
+                } else { loadPDFs([]); }
             });
         }
 
         function loadPDFs(studentCourses) {
             const coursesArray = Array.isArray(studentCourses) ? studentCourses : [studentCourses];
-            
             db.ref('myPDFs').on('value', (snap) => {
                 const grid = document.getElementById('grid');
                 const noAccess = document.getElementById('no-access');
                 grid.innerHTML = '';
                 const data = snap.val() || {};
-                
                 let found = 0;
 
                 Object.keys(data).reverse().forEach(key => {
                     const pdf = data[key];
                     const isMatch = coursesArray.some(c => c.trim() === pdf.category?.trim()) || 
-                                    pdf.category === "Other" || 
-                                    pdf.category === "All";
+                                    pdf.category === "Other" || pdf.category === "All";
 
                     if (isMatch) {
                         found++;
@@ -204,23 +187,21 @@
                         div.innerHTML = `
                             <div class="flex justify-between items-start mb-3">
                                 <span class="course-badge">${pdf.category}</span>
-                                <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                                <div class="flex gap-3">
+                                    <i class="fas fa-trash-alt delete-btn text-sm" onclick="deleteData('myPDFs', '${key}')"></i>
+                                    <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                                </div>
                             </div>
                             <h3 class="font-black text-sm mb-1 truncate">${pdf.name}</h3>
-                            <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description available.'}</p>
-                            <button onclick="viewPDF('${pdf.pdf}')" class="btn-view">
+                            <p class="text-[10px] text-slate-400 line-clamp-2 h-7">${pdf.desc || 'No description'}</p>
+                            <button onclick="viewPDF('${pdf.data || pdf.pdf}')" class="btn-view">
                                 <i class="fas fa-eye mr-2"></i> VIEW NOTES
                             </button>
                         `;
                         grid.appendChild(div);
                     }
                 });
-
-                if (found === 0) {
-                    noAccess.classList.remove('hidden');
-                } else {
-                    noAccess.classList.add('hidden');
-                }
+                found === 0 ? noAccess.classList.remove('hidden') : noAccess.classList.add('hidden');
             });
         }
     </script>
