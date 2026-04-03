@@ -14,10 +14,7 @@
   <style>
     :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #facc15; }
     body { font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); margin: 0; padding: 15px; user-select: none; }
-   #u-id, #u-id-top {
-    user-select: text !important;
-    -webkit-user-select: text !important;
-}
+    #u-id, #u-id-top { user-select: text !important; -webkit-user-select: text !important; }
  
     header { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
     header h1 { font-size: 18px; margin: 0; color: var(--accent); font-weight: 800; text-transform: uppercase; }
@@ -38,10 +35,9 @@
     .btn-pay { background: var(--success); color: white; }
     .btn-secondary { background: #334155; color: white; border: 1px solid rgba(255,255,255,0.1); }
 
-    /* Modal Styling */
     #pay-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center; backdrop-filter: blur(5px); padding: 20px; }
-    .modal-content { background: #fff; color: #333; padding: 20px; border-radius: 20px; width: 100%; max-width: 300px; text-align: center; }
-    select, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; }
+    .modal-content { background: #fff; color: #333; padding: 20px; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; }
+    select, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; color: #000; }
     
     #loader { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
     .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
@@ -52,7 +48,7 @@
 
   <div id="loader">
     <div class="spinner"></div>
-    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">LOADING YOUR PROFILE...</div>
+    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">SYNCING DASHBOARD...</div>
   </div>
 
   <header>
@@ -106,16 +102,31 @@
 
   <div id="pay-modal">
     <div class="modal-content">
-      <h3 style="margin-top:0">Pay Fees Online</h3>
+      <h3 style="margin-top:0; color:#0f172a; font-weight:900;">ONLINE PAYMENT</h3>
       <select id="pay-month">
-        <option>Admission Fee</option><option>Monthly Tuition Fee</option>
+        <option value="Admission Fee">Admission Fee</option>
+        <option disabled>───────</option>
+        <option value="January">January Fee</option>
+        <option value="February">February Fee</option>
+        <option value="March">March Fee</option>
+        <option value="April">April Fee</option>
+        <option value="May">May Fee</option>
+        <option value="June">June Fee</option>
+        <option value="July">July Fee</option>
+        <option value="August">August Fee</option>
+        <option value="September">September Fee</option>
+        <option value="October">October Fee</option>
+        <option value="November">November Fee</option>
+        <option value="December">December Fee</option>
       </select>
       <input type="number" id="pay-amount" placeholder="Enter Amount ₹">
-      <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center;"></div>
-      <p id="qr-status" style="font-size:12px; color:#666;"></p>
-      <button id="gen-qr-btn" class="btn-action" style="background: #000; color:#fff;" onclick="generatePayQR()">GENERATE QR</button>
+      <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center; border: 5px solid #f1f5f9; padding:10px; border-radius:10px;"></div>
+      <p id="qr-status" style="font-size:11px; color:#475569; font-weight:bold;"></p>
+      
+      <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE UPI QR</button>
       <button id="conf-pay-btn" class="btn-action" style="background: var(--success); color:#fff; display:none;" onclick="confirmStudentPayment()">I HAVE PAID SUCCESSFULLY</button>
-      <button onclick="closeModal()" style="border:none; background:none; color:red; margin-top:15px; cursor:pointer; font-weight:bold;">CANCEL</button>
+      
+      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px; text-transform:uppercase;">✕ Close Window</button>
     </div>
   </div>
 
@@ -146,13 +157,10 @@
           currentStudentKey = Object.keys(snap.val())[0];
           studentData = snap.val()[currentStudentKey];
 
-          // Profile Update
           document.getElementById('u-img').src = studentData.profilePicture || 'SNT.jpg';
           document.getElementById('u-name').innerText = studentData.name || '---';
           document.getElementById('u-id').innerText = studentData.studentId || 'N/A';
           document.getElementById('u-id-top').innerText = "ID: " + (studentData.studentId || 'N/A');
-          
-          // Admission & Personal
           document.getElementById('u-father').innerText = studentData.fatherName || 'N/A';
           document.getElementById('u-dob').innerText = studentData.dob || 'N/A';
           document.getElementById('u-gender').innerText = studentData.gender || 'N/A';
@@ -160,53 +168,35 @@
           document.getElementById('u-addr').innerText = studentData.address || 'N/A';
           document.getElementById('u-adm-date').innerText = studentData.admissionDate || '--/--/----';
 
-          // Courses (Handle Array)
-          let courseDisplay = 'N/A';
-          if (studentData.courses && Array.isArray(studentData.courses)) {
-              courseDisplay = studentData.courses.join(', ');
-          } else if (studentData.course) {
-              courseDisplay = studentData.course;
-          }
+          let courseDisplay = studentData.courses ? (Array.isArray(studentData.courses) ? studentData.courses.join(', ') : studentData.courses) : 'N/A';
           document.getElementById('u-course').innerText = courseDisplay;
 
-          // Batches (Handle Array)
-          let batchDisplay = 'N/A';
-          if (studentData.batches && Array.isArray(studentData.batches)) {
-              batchDisplay = studentData.batches.join(', ');
-          }
+          let batchDisplay = studentData.batches ? (Array.isArray(studentData.batches) ? studentData.batches.join(', ') : studentData.batches) : 'N/A';
           document.getElementById('u-batch').innerText = batchDisplay;
 
           document.getElementById('u-phone').innerText = studentData.mobile || studentData.phone || '--';
           document.getElementById('u-won').innerText = `₹${studentData.wonCash || 0}`;
 
-          // Status Badge
           const statusEl = document.getElementById('u-status');
           const regStatus = studentData.registrationStatus || 'Pending';
           statusEl.innerText = `● Status: ${regStatus}`;
           statusEl.style.color = (regStatus === 'Pending') ? '#ef4444' : '#10b981';
 
-          // Buttons
-          document.getElementById('att-btn').onclick = () => {
-            window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html?id=${currentStudentKey}`;
-          };
-          document.getElementById('rec-btn').onclick = () => {
-            window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(studentData.name)}`;
-          };
+          document.getElementById('att-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html?id=${currentStudentKey}`;
+          document.getElementById('rec-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(studentData.name)}`;
 
           document.getElementById('loader').style.display = 'none';
           document.getElementById('main-content').style.display = 'block';
         } else {
-          alert("Data synchronization error.");
-          logout();
+          alert("Record not found."); logout();
         }
       });
     }
 
-    // Payment Logic (UPI 9580807075@ybl)
     function openPaymentModal() {
       document.getElementById('pay-modal').style.display = 'flex';
       document.getElementById('qrcode-box').innerHTML = "";
-      document.getElementById('qr-status').innerText = "";
+      document.getElementById('qr-status').innerText = "Enter amount and select month";
       document.getElementById('conf-pay-btn').style.display = 'none';
       document.getElementById('gen-qr-btn').style.display = 'block';
     }
@@ -214,22 +204,41 @@
     function generatePayQR() {
       const amt = document.getElementById('pay-amount').value;
       const month = document.getElementById('pay-month').value;
-      if(!amt || amt < 1) return alert("Please enter amount");
+      if(!amt || amt < 1) return alert("Please enter a valid amount");
 
       document.getElementById('qrcode-box').innerHTML = "";
       new QRCode(document.getElementById('qrcode-box'), {
-        text: `upi://pay?pa=9580807075@ybl&pn=Sandeep%20Kumar&am=${amt}&cu=INR`,
-        width: 160, height: 160
+        text: `upi://pay?pa=9580807075@ybl&pn=Sandeep%20Kumar&am=${amt}&cu=INR&tn=SNT_${studentData.name}_${month}`,
+        width: 180, height: 180
       });
 
-      document.getElementById('qr-status').innerText = `Amount: ₹${amt} | Purpose: ${month}`;
+      document.getElementById('qr-status').innerText = `SENDING ₹${amt} FOR ${month.toUpperCase()}`;
       document.getElementById('gen-qr-btn').style.display = 'none';
       document.getElementById('conf-pay-btn').style.display = 'block';
     }
 
+    // New Function to Store Data in Firebase
     function confirmStudentPayment() {
-      alert("Please show the transaction ID/Screenshot to Institute Admin for manual verification.");
-      closeModal();
+      const amt = document.getElementById('pay-amount').value;
+      const month = document.getElementById('pay-month').value;
+
+      const paymentRecord = {
+        studentName: studentData.name,
+        studentId: studentData.studentId,
+        email: studentData.email,
+        amount: amt,
+        month: month,
+        timestamp: new Date().toLocaleString(),
+        status: "Review Required"
+      };
+
+      // Saving to 'paymentRequests' node in Firebase
+      db.ref('paymentRequests').push(paymentRecord).then(() => {
+          alert("THANK YOU! Your payment request for " + month + " has been sent to the Admin. Please keep your transaction screenshot ready for verification.");
+          closeModal();
+      }).catch((error) => {
+          alert("Error: " + error.message);
+      });
     }
 
     function closeModal() { document.getElementById('pay-modal').style.display = 'none'; }
