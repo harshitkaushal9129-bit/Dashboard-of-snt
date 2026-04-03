@@ -31,14 +31,12 @@
     .label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; }
     .val { font-size: 13px; font-weight: 600; color: #fff; overflow-wrap: break-word; }
 
-    /* Edit Button Styling */
     .edit-trigger { color: var(--edit-yellow); font-size: 9px; cursor: pointer; float: right; background: rgba(250, 204, 21, 0.1); padding: 1px 4px; border-radius: 3px; font-weight: bold; }
 
     .btn-action { margin-top: 12px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 11px; }
     .btn-pay { background: var(--success); color: white; }
     .btn-secondary { background: #334155; color: white; border: 1px solid rgba(255,255,255,0.1); }
 
-    /* Universal Modal Styling (used for Payment and Editing) */
     #pay-modal, #edit-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center; backdrop-filter: blur(8px); padding: 20px; }
     .modal-content { background: #fff; color: #333; padding: 25px; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     select, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; color: #000; outline: none; }
@@ -50,10 +48,7 @@
 </head>
 <body oncontextmenu="return false;">
 
-  <div id="loader">
-    <div class="spinner"></div>
-    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">FETCHING FULL PROFILE...</div>
-  </div>
+  <div id="loader"><div class="spinner"></div></div>
 
   <header>
     <h1>SNT DASHBOARD</h1>
@@ -130,21 +125,19 @@
       <input type="number" id="pay-amount" placeholder="Enter Amount ₹">
       <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center; border: 5px solid #f1f5f9; padding:10px; border-radius:10px;"></div>
       <p id="qr-status" style="font-size:11px; color:#475569; font-weight:bold;"></p>
-      
       <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE QR</button>
       <button id="conf-pay-btn" class="btn-action" style="background: var(--success); color:#fff; display:none;" onclick="confirmStudentPayment()">I HAVE PAID SUCCESSFULLY</button>
-      
-      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px;">✕ CANCEL</button>
+      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800;">✕ CANCEL</button>
     </div>
   </div>
 
   <div id="edit-modal">
     <div class="modal-content">
-      <h3 id="edit-title" style="margin-top:0; color:#0f172a; font-weight:900; text-transform: uppercase; font-size: 16px;">Update Info</h3>
+      <h3 id="edit-title" style="margin-top:0; color:#0f172a; font-weight:900;">Update Info</h3>
       <p style="font-size: 10px; color: #ef4444; font-weight: bold; margin-bottom: 10px;">NOTE: You can only update this once!</p>
       <input type="text" id="edit-input" placeholder="Enter details...">
       <button class="btn-action" style="background: var(--primary); color: #fff;" onclick="submitOneTimeUpdate()">SAVE PERMANENTLY</button>
-      <button onclick="closeEditModal()" style="border:none; background:none; color:#64748b; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px;">✕ CANCEL</button>
+      <button onclick="closeEditModal()" style="border:none; background:none; color:#64748b; margin-top:15px; cursor:pointer; font-weight:800;">✕ CANCEL</button>
     </div>
   </div>
 
@@ -176,18 +169,15 @@
           currentStudentKey = Object.keys(snap.val())[0];
           studentData = snap.val()[currentStudentKey];
 
-          // Photo & Name
           document.getElementById('u-img').src = studentData.profilePicture || 'SNT.jpg';
           document.getElementById('u-name').innerText = studentData.name || '---';
           document.getElementById('u-id-top').innerText = "ID: " + (studentData.studentId || 'N/A');
           
-          // Identity Section (with Editable logic)
           handleOneTimeField('u-father', 'fatherName', "Father's Name");
           handleOneTimeField('u-mother', 'motherName', "Mother's Name");
           document.getElementById('u-gender').innerText = studentData.gender || 'N/A';
           document.getElementById('u-dob').innerText = studentData.dob || 'N/A';
 
-          // Academic Section
           let courseDisplay = studentData.courses ? (Array.isArray(studentData.courses) ? studentData.courses.join(', ') : studentData.courses) : 'N/A';
           document.getElementById('u-course').innerText = courseDisplay;
           handleOneTimeField('u-edu', 'lastQualification', "Qualification");
@@ -195,13 +185,16 @@
           document.getElementById('u-eng').innerText = studentData.english || 'N/A';
           document.getElementById('u-adm-date').innerText = studentData.admissionDate || '--/--/----';
 
-          // Contact Section
           document.getElementById('u-phone').innerText = studentData.mobile || studentData.phone || '--';
           document.getElementById('u-work').innerText = studentData.working || 'N/A';
           document.getElementById('u-email').innerText = studentData.email || 'N/A';
           handleOneTimeField('u-addr', 'address', "Full Address");
 
-          // Status & Buttons
+          let batchDisplay = studentData.batches ? (Array.isArray(studentData.batches) ? studentData.batches.join(', ') : studentData.batches) : 'N/A';
+          document.getElementById('u-batch').innerText = batchDisplay;
+          document.getElementById('u-won').innerText = `₹${studentData.wonCash || 0}`;
+          document.getElementById('u-sign').innerText = studentData.signature || '---';
+
           const statusEl = document.getElementById('u-status');
           const regStatus = studentData.registrationStatus || 'Pending';
           statusEl.innerText = `● STATUS: ${regStatus}`;
@@ -216,11 +209,9 @@
       });
     }
 
-    // --- ONE-TIME EDIT LOGIC ---
     function handleOneTimeField(elementId, dbField, label) {
         const el = document.getElementById(elementId);
         const val = studentData[dbField] || 'N/A';
-        
         if (val === 'N/A' || val === '' || val === '---') {
             el.innerHTML = `<span style="color:#94a3b8">N/A</span> <span class="edit-trigger" onclick="openEditModal('${dbField}', '${label}')">Add ✎</span>`;
         } else {
@@ -239,19 +230,17 @@
 
     function submitOneTimeUpdate() {
         const newVal = document.getElementById('edit-input').value.trim();
-        if(!newVal) return alert("Please enter some value!");
+        if(!newVal || !activeEditField) return alert("Please enter value!");
 
         const updateObj = {};
         updateObj[activeEditField] = newVal;
 
-        // TARGET ONLY LOGGED IN STUDENT
         db.ref('students/' + currentStudentKey).update(updateObj).then(() => {
             alert("Updated Successfully!");
             closeEditModal();
         }).catch(err => alert("Error: " + err.message));
     }
 
-    // --- PAYMENT LOGIC ---
     function openPaymentModal() {
       document.getElementById('pay-modal').style.display = 'flex';
       document.getElementById('qrcode-box').innerHTML = "";
@@ -278,7 +267,6 @@
     function confirmStudentPayment() {
       const amt = document.getElementById('pay-amount').value;
       const month = document.getElementById('pay-month').value;
-      
       db.ref('paymentRequests').push({
         studentName: studentData.name,
         studentId: studentData.studentId,
