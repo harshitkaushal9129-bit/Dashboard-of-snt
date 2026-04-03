@@ -27,20 +27,20 @@ self.addEventListener('push', function(event) {
         }
     }
 
-    const options = {
-        body: data.body,
-        icon: './SNT.jpg',
-        badge: './SNT.jpg',
-        vibrate: [500, 110, 500, 110, 450],
-        tag: 'snt-notification',
-        renotify: true,
-        data: { url: data.url || './index.html' },
-        // Android Specific for Lock Screen
-        requireInteraction: true,
-        actions: [
-            { action: 'open', title: 'Check Now' }
-        ]
-    };
+const options = {
+    body: data.body,
+    icon: './SNT.jpg',    // Ye colored logo hai (Notification ke side mein dikhega)
+    badge: './badge.png', // Ye transparent PNG honi chahiye (Status Bar ke liye)
+    vibrate: [500, 110, 500, 110, 450],
+    tag: 'snt-notification',
+    renotify: true,
+    data: { url: data.url || './index.html' },
+    requireInteraction: true,
+    actions: [
+        { action: 'open', title: 'Check Now' }
+    ]
+};
+
 
     event.waitUntil(
         self.registration.showNotification(data.title, options)
