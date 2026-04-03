@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
   <style>
-    :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; }
+    :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; --edit-yellow: #facc15; }
     body { font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); margin: 0; padding: 15px; user-select: none; }
     #u-id, #u-id-top { user-select: text !important; -webkit-user-select: text !important; }
  
@@ -26,49 +26,50 @@
     .section-label { color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 20px 0 10px 0; display: block; letter-spacing: 1.5px; border-left: 3px solid var(--accent); padding-left: 8px; }
 
     .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .info-box { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .info-box { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); min-height: 45px; }
     .full-width { grid-column: span 2; }
     .label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; }
     .val { font-size: 13px; font-weight: 600; color: #fff; overflow-wrap: break-word; }
 
-    .btn-action { margin-top: 12px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 11px; }
-    .btn-pay { background: var(--success); color: white; }
-    .btn-secondary { background: #334155; color: white; border: 1px solid rgba(255,255,255,0.1); }
+    /* Edit Trigger Text */
+    .edit-trigger { color: var(--edit-yellow); font-size: 10px; cursor: pointer; text-decoration: underline; margin-left: 5px; }
 
-    #pay-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center; backdrop-filter: blur(5px); padding: 20px; }
-    .modal-content { background: #fff; color: #333; padding: 20px; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; }
-    select, input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; color: #000; }
+    /* Custom Edit Modal Styling */
+    #edit-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center; backdrop-filter: blur(8px); }
+    .modal-box { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; color: #333; }
+    .modal-box h3 { margin: 0 0 15px 0; font-size: 18px; color: var(--primary); }
+    .modal-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 14px; }
     
-    #loader { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
-    .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+    .btn-action { margin-top: 10px; width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+    .btn-save { background: var(--success); color: white; }
+    .btn-close { background: #64748b; color: white; }
+
+    #loader { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body oncontextmenu="return false;">
 
-  <div id="loader">
-    <div class="spinner"></div>
-    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">FETCHING FULL PROFILE...</div>
-  </div>
+  <div id="loader"><div class="spinner"></div></div>
 
   <header>
     <h1>SNT DASHBOARD</h1>
-    <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size: 12px;">LOGOUT</button>
+    <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:bold; font-size: 12px;">LOGOUT</button>
   </header>
 
   <div id="main-content" style="display:none;">
     <div class="student-card">
-      
       <div class="profile-header">
         <img id="u-img" src="SNT.jpg" class="profile-img">
         <div>
-          <div id="u-name" style="font-size: 20px; font-weight: 800; color: #fff;">---</div>
-          <div id="u-status" style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 5px; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px;">--</div>
-          <div id="u-id-top" style="font-size: 11px; color: var(--accent); font-weight: bold; margin-top: 5px;">ID: --</div>
+          <div id="u-name" style="font-size: 20px; font-weight: 800;">---</div>
+          <div id="u-status" style="font-size: 10px; font-weight: bold; margin-top: 5px;">--</div>
+          <div id="u-id-top" style="font-size: 11px; color: var(--accent);">ID: --</div>
         </div>
       </div>
 
-      <span class="section-label">Personal Identity</span>
+      <span class="section-label">Identity Details</span>
       <div class="data-grid">
         <div class="info-box"><div class="label">Father's Name</div><div id="u-father" class="val">--</div></div>
         <div class="info-box"><div class="label">Mother's Name</div><div id="u-mother" class="val">--</div></div>
@@ -76,61 +77,27 @@
         <div class="info-box"><div class="label">Date of Birth</div><div id="u-dob" class="val">--</div></div>
       </div>
 
-      <span class="section-label">Academic Background</span>
+      <span class="section-label">Academic & Location</span>
       <div class="data-grid">
-        <div class="info-box full-width"><div class="label">Course(s) Enrolled</div><div id="u-course" class="val">--</div></div>
-        <div class="info-box"><div class="label">Last Qualification</div><div id="u-edu" class="val">--</div></div>
+        <div class="info-box full-width"><div class="label">Qualification</div><div id="u-edu" class="val">--</div></div>
         <div class="info-box"><div class="label">Passing Year</div><div id="u-pass" class="val">--</div></div>
-        <div class="info-box"><div class="label">English Skill</div><div id="u-eng" class="val">--</div></div>
-        <div class="info-box"><div class="label">Admission Date</div><div id="u-adm-date" class="val">--</div></div>
-      </div>
-
-      <span class="section-label">Contact & Location</span>
-      <div class="data-grid">
         <div class="info-box"><div class="label">WhatsApp No.</div><div id="u-phone" class="val">--</div></div>
-        <div class="info-box"><div class="label">Working Status</div><div id="u-work" class="val">--</div></div>
-        <div class="info-box full-width"><div class="label">Registered Email</div><div id="u-email" class="val">--</div></div>
-        <div class="info-box full-width"><div class="label">Full Address</div><div id="u-addr" class="val" style="font-size:12px;">--</div></div>
-      </div>
-
-      <span class="section-label">Institute Details</span>
-      <div class="data-grid">
-        <div class="info-box"><div class="label">Batch Selection</div><div id="u-batch" class="val">--</div></div>
-        <div class="info-box"><div class="label">Cash Rewards</div><div id="u-won" class="val" style="color:var(--success)">₹0</div></div>
-        <div class="info-box full-width"><div class="label">Digital Signature</div><div id="u-sign" class="val" style="font-family: cursive; color: var(--accent);">--</div></div>
+        <div class="info-box full-width"><div class="label">Full Address</div><div id="u-addr" class="val">--</div></div>
       </div>
 
       <div style="margin-top: 25px;">
-        <button class="btn-action btn-pay" onclick="openPaymentModal()">💰 PAY ONLINE FEES</button>
-        <div style="display: flex; gap: 10px;">
-          <button id="att-btn" class="btn-action btn-secondary">Attendance</button>
-          <button id="rec-btn" class="btn-action btn-secondary">ID Card / Receipt</button>
-        </div>
+        <button class="btn-action" style="background:var(--accent); color:#000;" onclick="openPaymentModal()">💰 PAY ONLINE FEES</button>
+        <button id="rec-btn" class="btn-action" style="background:#334155; color:#fff;">GET ID CARD</button>
       </div>
     </div>
   </div>
 
-  <div id="pay-modal">
-    <div class="modal-content">
-      <h3 style="margin-top:0; color:#0f172a; font-weight:900;">FEES PAYMENT</h3>
-      <select id="pay-month">
-        <option value="Admission Fee">Admission Fee</option>
-        <option disabled>───────</option>
-        <option value="January">January Fee</option><option value="February">February Fee</option>
-        <option value="March">March Fee</option><option value="April">April Fee</option>
-        <option value="May">May Fee</option><option value="June">June Fee</option>
-        <option value="July">July Fee</option><option value="August">August Fee</option>
-        <option value="September">September Fee</option><option value="October">October Fee</option>
-        <option value="November">November Fee</option><option value="December">December Fee</option>
-      </select>
-      <input type="number" id="pay-amount" placeholder="Enter Amount ₹">
-      <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center; border: 5px solid #f1f5f9; padding:10px; border-radius:10px;"></div>
-      <p id="qr-status" style="font-size:11px; color:#475569; font-weight:bold;"></p>
-      
-      <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE QR</button>
-      <button id="conf-pay-btn" class="btn-action" style="background: var(--success); color:#fff; display:none;" onclick="confirmStudentPayment()">I HAVE PAID SUCCESSFULLY</button>
-      
-      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px;">✕ CANCEL</button>
+  <div id="edit-modal">
+    <div class="modal-box">
+      <h3 id="modal-title">Update Info</h3>
+      <input type="text" id="modal-input">
+      <button class="btn-action btn-save" onclick="saveData()">SAVE CHANGES</button>
+      <button class="btn-action btn-close" onclick="closeEditModal()">CANCEL</button>
     </div>
   </div>
 
@@ -149,6 +116,7 @@
 
     let currentStudentKey = null;
     let studentData = null;
+    let activeField = "";
 
     auth.onAuthStateChanged((user) => {
       if (user) { loadMyData(user.email); } 
@@ -161,46 +129,25 @@
           currentStudentKey = Object.keys(snap.val())[0];
           studentData = snap.val()[currentStudentKey];
 
-          // Photo & Name
+          // Set Static Data
           document.getElementById('u-img').src = studentData.profilePicture || 'SNT.jpg';
           document.getElementById('u-name').innerText = studentData.name || '---';
           document.getElementById('u-id-top').innerText = "ID: " + (studentData.studentId || 'N/A');
-          
-          // Identity Section
-          document.getElementById('u-father').innerText = studentData.fatherName || 'N/A';
-          document.getElementById('u-mother').innerText = studentData.motherName || 'N/A';
           document.getElementById('u-gender').innerText = studentData.gender || 'N/A';
           document.getElementById('u-dob').innerText = studentData.dob || 'N/A';
+          document.getElementById('u-phone').innerText = studentData.mobile || '--';
 
-          // Academic Section
-          let courseDisplay = studentData.courses ? (Array.isArray(studentData.courses) ? studentData.courses.join(', ') : studentData.courses) : 'N/A';
-          document.getElementById('u-course').innerText = courseDisplay;
-          document.getElementById('u-edu').innerText = studentData.lastQualification || 'N/A';
-          document.getElementById('u-pass').innerText = studentData.passingYear || 'N/A';
-          document.getElementById('u-eng').innerText = studentData.english || 'N/A';
-          document.getElementById('u-adm-date').innerText = studentData.admissionDate || '--/--/----';
-
-          // Contact Section
-          document.getElementById('u-phone').innerText = studentData.mobile || studentData.phone || '--';
-          document.getElementById('u-work').innerText = studentData.working || 'N/A';
-          document.getElementById('u-email').innerText = studentData.email || 'N/A';
-          document.getElementById('u-addr').innerText = studentData.address || 'N/A';
-
-          // Office Section
-          let batchDisplay = studentData.batches ? (Array.isArray(studentData.batches) ? studentData.batches.join(', ') : studentData.batches) : 'N/A';
-          document.getElementById('u-batch').innerText = batchDisplay;
-          document.getElementById('u-won').innerText = `₹${studentData.wonCash || 0}`;
-          document.getElementById('u-sign').innerText = studentData.signature || '---';
+          // Set Editable Data with N/A logic
+          handleEditUI('u-father', 'fatherName', 'Father\'s Name');
+          handleEditUI('u-mother', 'motherName', 'Mother\'s Name');
+          handleEditUI('u-edu', 'lastQualification', 'Qualification');
+          handleEditUI('u-pass', 'passingYear', 'Passing Year');
+          handleEditUI('u-addr', 'address', 'Address');
 
           // Status Badge
           const statusEl = document.getElementById('u-status');
-          const regStatus = studentData.registrationStatus || 'Pending';
-          statusEl.innerText = `● STATUS: ${regStatus}`;
-          statusEl.style.color = (regStatus === 'Pending') ? '#ef4444' : '#10b981';
-
-          // Buttons
-          document.getElementById('att-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html?id=${currentStudentKey}`;
-          document.getElementById('rec-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(studentData.name)}`;
+          statusEl.innerText = `● STATUS: ${studentData.registrationStatus || 'Pending'}`;
+          statusEl.style.color = (studentData.registrationStatus === 'Active') ? '#10b981' : '#ef4444';
 
           document.getElementById('loader').style.display = 'none';
           document.getElementById('main-content').style.display = 'block';
@@ -208,53 +155,45 @@
       });
     }
 
-    // Payment Logic
-    function openPaymentModal() {
-      document.getElementById('pay-modal').style.display = 'flex';
-      document.getElementById('qrcode-box').innerHTML = "";
-      document.getElementById('conf-pay-btn').style.display = 'none';
-      document.getElementById('gen-qr-btn').style.display = 'block';
+    // UI Manager for Editable Fields
+    function handleEditUI(divId, dbKey, label) {
+        const el = document.getElementById(divId);
+        const val = studentData[dbKey] || 'N/A';
+        
+        if (val === 'N/A' || val === '' || val === '---') {
+            el.innerHTML = `<span style="color:#94a3b8">N/A</span> <span class="edit-trigger" onclick="openEditModal('${dbKey}', '${label}')">Add ✎</span>`;
+        } else {
+            el.innerText = val;
+        }
     }
 
-    function generatePayQR() {
-      const amt = document.getElementById('pay-amount').value;
-      const month = document.getElementById('pay-month').value;
-      if(!amt || amt < 1) return alert("Please enter amount");
-
-      document.getElementById('qrcode-box').innerHTML = "";
-      new QRCode(document.getElementById('qrcode-box'), {
-        text: `upi://pay?pa=9580807075@ybl&pn=Sandeep%20Kumar&am=${amt}&cu=INR&tn=SNT_${studentData.name}_${month}`,
-        width: 170, height: 170
-      });
-
-      document.getElementById('qr-status').innerText = `PAYING ₹${amt} FOR ${month.toUpperCase()}`;
-      document.getElementById('gen-qr-btn').style.display = 'none';
-      document.getElementById('conf-pay-btn').style.display = 'block';
+    // Modal Control
+    function openEditModal(field, label) {
+        activeField = field;
+        document.getElementById('modal-title').innerText = "Enter " + label;
+        document.getElementById('modal-input').value = "";
+        document.getElementById('edit-modal').style.display = 'flex';
     }
 
-    function confirmStudentPayment() {
-      const amt = document.getElementById('pay-amount').value;
-      const month = document.getElementById('pay-month').value;
-      
-      db.ref('paymentRequests').push({
-        studentName: studentData.name,
-        studentId: studentData.studentId,
-        amount: amt,
-        month: month,
-        timestamp: new Date().toLocaleString(),
-        status: "Review Required"
-      }).then(() => {
-        alert("SUCCESS! Payment record stored. Admin will verify soon.");
-        closeModal();
-      });
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
     }
 
-    function closeModal() { document.getElementById('pay-modal').style.display = 'none'; }
+    // Final Save Function
+    function saveData() {
+        const newVal = document.getElementById('modal-input').value.trim();
+        if(!newVal) return alert("Please enter a value");
+
+        let updateObj = {};
+        updateObj[activeField] = newVal;
+
+        // Specific targeting of the logged-in student's key
+        db.ref('students/' + currentStudentKey).update(updateObj).then(() => {
+            closeEditModal();
+        }).catch(err => alert("Error: " + err.message));
+    }
+
     function logout() { auth.signOut().then(() => window.location.href = "index.html"); }
-
-    document.onkeydown = e => { 
-        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) return false; 
-    };
   </script>
 </body>
 </html>
