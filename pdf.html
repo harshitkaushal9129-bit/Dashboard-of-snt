@@ -23,9 +23,11 @@
         .img-item { min-width: 140px; max-width: 140px; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
         .img-item img { width: 100%; height: 90px; object-fit: cover; cursor: pointer; }
         
-        /* Delete Button Style */
         .delete-btn { color: #64748b; transition: 0.2s; cursor: pointer; }
         .delete-btn:hover { color: #ef4444; }
+        
+        /* Danger Zone Style */
+        .danger-zone { border-bottom: 3px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -39,12 +41,22 @@
             <div class="w-10"></div> 
         </header>
 
-        <div class="glass p-5 rounded-3xl mb-8 flex items-center gap-4 border-l-4 border-sky-500">
+        <div class="glass p-5 rounded-3xl mb-6 flex items-center gap-4 border-l-4 border-sky-500">
             <img id="user-img" src="./SNT.jpg" class="w-14 h-14 rounded-full border-2 border-sky-500 object-cover">
             <div>
                 <h2 id="welcome-msg" class="text-lg font-black leading-tight">Loading Profile...</h2>
                 <p id="course-msg" class="text-sky-400 text-[10px] font-bold uppercase tracking-widest mt-1">Checking Courses...</p>
             </div>
+        </div>
+
+        <div class="glass p-4 rounded-2xl mb-8 danger-zone flex justify-between items-center">
+            <div>
+                <h4 class="text-[9px] font-bold text-red-400 uppercase tracking-widest">Admin Control</h4>
+                <p class="text-xs font-black">All PDFs: <span id="bulkCount" class="text-red-500">0</span></p>
+            </div>
+            <button onclick="deleteAllPDFs()" class="bg-red-500/10 text-red-500 border border-red-500/30 px-3 py-2 rounded-xl text-[10px] font-bold hover:bg-red-500 hover:text-white transition-all">
+                <i class="fas fa-trash-sweep mr-1"></i> DELETE ALL DATA
+            </button>
         </div>
 
         <div class="mb-8">
@@ -87,12 +99,25 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // Data Delete Function
+        // Single Item Delete
         function deleteData(path, key) {
-            if(confirm("⚠ Kya aap is file ko hamesha ke liye delete karna chahte hain?")) {
+            if(confirm("⚠ Kya aap ise delete karna chahte hain?")) {
                 db.ref(`${path}/${key}`).remove()
-                .then(() => alert("Data safely delete ho gaya!"))
+                .then(() => alert("Entry deleted."))
                 .catch((err) => alert("Error: " + err.message));
+            }
+        }
+
+        // NEW: Bulk Delete PDFs Function
+        function deleteAllPDFs() {
+            const check1 = confirm("❗ WARNING: Kya aap SARE uploaded PDFs hamesha ke liye delete karna chahte hain?");
+            if (check1) {
+                const check2 = confirm("⚠ Double Confirmation: Ye process undo nahi hoga. Kya aap sure hain?");
+                if (check2) {
+                    db.ref('myPDFs').remove()
+                    .then(() => alert("Success: Saara PDF data delete ho gaya!"))
+                    .catch((err) => alert("Error: " + err.message));
+                }
             }
         }
 
@@ -101,12 +126,12 @@
                 const blob = base64ToBlob(base64Data, 'application/pdf');
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
-            } catch (e) { alert("PDF load karne mein dikkat aa rahi hai."); }
+            } catch (e) { alert("PDF load nahi ho saka."); }
         }
 
         function viewImg(base64Data) {
             const win = window.open();
-            win.document.write(`<body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center;"><img src="${base64Data}" style="max-width:100%; height:auto;"></body>`);
+            win.document.write(`<body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center;"><img src="${base64Data}" style="max-width:100%; height:auto; border-radius:10px;"></body>`);
         }
 
         function base64ToBlob(base64, type) {
@@ -146,7 +171,7 @@
                         <img src="${img.data}" onclick="viewImg('${img.data}')">
                         <div class="p-2">
                             <div class="flex justify-between items-center mb-1">
-                                <p class="text-[9px] font-bold truncate text-sky-400 w-full">${img.name || 'Update'}</p>
+                                <p class="text-[9px] font-bold truncate text-sky-400 w-2/3">${img.name || 'Update'}</p>
                                 <i class="fas fa-trash-alt delete-btn text-[9px]" onclick="deleteData('myImages', '${key}')"></i>
                             </div>
                             <p class="text-[8px] text-slate-400 line-clamp-1">${img.desc || ''}</p>
@@ -169,6 +194,9 @@
         function loadPDFs(studentCourses) {
             const coursesArray = Array.isArray(studentCourses) ? studentCourses : [studentCourses];
             db.ref('myPDFs').on('value', (snap) => {
+                // Update Bulk Count
+                document.getElementById('bulkCount').innerText = snap.exists() ? snap.numChildren() : "0";
+                
                 const grid = document.getElementById('grid');
                 const noAccess = document.getElementById('no-access');
                 grid.innerHTML = '';
