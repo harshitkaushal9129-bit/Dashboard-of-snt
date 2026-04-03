@@ -3,142 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SNT Admin - Student Queries</title>
+    <title>SNT Admin - Control Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .query-card { border-left: 4px solid #38bdf8; transition: 0.3s; }
-        .query-card:hover { transform: translateX(5px); background: rgba(56, 189, 248, 0.05); }
-        
-        /* Auth Screen Style */
+        body { background: #0b0f1a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .input-style { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; font-size: 14px; outline: none; transition: 0.3s; color: white; }
+        .input-style:focus { border-color: #0ea5e9; box-shadow: 0 0 10px rgba(14, 165, 233, 0.2); }
         #auth-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
-        .pin-input { background: rgba(30, 41, 59, 0.8); border: 2px solid rgba(56, 189, 248, 0.3); color: white; text-align: center; font-size: 24px; letter-spacing: 10px; font-weight: 900; }
-        .pin-input:focus { border-color: #38bdf8; outline: none; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
+        .nav-btn { font-size: 10px; font-weight: 800; letter-spacing: 1px; transition: 0.3s; }
+        .nav-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div id="auth-overlay">
-        <div class="text-center w-full max-w-xs animate-fade-in">
+        <div class="text-center w-full max-w-xs">
             <div class="w-20 h-20 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-sky-500/30">
                 <i class="fas fa-user-shield text-3xl text-sky-500"></i>
             </div>
-            <h2 class="text-xl font-black tracking-tighter mb-2 uppercase">Admin Security</h2>
-            <p class="text-[10px] text-slate-500 font-bold tracking-[0.3em] mb-6 uppercase">Enter Master PIN</p>
-            <input type="password" id="admin-pin" class="pin-input w-full p-4 rounded-2xl mb-4" placeholder="••••••" maxlength="6">
+            <h2 class="text-xl font-black tracking-tighter mb-2 uppercase">SNT Admin</h2>
+            <input type="password" id="admin-pin" class="input-style w-full text-center text-2xl tracking-[10px] mb-4" placeholder="••••••" maxlength="6">
             <button onclick="verifyPin()" class="w-full bg-sky-500 text-slate-900 p-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">Verify Identity</button>
-            <button onclick="location.href='index.html'" class="mt-6 text-slate-500 text-[10px] font-bold uppercase tracking-widest">Back to Portal</button>
+            <button onclick="location.href='index.html'" class="mt-6 text-slate-500 text-[10px] font-bold uppercase tracking-widest block mx-auto">Back to Portal</button>
         </div>
     </div>
 
     <div id="admin-content" class="hidden max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-8">
-            <div class="flex items-center gap-4">
-                <button onclick="location.href='index.html'" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90"><i class="fas fa-home"></i></button>
-                <h1 class="text-xl font-black tracking-tighter uppercase italic">Student <span class="text-sky-500">Queries</span></h1>
-            </div>
-            <div class="flex gap-2">
-                <div class="glass px-4 py-2 rounded-xl text-[9px] font-black text-sky-400 border border-sky-500/20 uppercase tracking-widest">
-                    Live Database
-                </div>
+            <h1 class="text-xl font-black italic">SNT <span class="text-sky-500">CONTROL</span></h1>
+            <div class="flex gap-6">
+                <button onclick="switchTab('queries')" id="tab-queries" class="nav-btn uppercase active">Queries</button>
+                <button onclick="switchTab('notifs')" id="tab-notifs" class="nav-btn uppercase">Notifications</button>
+                <button onclick="location.href='index.html'" class="text-slate-400"><i class="fas fa-home"></i></button>
             </div>
         </header>
 
-        <div id="queries-list" class="space-y-4 pb-10">
-            <div class="text-center py-20 opacity-50 italic uppercase text-[10px] tracking-widest">Initialising Secure Connection...</div>
+        <div id="section-queries" class="space-y-4">
+            <div id="queries-list" class="space-y-4">
+                <div class="text-center py-20 opacity-50 italic text-[10px] uppercase">Loading Database...</div>
+            </div>
+        </div>
+
+        <div id="section-notifs" class="hidden">
+            <div class="glass p-6 rounded-3xl mb-8">
+                <h2 class="text-xs font-black uppercase tracking-widest mb-6 text-sky-400">Push New Notice</h2>
+                <div class="space-y-4">
+                    <textarea id="notifText" class="w-full input-style resize-none" rows="3" placeholder="Announcement text..."></textarea>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="file" id="notifImage" class="hidden" accept="image/*" onchange="updateFileName()">
+                        <button onclick="document.getElementById('notifImage').click()" class="input-style text-xs font-bold text-slate-400">
+                            <i class="fas fa-camera mr-2"></i> <span id="fileName">Add Image</span>
+                        </button>
+                        <input type="datetime-local" id="notifExpiry" class="input-style text-[10px]">
+                    </div>
+                    <button id="pushBtn" onclick="uploadNotice()" class="w-full bg-sky-500 p-4 rounded-xl font-black text-xs uppercase tracking-widest active:scale-95">Push Notification</button>
+                </div>
+            </div>
+            <div id="active-notifs-list" class="space-y-3"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, get, set, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
             projectId: "snt-computer-institute",
             databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
+            storageBucket: "snt-computer-institute.appspot.com",
             appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const auth = getAuth(app);
+        const storage = getStorage(app);
 
-        // Verification Logic
+        // Security
         window.verifyPin = () => {
-            const pin = document.getElementById('admin-pin').value;
-            if (pin === "912919") {
-                if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
-                document.getElementById('auth-overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('auth-overlay').style.display = 'none';
-                    document.getElementById('admin-content').classList.remove('hidden');
-                    loadQueries();
-                }, 500);
-            } else {
-                if(navigator.vibrate) navigator.vibrate(200);
-                alert("ACCESS DENIED: Invalid Security PIN");
-                document.getElementById('admin-pin').value = "";
-            }
+            if(document.getElementById('admin-pin').value === "912919") {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                loadData();
+            } else { alert("WRONG PIN"); }
         };
 
-        async function loadQueries() {
-            const queriesRef = ref(db, 'queries');
-            const studentsRef = ref(db, 'students');
+        // Tabs
+        window.switchTab = (tab) => {
+            document.getElementById('section-queries').classList.toggle('hidden', tab !== 'queries');
+            document.getElementById('section-notifs').classList.toggle('hidden', tab !== 'notifs');
+            document.getElementById('tab-queries').classList.toggle('active', tab === 'queries');
+            document.getElementById('tab-notifs').classList.toggle('active', tab === 'notifs');
+        };
 
-            const studentSnap = await get(studentsRef);
+        window.updateFileName = () => {
+            const file = document.getElementById('notifImage').files[0];
+            if(file) document.getElementById('fileName').innerText = file.name;
+        };
+
+        // Main Data Loader
+        async function loadData() {
+            const studentSnap = await get(ref(db, 'students'));
             const studentMap = {};
-            if (studentSnap.exists()) {
-                Object.values(studentSnap.val()).forEach(s => {
-                    // Mobile field can be 'mobile' or 'phone'
-                    studentMap[s.email] = s.mobile || s.phone || "No Number";
-                });
+            if(studentSnap.exists()) {
+                Object.values(studentSnap.val()).forEach(s => studentMap[s.email] = s.mobile || s.phone || "No Num");
             }
 
-            onValue(queriesRef, (snapshot) => {
+            // Realtime Queries
+            onValue(ref(db, 'queries'), (snap) => {
                 const list = document.getElementById('queries-list');
-                if (snapshot.exists()) {
-                    // Reverse to show latest first
-                    const data = Object.entries(snapshot.val()).reverse();
-                    list.innerHTML = data.map(([key, q]) => `
-                        <div class="glass p-6 rounded-3xl query-card animate-fade-in">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-sky-400 font-black text-xs uppercase tracking-[0.2em]">${q.subject || 'No Subject'}</h3>
-                                    <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase tracking-wider italic">${q.timestamp || 'Just Now'}</p>
-                                </div>
-                                <span class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full border border-sky-500/20 font-black uppercase tracking-tighter">${q.status || 'Pending'}</span>
+                if(!snap.exists()) { list.innerHTML = "<p class='text-center opacity-30 uppercase text-[10px] mt-10'>No Queries</p>"; return; }
+                list.innerHTML = Object.entries(snap.val()).reverse().map(([key, q]) => `
+                    <div class="glass p-5 rounded-2xl border-l-4 border-sky-500">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-sky-400 font-black text-[10px] uppercase">${q.subject || 'Query'}</h3>
+                            <span class="text-[8px] bg-sky-500/10 px-2 py-1 rounded text-sky-400 uppercase">${q.status || 'Pending'}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-4">"${q.message}"</p>
+                        <div class="flex items-center gap-3 pt-3 border-t border-white/5">
+                            <div class="flex-1">
+                                <p class="text-[10px] font-black uppercase">${q.name || 'Anonymous'}</p>
+                                <p class="text-[8px] text-slate-500">${q.email}</p>
                             </div>
-                            <p class="text-sm text-slate-200 mb-6 leading-relaxed">"${q.message}"</p>
-                            
-                            <div class="flex items-center gap-3 border-t border-white/5 pt-4">
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-xs font-black text-white shadow-lg">
-                                    ${q.name ? q.name[0] : 'S'}
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-[11px] font-black text-white uppercase tracking-wide">${q.name || 'Anonymous'}</p>
-                                    <p class="text-[9px] text-slate-400 font-mono opacity-80">${q.email}</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="tel:${studentMap[q.email]}" class="w-8 h-8 rounded-full glass flex items-center justify-center text-sky-400 border border-sky-500/20">
-                                        <i class="fas fa-phone-alt text-[10px]"></i>
-                                    </a>
-                                    <a href="https://wa.me/91${studentMap[q.email]}" target="_blank" class="w-8 h-8 rounded-full glass flex items-center justify-center text-green-500 border border-green-500/20">
-                                        <i class="fab fa-whatsapp text-sm"></i>
-                                    </a>
-                                </div>
+                            <div class="flex gap-2">
+                                <a href="tel:${studentMap[q.email]}" class="w-8 h-8 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-phone-alt text-[10px]"></i></a>
+                                <a href="https://wa.me/91${studentMap[q.email]}" target="_blank" class="w-8 h-8 rounded-full glass flex items-center justify-center text-green-500"><i class="fab fa-whatsapp"></i></a>
                             </div>
                         </div>
-                    `).join('');
-                } else {
-                    list.innerHTML = '<div class="text-center py-20 opacity-30 italic uppercase text-[10px] tracking-[0.5em]">Zero Inbox - No Queries Found</div>';
+                    </div>
+                `).join('');
+            });
+
+            // Realtime Notifs
+            onValue(ref(db, 'notifications'), (snap) => {
+                const list = document.getElementById('active-notifs-list');
+                list.innerHTML = '<h3 class="text-[9px] font-bold text-slate-500 uppercase mb-3">Active Notices</h3>';
+                if(snap.exists()) {
+                    Object.entries(snap.val()).reverse().forEach(([key, n]) => {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-slate-900/40 p-3 rounded-xl border border-white/5";
+                        div.innerHTML = `
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                ${n.imageUrl ? `<img src="${n.imageUrl}" class="w-8 h-8 rounded object-cover">` : `<i class="fas fa-envelope text-slate-600"></i>`}
+                                <span class="text-[10px] text-slate-300 truncate">${n.message}</span>
+                            </div>
+                            <button onclick="deleteNotice('${key}')" class="text-red-500 text-[8px] font-black uppercase px-2">Delete</button>
+                        `;
+                        list.appendChild(div);
+                    });
                 }
             });
         }
+
+        window.uploadNotice = async () => {
+            const text = document.getElementById('notifText').value;
+            const expiry = document.getElementById('notifExpiry').value;
+            const file = document.getElementById('notifImage').files[0];
+            const btn = document.getElementById('pushBtn');
+
+            if(!text || !expiry) return alert("Fill Text & Expiry!");
+            btn.innerText = "PUSHING..."; btn.disabled = true;
+
+            let imageUrl = "";
+            if(file) {
+                const storageRef = sRef(storage, `notices/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                imageUrl = await getDownloadURL(storageRef);
+            }
+
+            push(ref(db, 'notifications'), { message: text, expiry: expiry, imageUrl: imageUrl, timestamp: new Date().toISOString() })
+            .then(() => { alert("Published!"); location.reload(); });
+        };
+
+        window.deleteNotice = (key) => { if(confirm("Delete?")) remove(ref(db, `notifications/${key}`)); };
     </script>
 </body>
 </html>
