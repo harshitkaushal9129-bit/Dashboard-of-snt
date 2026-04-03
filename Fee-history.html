@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SNT - Auto Ledger</title>
+    <title>SNT - Smart Ledger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .paid-card { border-left: 4px solid #10b981; }
-        .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
-        .admission-card { border-left: 4px solid #f59e0b; }
+        .paid-card { border-left: 4px solid #10b981; animation: slideIn 0.4s ease-out; }
+        .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); animation: slideIn 0.4s ease-out; }
+        .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -22,18 +23,30 @@
     <div class="max-w-2xl mx-auto">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-4">
-                <button onclick="history.back()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-arrow-left"></i></button>
-                <h1 onclick="askAdmin()" class="text-xl font-black tracking-tighter uppercase cursor-pointer italic">Fee <span id="title-color" class="text-emerald-500">Ledger</span></h1>
+                <button onclick="history.back()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 onclick="askAdmin()" class="text-xl font-black tracking-tighter uppercase cursor-pointer italic">
+                    Fee <span id="title-color" class="text-emerald-500">Ledger</span>
+                </h1>
             </div>
-            <div id="total-balance" class="glass px-4 py-2 rounded-xl text-[10px] font-black text-red-400 border border-red-500/20 uppercase">BAL: ₹0</div>
+            <div id="total-balance" class="glass px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 border border-white/10 uppercase tracking-widest">
+                BAL: ₹0
+            </div>
         </header>
 
         <div id="fee-container" class="space-y-4">
-            <div class="text-center py-20 opacity-30 animate-pulse text-xs uppercase tracking-widest">Checking Records...</div>
+            <div class="flex flex-col items-center justify-center py-20 opacity-30">
+                <i class="fas fa-sync-alt fa-spin text-2xl mb-4 text-sky-400"></i>
+                <p class="text-[10px] font-black tracking-[0.3em] uppercase">Calculating Monthly Dues...</p>
+            </div>
         </div>
+
+        <p class="mt-10 text-center text-[8px] font-bold text-slate-600 uppercase tracking-[0.4em]">Official Dashboard of SNT</p>
     </div>
 
     <script>
+        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -47,87 +60,103 @@
         const auth = firebase.auth();
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const MONTHLY_FEE = 500; // Yahan apni monthly fee set karein
+        const MONTHLY_FEE = 500; // Institute ki monthly fee yahan set karein
 
         auth.onAuthStateChanged((user) => {
-            if (user) loadLedger(user.uid, user.email);
+            if (user) {
+                loadSmartLedger(user.uid, user.email);
+            } else {
+                window.location.href = 'login.html';
+            }
         });
 
-        function loadLedger(uid, email) {
-            db.ref('students').orderByChild('email').equalTo(email).on('value', (snap) => {
-                if (!snap.exists()) return;
-                const student = Object.values(snap.val())[0];
-                renderLedger(student);
+        function loadSmartLedger(uid, email) {
+            db.ref('students').orderByChild('email').equalTo(email).on('value', (snapshot) => {
+                const container = document.getElementById('fee-container');
+                const balElement = document.getElementById('total-balance');
+                
+                if (snapshot.exists()) {
+                    const student = Object.values(snapshot.val())[0];
+                    const history = student.paymentHistory || [];
+                    let html = '';
+                    let totalPendingAmount = 0;
+
+                    // 1. Admission Status Card
+                    if (student.registrationStatus === "Paid") {
+                        html += `
+                        <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-6">
+                            <div>
+                                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Enrollment Verified</p>
+                                <h3 class="font-black text-white text-lg italic">ADMISSION FEE PAID</h3>
+                            </div>
+                            <i class="fas fa-id-badge text-yellow-500/40 text-3xl"></i>
+                        </div>`;
+                    }
+
+                    // 2. Automated Monthly Logic
+                    // Registration date se lekar current date tak ke saare mahine
+                    const regDate = student.registrationDate ? new Date(student.registrationDate) : new Date(2026, 0, 1);
+                    const currentDate = new Date(); // Today (April 2026)
+
+                    let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
+
+                    while (checkDate <= currentDate) {
+                        const mName = MONTHS[checkDate.getMonth()];
+                        const year = checkDate.getFullYear();
+                        
+                        // Check if this month exists in paymentHistory
+                        const isPaid = history.find(p => p.month === mName);
+
+                        if (isPaid) {
+                            html += `
+                            <div class="glass p-5 rounded-2xl paid-card flex justify-between items-center mb-3">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${isPaid.date || mName + ' ' + year}</p>
+                                    <h3 class="font-black text-white text-lg tracking-tighter">₹${isPaid.amount}</h3>
+                                    <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${mName}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20 font-black uppercase">PAID ✅</span>
+                                </div>
+                            </div>`;
+                        } else {
+                            totalPendingAmount += MONTHLY_FEE;
+                            html += `
+                            <div class="glass p-5 rounded-2xl pending-card flex justify-between items-center mb-3">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">Fees Pending</p>
+                                    <h3 class="font-black text-red-400 text-lg tracking-tighter">₹${MONTHLY_FEE}</h3>
+                                    <p class="text-[9px] text-red-500/60 font-bold uppercase">${mName}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[9px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/20 font-black uppercase italic tracking-tighter">UNPAID ⏳</span>
+                                </div>
+                            </div>`;
+                        }
+
+                        // Move to next month
+                        checkDate.setMonth(checkDate.getMonth() + 1);
+                    }
+
+                    // 3. Render and Update Balance
+                    balElement.innerText = `BAL: ₹${totalPendingAmount}`;
+                    balElement.style.color = totalPendingAmount > 0 ? '#ef4444' : '#10b981';
+                    balElement.classList.add(totalPendingAmount > 0 ? 'border-red-500/30' : 'border-emerald-500/30');
+                    container.innerHTML = html;
+
+                } else {
+                    container.innerHTML = '<div class="text-center py-20 opacity-30 text-[10px] font-black uppercase">User Record Missing in Database.</div>';
+                }
             });
         }
 
-        function renderLedger(student) {
-            const container = document.getElementById('fee-container');
-            let html = '';
-            let totalDue = 0;
-
-            // 1. Admission Card
-            if (student.registrationStatus === "Paid") {
-                html += `
-                <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-6">
-                    <div>
-                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">SNT Official</p>
-                        <h3 class="font-black text-white text-lg">ADMISSION VERIFIED</h3>
-                    </div>
-                    <i class="fas fa-check-circle text-yellow-500 text-2xl"></i>
-                </div>`;
-            }
-
-            // 2. Month-wise Logic
-            const adDate = new Date(student.registrationDate || "2026-01-01");
-            const curDate = new Date(); // Current system date
-            
-            let tempDate = new Date(adDate);
-            tempDate.setDate(1); // Start from 1st of admission month
-
-            const history = student.paymentHistory || [];
-
-            while (tempDate <= curDate) {
-                const monthName = MONTHS[tempDate.getMonth()];
-                const year = tempDate.getFullYear();
-                const monthYear = `${monthName} ${year}`;
-                
-                // Check if this month is paid
-                const paidRecord = history.find(p => p.month === monthName);
-
-                if (paidRecord) {
-                    html += `
-                    <div class="glass p-5 rounded-2xl paid-card flex justify-between items-center mb-3">
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${paidRecord.date || monthYear}</p>
-                            <h3 class="font-black text-white text-lg">₹${paidRecord.amount}</h3>
-                            <p class="text-[9px] text-emerald-400 font-bold uppercase">${monthName}</p>
-                        </div>
-                        <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded border border-emerald-500/20 font-black uppercase">PAID ✅</span>
-                    </div>`;
-                } else {
-                    totalDue += MONTHLY_FEE;
-                    html += `
-                    <div class="glass p-5 rounded-2xl pending-card flex justify-between items-center mb-3">
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">Not Received</p>
-                            <h3 class="font-black text-red-400 text-lg">₹${MONTHLY_FEE}</h3>
-                            <p class="text-[9px] text-red-500/60 font-bold uppercase">${monthName}</p>
-                        </div>
-                        <span class="text-[9px] bg-red-500/10 text-red-500 px-3 py-1 rounded border border-red-500/20 font-black uppercase tracking-tighter">PENDING ⏳</span>
-                    </div>`;
-                }
-                
-                tempDate.setMonth(tempDate.getMonth() + 1);
-            }
-
-            document.getElementById('total-balance').innerText = `BAL: ₹${totalDue}`;
-            container.innerHTML = html;
-        }
-
+        // --- Admin Access ---
         window.askAdmin = () => {
             const pin = prompt("ENTER MASTER PIN:");
-            if (pin === "912919") window.location.href = "admin-dashboard.html";
+            if (pin === "912919") {
+                // Aapka Admin Dashboard Link yahan aayega
+                window.location.href = "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/";
+            }
         };
     </script>
 </body>
