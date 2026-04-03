@@ -30,7 +30,7 @@ self.addEventListener('push', function(event) {
 const options = {
     body: data.body,
     icon: './SNT.jpg',    // Ye colored logo hai (Notification ke side mein dikhega)
-    badge: './badge.png', // Ye transparent PNG honi chahiye (Status Bar ke liye)
+    badge: './SNT.png', // Ye transparent PNG honi chahiye (Status Bar ke liye)
     vibrate: [500, 110, 500, 110, 450],
     tag: 'snt-notification',
     renotify: true,
