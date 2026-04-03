@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SNT - Fee History</title>
+    <title>SNT - Fee Ledger Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -14,8 +14,10 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .fee-card { border-left: 4px solid #10b981; }
         .extra-card { border-left: 4px solid #38bdf8; }
+        .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
         .admin-card { border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .admin-card:hover { background: rgba(56, 189, 248, 0.05); }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -36,7 +38,7 @@
         <div id="fee-container" class="space-y-4">
             <div class="flex flex-col items-center justify-center py-20 opacity-30">
                 <i class="fas fa-circle-notch fa-spin text-2xl mb-4"></i>
-                <p class="text-[10px] font-black tracking-[0.3em] uppercase">Securing Connection...</p>
+                <p class="text-[10px] font-black tracking-[0.3em] uppercase">Syncing Records...</p>
             </div>
         </div>
 
@@ -44,7 +46,7 @@
     </div>
 
     <script>
-        // --- Firebase Config (Same as your Admin Dashboard) ---
+        // --- Firebase Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -57,141 +59,117 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        const MASTER_PIN = "912919";
-
-        // --- Auth State Logic ---
         auth.onAuthStateChanged((user) => {
             if (user) {
-                loadStudentView(user.uid);
+                loadStudentView(user.uid, user.email);
             } else {
-                location.href = 'index.html';
+                window.location.href = 'login.html';
             }
         });
 
-        // --- 1. STUDENT VIEW (Normal Mode) ---
-        function loadStudentView(uid) {
+        // --- Student View Logic ---
+        function loadStudentView(uid, email) {
+            const container = document.getElementById('fee-container');
+
+            // 1. Pehle UID se dhoondo
             db.ref(`students/${uid}`).on('value', (snapshot) => {
-                const container = document.getElementById('fee-container');
-                const balElement = document.getElementById('total-balance');
-                
                 if (snapshot.exists()) {
-                    const student = snapshot.val();
-                    
-                    // Update Balance Display
-                    const pending = student.pendingAmount || 0;
-                    balElement.innerText = `BAL: ₹${pending}`;
-                    balElement.style.color = pending > 0 ? '#ef4444' : '#10b981';
-                    balElement.style.borderColor = pending > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)';
-
-                    let html = '';
-
-                    // Monthly Fees
-                    if (student.paymentHistory && Array.isArray(student.paymentHistory)) {
-                        [...student.paymentHistory].reverse().forEach(pay => {
-                            html += `
-                                <div class="glass p-5 rounded-2xl fee-card flex justify-between items-center mb-3">
-                                    <div>
-                                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${pay.date || 'Record Date'}</p>
-                                        <h3 class="font-black text-white text-lg">₹${pay.amount}</h3>
-                                        <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${pay.month}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20 font-black uppercase">PAID ✅</span>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-
-                    // Extra Charges (Card, Exam, etc.)
-                    if (student.extraHistory && Array.isArray(student.extraHistory)) {
-                        [...student.extraHistory].reverse().forEach(ex => {
-                            html += `
-                                <div class="glass p-5 rounded-2xl extra-card flex justify-between items-center mb-3 opacity-90">
-                                    <div>
-                                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${ex.date || 'Record Date'}</p>
-                                        <h3 class="font-black text-white text-lg">₹${ex.amount}</h3>
-                                        <p class="text-[9px] text-sky-400 font-bold uppercase italic">${ex.reason}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[8px] bg-sky-500/10 text-sky-400 px-2 py-1 rounded border border-sky-500/20 font-black uppercase tracking-tighter">OTHERS</span>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-
-                    container.innerHTML = html || '<div class="text-center py-20 opacity-30 italic text-xs uppercase tracking-widest">No transaction history found.</div>';
-
+                    renderData(snapshot.val());
                 } else {
-                    container.innerHTML = '<div class="text-center py-20 opacity-30 text-xs font-black uppercase tracking-widest italic">Personal record not found.</div>';
+                    // 2. Backup: Email se dhoondo (Admission status ke liye)
+                    db.ref('students').orderByChild('email').equalTo(email).once('value', (snap) => {
+                        if (snap.exists()) {
+                            const data = Object.values(snap.val())[0];
+                            renderData(data);
+                        } else {
+                            container.innerHTML = `<div class="text-center py-20 opacity-30 text-xs font-black uppercase italic">No Record Found for ${email}</div>`;
+                        }
+                    });
                 }
             });
         }
 
-        // --- 2. ADMIN VIEW TRIGGER (Master Mode) ---
-        window.askAdmin = () => {
-            const pin = prompt("ENTER MASTER PIN TO VIEW ALL RECORDS:");
-            if (pin === MASTER_PIN) {
-                if(navigator.vibrate) navigator.vibrate(50);
-                loadAdminView();
-            } else if (pin !== null) {
-                alert("ACCESS DENIED: WRONG PIN");
-            }
-        };
-
-        async function loadAdminView() {
+        function renderData(student) {
             const container = document.getElementById('fee-container');
-            const title = document.getElementById('title-color');
+            const balElement = document.getElementById('total-balance');
             
-            title.innerText = "MASTER PANEL";
-            title.classList.replace('text-emerald-500', 'text-sky-500');
-            container.innerHTML = '<div class="text-center py-10 italic text-[10px] uppercase animate-pulse">Fetching All Student Records...</div>';
+            const pending = student.pendingAmount || 0;
+            balElement.innerText = `BAL: ₹${pending}`;
+            balElement.style.color = pending > 0 ? '#ef4444' : '#10b981';
 
-            db.ref('students').once('value', (snapshot) => {
-                if (snapshot.exists()) {
+            let html = '';
+
+            // ADMISSION STATUS CARD
+            if (student.registrationStatus === "Paid") {
+                html += `
+                    <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-3 animate-fade">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Enrollment</p>
+                            <h3 class="font-black text-white text-lg italic">ADMISSION PAID</h3>
+                            <p class="text-[9px] text-yellow-500 font-bold uppercase tracking-tighter">Identity Verified</p>
+                        </div>
+                        <i class="fas fa-check-circle text-yellow-500 text-xl opacity-50"></i>
+                    </div>`;
+            }
+
+            // MONTHLY PAYMENTS
+            if (student.paymentHistory && Array.isArray(student.paymentHistory)) {
+                [...student.paymentHistory].reverse().forEach(pay => {
+                    html += `
+                        <div class="glass p-5 rounded-2xl fee-card flex justify-between items-center mb-3 animate-fade">
+                            <div>
+                                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${pay.date || 'Recieved'}</p>
+                                <h3 class="font-black text-white text-lg">₹${pay.amount}</h3>
+                                <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${pay.month}</p>
+                            </div>
+                            <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20 font-black uppercase tracking-tighter">SUCCESS ✅</span>
+                        </div>`;
+                });
+            }
+
+            // EXTRA CHARGES
+            if (student.extraHistory && Array.isArray(student.extraHistory)) {
+                [...student.extraHistory].reverse().forEach(ex => {
+                    html += `
+                        <div class="glass p-5 rounded-2xl extra-card flex justify-between items-center mb-3 opacity-90 animate-fade">
+                            <div>
+                                <h3 class="font-black text-white text-lg">₹${ex.amount}</h3>
+                                <p class="text-[9px] text-sky-400 font-bold uppercase italic">${ex.reason}</p>
+                            </div>
+                            <span class="text-[8px] bg-sky-500/10 text-sky-400 px-2 py-1 rounded border border-sky-500/20 font-black uppercase">MISC</span>
+                        </div>`;
+                });
+            }
+
+            container.innerHTML = html || '<div class="text-center py-20 opacity-30 text-xs uppercase tracking-widest">Record is Empty</div>';
+        }
+
+        // --- Admin Master View ---
+        window.askAdmin = () => {
+            const pin = prompt("ENTER MASTER PIN:");
+            if (pin === "912919") {
+                db.ref('students').once('value', (snapshot) => {
+                    const container = document.getElementById('fee-container');
                     const data = snapshot.val();
-                    let adminHtml = '';
+                    let adminHtml = '<h2 class="text-[10px] font-black text-sky-500 mb-4 tracking-[0.3em] uppercase">Master Ledger View</h2>';
                     
                     Object.keys(data).forEach(id => {
                         const s = data[id];
-                        const lastPay = (s.paymentHistory && s.paymentHistory.length > 0) 
-                                        ? s.paymentHistory[s.paymentHistory.length - 1] 
-                                        : null;
                         const bal = s.pendingAmount || 0;
-
                         adminHtml += `
-                            <div class="glass p-5 rounded-3xl mb-4 admin-card border-l-4 ${bal > 0 ? 'border-red-500' : 'border-emerald-500'}">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-white/5">
-                                            <i class="fas fa-user text-xs text-sky-400"></i>
-                                        </div>
-                                        <div>
-                                            <h2 class="font-black text-white uppercase text-xs tracking-tight">${s.name || 'Unknown'}</h2>
-                                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">${s.studentId || 'No ID'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[10px] font-black ${bal > 0 ? 'text-red-400' : 'text-emerald-400'} uppercase">DUE: ₹${bal}</p>
-                                    </div>
+                            <div class="glass p-4 rounded-3xl mb-3 border-l-2 ${bal > 0 ? 'border-red-500' : 'border-emerald-500'}">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black uppercase tracking-tight">${s.name || 'Student'}</span>
+                                    <span class="text-[10px] font-black ${bal > 0 ? 'text-red-400' : 'text-emerald-400'}">₹${bal}</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 mt-2">
-                                    <div class="bg-white/5 p-3 rounded-2xl">
-                                        <p class="text-[8px] text-slate-500 font-black uppercase mb-1">Last Payment</p>
-                                        <p class="text-[10px] font-bold text-white uppercase tracking-tighter">${lastPay ? lastPay.month + ' (₹' + lastPay.amount + ')' : 'No Records'}</p>
-                                    </div>
-                                    <div class="bg-white/5 p-3 rounded-2xl text-right">
-                                        <p class="text-[8px] text-slate-500 font-black uppercase mb-1">Inam / Won</p>
-                                        <p class="text-[10px] font-bold text-emerald-400">₹${s.wonCash || 0}</p>
-                                    </div>
-                                </div>
+                                <p class="text-[8px] text-slate-500 mt-1 uppercase">${s.registrationStatus === 'Paid' ? 'ADMISSION DONE' : 'ADMISSION PENDING'}</p>
                             </div>`;
                     });
                     container.innerHTML = adminHtml;
-                } else {
-                    container.innerHTML = '<div class="text-center py-20 opacity-30 text-xs">Database is empty.</div>';
-                }
-            });
-        }
+                    document.getElementById('title-color').innerText = "MASTER PANEL";
+                });
+            } else if (pin) { alert("WRONG PIN!"); }
+        };
     </script>
 </body>
 </html>
