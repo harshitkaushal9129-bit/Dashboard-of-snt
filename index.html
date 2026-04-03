@@ -4,81 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT Institute - Official Portal</title>
-    
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="./SNT.jpg">
     <link rel="icon" type="image/jpeg" href="SNT.jpg">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-            /* index.html ke <style> mein ye add karein */
-* {
-    -webkit-user-select: none; /* Chrome/Safari */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE10+ */
-    user-select: none;         /* Standard */
-    -webkit-user-drag: none;   /* Images drag nahi hongi */
-}
-
-        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-drag: none; outline: none; }
+        body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .hidden { display: none !important; }
-        
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; }
         .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
-        
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
-        
         .social-link-icon { font-size: 20px; transition: 0.2s; cursor: pointer; }
         .qr-card { background: white; color: #1e293b; padding: 24px; border-radius: 30px; text-align: center; width: 300px; position: relative; }
-
         .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; }
         .search-box:focus-within { border-color: #38bdf8; background: rgba(30, 41, 59, 0.8); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
-
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
         <div class="glass p-10 rounded-3xl w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
             <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
             <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Digital Student Portal</p>
             <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
-                LOGIN WITH GOOGLE
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">LOGIN WITH GOOGLE
             </button>
         </div>
     </div>
-
     <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
         <header class="flex justify-between items-center mb-8">
             <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
             <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
             <div class="flex gap-2">
                 <div class="relative">
-                    <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400">
-                        <i class="fas fa-bell"></i>
-                    </button>
+                    <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400"><i class="fas fa-bell"></i></button>
                     <span id="notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#0f172a] rounded-full animate-pulse"></span>
                 </div>
                 <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-circle-info"></i></button>
                 <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes"></i></button>
             </div>
         </header>
-
         <div id="profile-section" class="glass p-6 rounded-3xl mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
-            <div class="relative">
-                <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800">
-            </div>
+            <div class="relative"><img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800"></div>
             <div class="flex-1">
                 <p id="greeting-msg" class="text-sky-400 text-[9px] font-black uppercase tracking-widest mb-1"></p>
                 <h3 id="user-name" class="text-lg font-black text-white leading-tight mb-0.5">Loading...</h3>
@@ -89,17 +65,14 @@
                 </div>
             </div>
         </div>
-
         <div class="mb-6 relative">
             <div class="search-box flex items-center px-4 py-3 rounded-2xl">
                 <i class="fas fa-search text-sky-500 mr-3 text-sm"></i>
                 <input type="text" id="appSearch" placeholder="SEARCH SERVICES..." class="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-widest w-full text-white placeholder:text-slate-500">
             </div>
         </div>
-
         <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-24"></div>
     </div>
-
     <div id="info-modal" class="modal-overlay">
         <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative">
             <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white">System Info</h2>
@@ -115,7 +88,6 @@
             <button onclick="closeInfo()" class="w-full mt-8 bg-slate-800/50 text-slate-400 p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-white/5 active:scale-95 transition-all">Close Panel</button>
         </div>
     </div>
-
     <div id="qr-modal" class="modal-overlay" onclick="closeQR()">
         <div class="qr-card animate-fade-in" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -125,246 +97,116 @@
             <div class="bg-slate-100 p-4 rounded-2xl mb-4">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=mandavikaushal913@okaxis&pn=Harshit%20Kaushal&cu=INR" class="mx-auto w-44 h-44 shadow-sm">
             </div>
-            <p class="text-xs font-black text-sky-600 break-all">mandavikaushal913@okaxis</p>
+            <p class="text-xs font-black text-sky-600 break-all text-center">mandavikaushal913@okaxis</p>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue, get, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
-            authDomain: "snt-computer-institute.firebaseapp.com",
-            projectId: "snt-computer-institute",
-            databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com",
-            appId: "1:117580784781:web:73ba19d2d008beb3a5eec4"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", authDomain: "snt-computer-institute.firebaseapp.com", projectId: "snt-computer-institute", databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com", appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
-
-        // 1. Service Worker & Notification Handler
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('Service Worker Active');
-            });
-        }
-
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
         function triggerLockScreenNotification(title, message) {
             if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.showNotification(title, {
-                        body: message,
-                        icon: './SNT.jpg',
-                        badge: './SNT.jpg',
-                        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
-                        tag: 'snt-dynamic-update',
-                        requireInteraction: true 
-                    });
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, { body: message, icon: './SNT.jpg', badge: './SNT.png', vibrate: [500, 110, 500], tag: 'snt-dynamic-update', requireInteraction: true });
                 });
             }
         }
-
-        // 2. Main Logic: Auth + Student Name + Database Notification
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                
                 const hr = new Date().getHours();
-                const greet = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
-                document.getElementById('greeting-msg').innerText = greet;
-
+                document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
                         if (sData) {
-                            const studentFirstName = sData.name.split(' ')[0];
-                            document.getElementById('user-name').innerText = sData.name || user.displayName;
+                            const firstName = sData.name.split(' ')[0];
+                            document.getElementById('user-name').innerText = sData.name;
                             document.getElementById('user-email').innerText = user.email;
-                            document.getElementById('user-img').src = sData.profilePic || sData.profilePicture || user.photoURL;
+                            document.getElementById('user-img').src = sData.profilePic || user.photoURL;
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
-                            
                             const statusEl = document.getElementById('user-status-badge');
-                            const status = sData.registrationStatus || "Guest User";
-                            statusEl.innerText = status;
-                            statusEl.className = status === "Active" ? 
-                                "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : 
-                                "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
-
-                            // DYNAMIC NOTIFICATION LISTENER
+                            statusEl.innerText = sData.registrationStatus || "Guest";
+                            statusEl.className = sData.registrationStatus === "Active" ? "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
                             onValue(ref(db, 'notifications'), (notifSnap) => {
                                 if (notifSnap.exists()) {
                                     const notices = Object.values(notifSnap.val());
-                                    const latestNotif = notices[notices.length - 1]; // Get latest upload
-                                    
-                                    // Use last_notif_id to prevent repeat popups
-                                    const lastSeenId = localStorage.getItem('last_notif_id');
-                                    
-                                    if (latestNotif.id !== lastSeenId) {
-                                        Notification.requestPermission().then(perm => {
-                                            if (perm === 'granted') {
-                                                triggerLockScreenNotification(
-                                                    `Namaste, ${studentFirstName}!`, 
-                                                    latestNotif.text || latestNotif.message || "SNT Portal par naya update aaya hai."
-                                                );
-                                                localStorage.setItem('last_notif_id', latestNotif.id);
-                                            }
-                                        });
-                                    }
+                                    const now = new Date().getTime();
+                                    const validNotices = notices.filter(n => !n.expiry || new Date(n.expiry).getTime() > now);
+                                    if (validNotices.length > 0) {
+                                        const latest = validNotices[validNotices.length - 1];
+                                        if (latest.timestamp !== localStorage.getItem('last_notif_id')) {
+                                            Notification.requestPermission().then(perm => {
+                                                if (perm === 'granted') { triggerLockScreenNotification(`Namaste, ${firstName}!`, latest.message); localStorage.setItem('last_notif_id', latest.timestamp); }
+                                            });
+                                        }
+                                        document.getElementById('notif-badge').classList.remove('hidden');
+                                    } else { document.getElementById('notif-badge').classList.add('hidden'); }
                                 }
                             });
                         }
                     }
                 });
-
                 renderMenu();
             }
         });
-
-        // 3. Grid Menu
         function renderMenu() {
             const menuItems = [
-    { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
-    { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-    { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
-    { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
-    { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
-    { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
-    { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
-    { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' }, 
-    { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
-    { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
-    { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
-    { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
-    { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
-    { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
-    { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
-    { name: 'Admin Inbox', url: './admin-queries.html', icon: 'fa-user-cog', color: 'text-red-500' },
-];
-
+                { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
+                { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
+                { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
+                { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
+                { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
+                { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+                { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
+                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
+                { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
+                { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
+                { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
+                { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
+                { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
+                { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
+                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
+                { name: 'Admin Inbox', url: './admin-queries.html', icon: 'fa-user-cog', color: 'text-red-500' }
+            ];
             const grid = document.getElementById('app-grid');
-            grid.innerHTML = menuItems.map(item => `
-                <div class="app-card p-4" onclick="location.href='${item.url}'">
-                    <i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i>
-                    <p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p>
-                </div>
-            `).join('');
-            
+            grid.innerHTML = menuItems.map(item => `<div class="app-card p-4" onclick="location.href='${item.url}'"><i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p></div>`).join('');
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
-                document.querySelectorAll('.app-card').forEach(card => {
-                    card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none';
-                });
+                document.querySelectorAll('.app-card').forEach(card => card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none');
             });
         }
-
-        // 4. Utility Functions
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 const snapshot = await get(ref(db, 'students'));
-                let existingId = null;
-                if (snapshot.exists()) {
-                    existingId = Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email);
-                }
-                if (existingId) {
-                    await update(ref(db, `students/${existingId}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL });
-                } else {
-                    await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" });
-                }
-            } catch (error) { console.error("Login Error", error); }
+                let existingKey = snapshot.exists() ? Object.keys(snapshot.val()).find(key => snapshot.val()[key].email === user.email) : null;
+                if (existingKey) { await update(ref(db, `students/${existingKey}`), { lastLogin: new Date().toLocaleString(), profilePic: user.photoURL }); }
+                else { await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" }); }
+            } catch (err) { console.error(err); }
         };
-
         window.logout = () => signOut(auth).then(() => location.reload());
         window.openNotifications = () => { location.href = './notifications_view.html'; };
-        window.openInfo = async () => { 
-            document.getElementById('info-modal').style.display = "flex"; 
-            if (navigator.getBattery) { 
-                const b = await navigator.getBattery(); 
-                document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; 
-            } 
-        };
+        window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
         window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
     </script>
     <script>
-/**
- * SNT PORTAL - MULTI-LAYER SECURITY SHIELD
- * Developer: Harshit Kaushal
- * Purpose: Block DevTools, Inspect Element, and Source View
- */
-
-(function() {
-    // 1. Right-Click Block (Mouse and Touch)
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 2. Keyboard Shortcuts Block (F12, Ctrl+Shift+I, J, C, U, S)
-    document.onkeydown = function(e) {
-        if (
-            e.keyCode === 123 || // F12
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I, J, C
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) // Ctrl+U (Source), Ctrl+S (Save)
-        ) {
-            alert("Security Alert: SNT Portal Restricted Action!");
-            return false;
-        }
-    };
-
-    // 3. Selection, Dragging, and Copy-Paste Block
-    document.addEventListener('selectstart', (e) => e.preventDefault());
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-    document.addEventListener('copy', (e) => e.preventDefault());
-
-    // 4. Advanced DevTools Detection & Auto-Reload
-    // Agar koi user browser window ka size chota karke DevTools kholne ki koshish karega
-    const devtoolsDetector = function() {
-        const threshold = 160;
-        const widthDiff = window.outerWidth - window.innerWidth > threshold;
-        const heightDiff = window.outerHeight - window.innerHeight > threshold;
-
-        if (widthDiff || heightDiff) {
-            // DevTools detect hote hi page reload kar do ya alert dikhao
-            window.location.reload();
-            console.clear();
-        }
-    };
-
-    // Har 500ms par check karega
-    setInterval(devtoolsDetector, 500);
-
-    // 5. Console Cleansing
-    // Agar koi kisi tarah console tak pahuch jaye, toh usey kuch dikhega nahi
-    setInterval(() => {
-        console.clear();
-        console.log("%cSTOP! ACCESS DENIED", "color: red; font-size: 30px; font-weight: bold;");
-        console.log("%cSNT Official Portal - Developed by Harshit Kaushal", "color: skyblue; font-size: 14px;");
-    }, 1000);
-
-    // 6. CSS Layer Injection (Selection Shield)
-    const style = document.createElement('style');
-    style.innerHTML = `
-        * {
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            user-select: none !important;
-            -webkit-touch-callout: none !important;
-            -webkit-user-drag: none !important;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    console.log("SNT Security Layer: Active");
-})();
-</script>
-
+        (function() {
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.onkeydown = e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && [85, 83].includes(e.keyCode))) return false; };
+            setInterval(() => { if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) window.location.reload(); }, 500);
+        })();
+    </script>
 </body>
 </html>
