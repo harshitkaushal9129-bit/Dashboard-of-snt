@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
   <style>
-    :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #facc15; }
+    :root { --primary: #0f172a; --accent: #38bdf8; --card-bg: #1e293b; --text: #f8fafc; --success: #10b981; }
     body { font-family: 'Segoe UI', sans-serif; background: var(--primary); color: var(--text); margin: 0; padding: 15px; user-select: none; }
     #u-id, #u-id-top { user-select: text !important; -webkit-user-select: text !important; }
  
@@ -21,12 +21,12 @@
 
     .student-card { background: var(--card-bg); border-radius: 25px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
     .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-    .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; background: #0f172a; }
+    .profile-img { width: 90px; height: 90px; border-radius: 20px; border: 3px solid var(--accent); object-fit: cover; background: #0f172a; }
     
-    .section-label { color: var(--accent); font-size: 12px; font-weight: 800; text-transform: uppercase; margin: 15px 0 10px 0; display: block; letter-spacing: 1px; }
+    .section-label { color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 20px 0 10px 0; display: block; letter-spacing: 1.5px; border-left: 3px solid var(--accent); padding-left: 8px; }
 
     .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .info-box { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 12px; border-left: 3px solid var(--accent); }
+    .info-box { background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
     .full-width { grid-column: span 2; }
     .label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; }
     .val { font-size: 13px; font-weight: 600; color: #fff; overflow-wrap: break-word; }
@@ -48,7 +48,7 @@
 
   <div id="loader">
     <div class="spinner"></div>
-    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">SYNCING DASHBOARD...</div>
+    <div style="font-weight: bold; font-size: 10px; letter-spacing: 2px; color: var(--accent);">FETCHING FULL PROFILE...</div>
   </div>
 
   <header>
@@ -58,39 +58,49 @@
 
   <div id="main-content" style="display:none;">
     <div class="student-card">
+      
       <div class="profile-header">
         <img id="u-img" src="SNT.jpg" class="profile-img">
         <div>
           <div id="u-name" style="font-size: 20px; font-weight: 800; color: #fff;">---</div>
-          <div id="u-status" style="font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: 5px;">--</div>
-          <div id="u-id-top" style="font-size: 10px; color: var(--accent); font-weight: bold;">--</div>
+          <div id="u-status" style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 5px; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px;">--</div>
+          <div id="u-id-top" style="font-size: 11px; color: var(--accent); font-weight: bold; margin-top: 5px;">ID: --</div>
         </div>
       </div>
 
-      <span class="section-label">Identity Details</span>
+      <span class="section-label">Personal Identity</span>
       <div class="data-grid">
-        <div class="info-box"><div class="label">Registration ID</div><div id="u-id" class="val">--</div></div>
         <div class="info-box"><div class="label">Father's Name</div><div id="u-father" class="val">--</div></div>
-        <div class="info-box"><div class="label">Date of Birth</div><div id="u-dob" class="val">--</div></div>
+        <div class="info-box"><div class="label">Mother's Name</div><div id="u-mother" class="val">--</div></div>
         <div class="info-box"><div class="label">Gender</div><div id="u-gender" class="val">--</div></div>
+        <div class="info-box"><div class="label">Date of Birth</div><div id="u-dob" class="val">--</div></div>
       </div>
 
-      <span class="section-label">Academic & Batch</span>
+      <span class="section-label">Academic Background</span>
       <div class="data-grid">
         <div class="info-box full-width"><div class="label">Course(s) Enrolled</div><div id="u-course" class="val">--</div></div>
-        <div class="info-box"><div class="label">Batch Selection</div><div id="u-batch" class="val">--</div></div>
+        <div class="info-box"><div class="label">Last Qualification</div><div id="u-edu" class="val">--</div></div>
+        <div class="info-box"><div class="label">Passing Year</div><div id="u-pass" class="val">--</div></div>
+        <div class="info-box"><div class="label">English Skill</div><div id="u-eng" class="val">--</div></div>
         <div class="info-box"><div class="label">Admission Date</div><div id="u-adm-date" class="val">--</div></div>
       </div>
 
-      <span class="section-label">Contact & Rewards</span>
+      <span class="section-label">Contact & Location</span>
       <div class="data-grid">
         <div class="info-box"><div class="label">WhatsApp No.</div><div id="u-phone" class="val">--</div></div>
-        <div class="info-box"><div class="label">Cash Rewards</div><div id="u-won" class="val" style="color:var(--success)">₹0</div></div>
-        <div class="info-box full-width"><div class="label">Registered Email</div><div id="u-email" class="val" style="font-size:11px;">--</div></div>
-        <div class="info-box full-width"><div class="label">Permanent Address</div><div id="u-addr" class="val" style="font-size:12px;">--</div></div>
+        <div class="info-box"><div class="label">Working Status</div><div id="u-work" class="val">--</div></div>
+        <div class="info-box full-width"><div class="label">Registered Email</div><div id="u-email" class="val">--</div></div>
+        <div class="info-box full-width"><div class="label">Full Address</div><div id="u-addr" class="val" style="font-size:12px;">--</div></div>
       </div>
 
-      <div style="margin-top: 20px;">
+      <span class="section-label">Institute Details</span>
+      <div class="data-grid">
+        <div class="info-box"><div class="label">Batch Selection</div><div id="u-batch" class="val">--</div></div>
+        <div class="info-box"><div class="label">Cash Rewards</div><div id="u-won" class="val" style="color:var(--success)">₹0</div></div>
+        <div class="info-box full-width"><div class="label">Digital Signature</div><div id="u-sign" class="val" style="font-family: cursive; color: var(--accent);">--</div></div>
+      </div>
+
+      <div style="margin-top: 25px;">
         <button class="btn-action btn-pay" onclick="openPaymentModal()">💰 PAY ONLINE FEES</button>
         <div style="display: flex; gap: 10px;">
           <button id="att-btn" class="btn-action btn-secondary">Attendance</button>
@@ -102,31 +112,25 @@
 
   <div id="pay-modal">
     <div class="modal-content">
-      <h3 style="margin-top:0; color:#0f172a; font-weight:900;">ONLINE PAYMENT</h3>
+      <h3 style="margin-top:0; color:#0f172a; font-weight:900;">FEES PAYMENT</h3>
       <select id="pay-month">
         <option value="Admission Fee">Admission Fee</option>
         <option disabled>───────</option>
-        <option value="January">January Fee</option>
-        <option value="February">February Fee</option>
-        <option value="March">March Fee</option>
-        <option value="April">April Fee</option>
-        <option value="May">May Fee</option>
-        <option value="June">June Fee</option>
-        <option value="July">July Fee</option>
-        <option value="August">August Fee</option>
-        <option value="September">September Fee</option>
-        <option value="October">October Fee</option>
-        <option value="November">November Fee</option>
-        <option value="December">December Fee</option>
+        <option value="January">January Fee</option><option value="February">February Fee</option>
+        <option value="March">March Fee</option><option value="April">April Fee</option>
+        <option value="May">May Fee</option><option value="June">June Fee</option>
+        <option value="July">July Fee</option><option value="August">August Fee</option>
+        <option value="September">September Fee</option><option value="October">October Fee</option>
+        <option value="November">November Fee</option><option value="December">December Fee</option>
       </select>
       <input type="number" id="pay-amount" placeholder="Enter Amount ₹">
       <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center; border: 5px solid #f1f5f9; padding:10px; border-radius:10px;"></div>
       <p id="qr-status" style="font-size:11px; color:#475569; font-weight:bold;"></p>
       
-      <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE UPI QR</button>
+      <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE QR</button>
       <button id="conf-pay-btn" class="btn-action" style="background: var(--success); color:#fff; display:none;" onclick="confirmStudentPayment()">I HAVE PAID SUCCESSFULLY</button>
       
-      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px; text-transform:uppercase;">✕ Close Window</button>
+      <button onclick="closeModal()" style="border:none; background:none; color:#ef4444; margin-top:15px; cursor:pointer; font-weight:800; font-size:11px;">✕ CANCEL</button>
     </div>
   </div>
 
@@ -157,46 +161,57 @@
           currentStudentKey = Object.keys(snap.val())[0];
           studentData = snap.val()[currentStudentKey];
 
+          // Photo & Name
           document.getElementById('u-img').src = studentData.profilePicture || 'SNT.jpg';
           document.getElementById('u-name').innerText = studentData.name || '---';
-          document.getElementById('u-id').innerText = studentData.studentId || 'N/A';
           document.getElementById('u-id-top').innerText = "ID: " + (studentData.studentId || 'N/A');
+          
+          // Identity Section
           document.getElementById('u-father').innerText = studentData.fatherName || 'N/A';
-          document.getElementById('u-dob').innerText = studentData.dob || 'N/A';
+          document.getElementById('u-mother').innerText = studentData.motherName || 'N/A';
           document.getElementById('u-gender').innerText = studentData.gender || 'N/A';
-          document.getElementById('u-email').innerText = studentData.email || 'N/A';
-          document.getElementById('u-addr').innerText = studentData.address || 'N/A';
-          document.getElementById('u-adm-date').innerText = studentData.admissionDate || '--/--/----';
+          document.getElementById('u-dob').innerText = studentData.dob || 'N/A';
 
+          // Academic Section
           let courseDisplay = studentData.courses ? (Array.isArray(studentData.courses) ? studentData.courses.join(', ') : studentData.courses) : 'N/A';
           document.getElementById('u-course').innerText = courseDisplay;
+          document.getElementById('u-edu').innerText = studentData.lastQualification || 'N/A';
+          document.getElementById('u-pass').innerText = studentData.passingYear || 'N/A';
+          document.getElementById('u-eng').innerText = studentData.english || 'N/A';
+          document.getElementById('u-adm-date').innerText = studentData.admissionDate || '--/--/----';
 
+          // Contact Section
+          document.getElementById('u-phone').innerText = studentData.mobile || studentData.phone || '--';
+          document.getElementById('u-work').innerText = studentData.working || 'N/A';
+          document.getElementById('u-email').innerText = studentData.email || 'N/A';
+          document.getElementById('u-addr').innerText = studentData.address || 'N/A';
+
+          // Office Section
           let batchDisplay = studentData.batches ? (Array.isArray(studentData.batches) ? studentData.batches.join(', ') : studentData.batches) : 'N/A';
           document.getElementById('u-batch').innerText = batchDisplay;
-
-          document.getElementById('u-phone').innerText = studentData.mobile || studentData.phone || '--';
           document.getElementById('u-won').innerText = `₹${studentData.wonCash || 0}`;
+          document.getElementById('u-sign').innerText = studentData.signature || '---';
 
+          // Status Badge
           const statusEl = document.getElementById('u-status');
           const regStatus = studentData.registrationStatus || 'Pending';
-          statusEl.innerText = `● Status: ${regStatus}`;
+          statusEl.innerText = `● STATUS: ${regStatus}`;
           statusEl.style.color = (regStatus === 'Pending') ? '#ef4444' : '#10b981';
 
+          // Buttons
           document.getElementById('att-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/calendar.html?id=${currentStudentKey}`;
           document.getElementById('rec-btn').onclick = () => window.location.href = `https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(studentData.name)}`;
 
           document.getElementById('loader').style.display = 'none';
           document.getElementById('main-content').style.display = 'block';
-        } else {
-          alert("Record not found."); logout();
         }
       });
     }
 
+    // Payment Logic
     function openPaymentModal() {
       document.getElementById('pay-modal').style.display = 'flex';
       document.getElementById('qrcode-box').innerHTML = "";
-      document.getElementById('qr-status').innerText = "Enter amount and select month";
       document.getElementById('conf-pay-btn').style.display = 'none';
       document.getElementById('gen-qr-btn').style.display = 'block';
     }
@@ -204,40 +219,33 @@
     function generatePayQR() {
       const amt = document.getElementById('pay-amount').value;
       const month = document.getElementById('pay-month').value;
-      if(!amt || amt < 1) return alert("Please enter a valid amount");
+      if(!amt || amt < 1) return alert("Please enter amount");
 
       document.getElementById('qrcode-box').innerHTML = "";
       new QRCode(document.getElementById('qrcode-box'), {
         text: `upi://pay?pa=9580807075@ybl&pn=Sandeep%20Kumar&am=${amt}&cu=INR&tn=SNT_${studentData.name}_${month}`,
-        width: 180, height: 180
+        width: 170, height: 170
       });
 
-      document.getElementById('qr-status').innerText = `SENDING ₹${amt} FOR ${month.toUpperCase()}`;
+      document.getElementById('qr-status').innerText = `PAYING ₹${amt} FOR ${month.toUpperCase()}`;
       document.getElementById('gen-qr-btn').style.display = 'none';
       document.getElementById('conf-pay-btn').style.display = 'block';
     }
 
-    // New Function to Store Data in Firebase
     function confirmStudentPayment() {
       const amt = document.getElementById('pay-amount').value;
       const month = document.getElementById('pay-month').value;
-
-      const paymentRecord = {
+      
+      db.ref('paymentRequests').push({
         studentName: studentData.name,
         studentId: studentData.studentId,
-        email: studentData.email,
         amount: amt,
         month: month,
         timestamp: new Date().toLocaleString(),
         status: "Review Required"
-      };
-
-      // Saving to 'paymentRequests' node in Firebase
-      db.ref('paymentRequests').push(paymentRecord).then(() => {
-          alert("THANK YOU! Your payment request for " + month + " has been sent to the Admin. Please keep your transaction screenshot ready for verification.");
-          closeModal();
-      }).catch((error) => {
-          alert("Error: " + error.message);
+      }).then(() => {
+        alert("SUCCESS! Payment record stored. Admin will verify soon.");
+        closeModal();
       });
     }
 
