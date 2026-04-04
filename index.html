@@ -236,54 +236,34 @@ recognition.onresult = (event) => {
     const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
     console.log("Command Received:", command);
 
-    // --- COMMAND MAPPING ---
-    
-    // 1. LOGIN / LOGOUT
-    if (command.includes("login")) {
-        window.loginWithGoogle();
-    } 
-    else if (command.includes("logout") || command.includes("exit")) {
-        window.logout();
-    }
+    if(command.includes("login")){window.loginWithGoogle();}
+else if(command.includes("logout")||command.includes("exit")){window.logout();}
+else if(command.includes("open info")||command.includes("system info")){window.openInfo();}
+else if(command.includes("close info")||command.includes("close panel")){window.closeInfo();}
+else if(command.includes("open scanner")||command.includes("show qr")){window.openQR();}
+else if(command.includes("close qr")||command.includes("close scanner")){window.closeQR();}
+else if(command.includes("open dashboard")||command.includes("go home")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/Index.html';}
+else if(command.includes("open attendance")||command.includes("show my attendance")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';}
+else if(command.includes("open certificate")||command.includes("show my security")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/basic.html';}
+else if(command.includes("open id card")||command.includes("show my identity")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html';}
+else if(command.includes("open pdf")||command.includes("study material")||command.includes("open notes")){location.href='https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';}
+else if(command.includes("open receipt")||command.includes("show my bill")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html';}
+else if(command.includes("open display")||command.includes("show screen")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html';}
+else if(command.includes("open calendar")||command.includes("show holidays")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html';}
+else if(command.includes("open exam")||command.includes("start quiz")||command.includes("online test")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html';}
+else if(command.includes("open exam form")||command.includes("fill registration")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/examination.html';}
+else if(command.includes("open admit card")||command.includes("show my admit card")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html';}
+else if(command.includes("open results")||command.includes("show my marks")){location.href='./result-history.html';}
+else if(command.includes("open help")||command.includes("ask query")){location.href='./Query-box.html';}
+else if(command.includes("open fee status")||command.includes("check my fees")){location.href='./Fee-history.html';}
+else if(command.includes("open rankings")||command.includes("show toppers")){location.href='./ranking.html';}
+else if(command.includes("open admin")||command.includes("admin settings")){location.href='./admin-queries.html';}
+else if(command.includes("share app")){window.shareApp();}
+else if(command.includes("scroll down")||command.includes("go down")){window.scrollBy({top:400,behavior:'smooth'});}
+else if(command.includes("scroll up")||command.includes("go up")){window.scrollBy({top:-400,behavior:'smooth'});}
+else if(command.includes("go back")){window.history.back();}
+else if(command.includes("refresh page")||command.includes("reload")){location.reload();}
 
-    // 2. OPEN MODALS / PANELS
-    else if (command.includes("open info") || command.includes("system info")) {
-        window.openInfo();
-    }
-    else if (command.includes("close info") || command.includes("close panel")) {
-        window.closeInfo();
-    }
-    else if (command.includes("open scanner") || command.includes("show qr")) {
-        window.openQR();
-    }
-    else if (command.includes("close qr") || command.includes("close scanner")) {
-        window.closeQR();
-    }
-
-    // 3. NAVIGATION (Apps)
-    else if (command.includes("open exam") || command.includes("start quiz")) {
-        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html';
-    }
-    else if (command.includes("open attendance")) {
-        location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';
-    }
-    else if (command.includes("open admit card")) {
-        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html';
-    }
-    else if (command.includes("open pdf") || command.includes("study material")) {
-        location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';
-    }
-
-    // 4. UTILITIES
-    else if (command.includes("share app")) {
-        window.shareApp();
-    }
-    else if (command.includes("scroll down")) {
-        window.scrollBy({ top: 400, behavior: 'smooth' });
-    }
-    else if (command.includes("scroll up")) {
-        window.scrollBy({ top: -400, behavior: 'smooth' });
-    }
 };
 
 // Start on Load
