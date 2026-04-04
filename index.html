@@ -40,6 +40,14 @@
             </button>
         </div>
     </div>
+    <div id="ai-assistant-ui" class="fixed bottom-6 right-6 z-[5000] flex flex-col items-center gap-3">
+    <div id="ai-status-text" class="text-[9px] font-black text-sky-400 uppercase tracking-widest opacity-0 transition-opacity">Listening...</div>
+    <div onclick="toggleAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.4)] cursor-pointer overflow-hidden relative">
+        <i class="fas fa-microphones text-sky-500 text-xl z-10"></i>
+        <div id="ai-wave" class="absolute inset-0 bg-sky-500/20 scale-0 rounded-full animate-ping hidden"></div>
+    </div>
+</div>
+
     <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
         <header class="flex justify-between items-center mb-8">
             <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
@@ -200,6 +208,95 @@
         window.openQR = () => document.getElementById('qr-modal').style.display = "flex";
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
+
+
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US'; 
+recognition.continuous = true; // इसे परमानेंट चालू रखने के लिए
+recognition.interimResults = false;
+
+const aiStatus = document.getElementById('ai-status-text');
+const aiWave = document.getElementById('ai-wave');
+
+// Voice Assistant Start Logic
+function startAssistant() {
+    try {
+        recognition.start();
+        aiStatus.classList.remove('opacity-0');
+        aiWave.classList.remove('hidden');
+    } catch (e) { console.log("AI already active"); }
+}
+
+// Auto-Restart Logic (ताकि यह कभी बंद न हो)
+recognition.onend = () => {
+    recognition.start(); 
+};
+
+recognition.onresult = (event) => {
+    const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+    console.log("Command Received:", command);
+
+    // --- COMMAND MAPPING ---
+    
+    // 1. LOGIN / LOGOUT
+    if (command.includes("login")) {
+        window.loginWithGoogle();
+    } 
+    else if (command.includes("logout") || command.includes("exit")) {
+        window.logout();
+    }
+
+    // 2. OPEN MODALS / PANELS
+    else if (command.includes("open info") || command.includes("system info")) {
+        window.openInfo();
+    }
+    else if (command.includes("close info") || command.includes("close panel")) {
+        window.closeInfo();
+    }
+    else if (command.includes("open scanner") || command.includes("show qr")) {
+        window.openQR();
+    }
+    else if (command.includes("close qr") || command.includes("close scanner")) {
+        window.closeQR();
+    }
+
+    // 3. NAVIGATION (Apps)
+    else if (command.includes("open exam") || command.includes("start quiz")) {
+        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html';
+    }
+    else if (command.includes("open attendance")) {
+        location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';
+    }
+    else if (command.includes("open admit card")) {
+        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html';
+    }
+    else if (command.includes("open pdf") || command.includes("study material")) {
+        location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';
+    }
+
+    // 4. UTILITIES
+    else if (command.includes("share app")) {
+        window.shareApp();
+    }
+    else if (command.includes("scroll down")) {
+        window.scrollBy({ top: 400, behavior: 'smooth' });
+    }
+    else if (command.includes("scroll up")) {
+        window.scrollBy({ top: -400, behavior: 'smooth' });
+    }
+};
+
+// Start on Load
+window.addEventListener('load', () => {
+    // ब्राउज़र पॉलिसी के कारण पहली बार यूजर इंटरैक्शन जरूरी हो सकता है
+    document.body.addEventListener('click', startAssistant, { once: true });
+});
+
+
+
+
+        
+    
     </script>
     <script>
         (function() {
