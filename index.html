@@ -307,5 +307,9 @@
         };
 
     </script>
+    <script>
+    if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(e=>console.log("SW Error:",e));});}
+(function(){document.addEventListener('contextmenu',e=>e.preventDefault());document.onkeydown=(e)=>{if(e.keyCode===123||(e.ctrlKey&&e.shiftKey&&(e.keyCode===73||e.keyCode===74||e.keyCode===67))||(e.ctrlKey&&(e.keyCode===85||e.keyCode===83))){return false;}};const blockDev=()=>{const t=160;if(window.outerWidth-window.innerWidth>t||window.outerHeight-window.innerHeight>t){window.location.reload();}};setInterval(blockDev,500);setInterval(()=>{ (function(){(function a(){try{(function b(i){if((''+(i/i)).length!==1||i%20===0){(function(){}).constructor('debugger')();}else{debugger;}b(++i);})(0);}catch(e){setTimeout(a,50);}})();})();},1000);})();
+</script>
 </body>
 </html>
