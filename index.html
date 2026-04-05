@@ -14,8 +14,28 @@
         * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-user-drag: none; outline: none; }
         body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; }
+        
+        /* Layout optimized for Android/Mobile */
+        .app-card { 
+            background: rgba(30, 41, 59, 0.6); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            transition: 0.3s; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            aspect-ratio: 1/1; 
+            border-radius: 20px; 
+        }
         .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
+        
+        @media (max-width: 640px) {
+            #app-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+            #user-img { width: 60px !important; height: 60px !important; }
+            .profile-card { padding: 16px !important; }
+        }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
@@ -40,62 +60,65 @@
             </button>
         </div>
     </div>
+
     <div id="ai-assistant-ui" class="fixed bottom-6 right-6 z-[5000] flex flex-col items-center gap-3">
-    <div id="ai-status-text" class="text-[9px] font-black text-sky-400 uppercase tracking-widest opacity-0 transition-opacity">Listening...</div>
-    <div onclick="toggleAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.4)] cursor-pointer overflow-hidden relative">
-        <i class="fas fa-microphones text-sky-500 text-xl z-10"></i>
-        <div id="ai-wave" class="absolute inset-0 bg-sky-500/20 scale-0 rounded-full animate-ping hidden"></div>
+        <div id="ai-status-text" class="text-[9px] font-black text-sky-400 uppercase tracking-widest opacity-0 transition-opacity">Listening...</div>
+        <div onclick="toggleAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.4)] cursor-pointer overflow-hidden relative">
+            <i class="fas fa-microphone text-sky-500 text-xl z-10"></i>
+            <div id="ai-wave" class="absolute inset-0 bg-sky-500/20 scale-0 rounded-full animate-ping hidden"></div>
+        </div>
     </div>
-</div>
 
     <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
-        <header class="flex justify-between items-center mb-8">
-            <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
-            <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
+        <header class="flex justify-between items-center mb-6">
+            <button onclick="logout()" class="text-red-400 text-[8px] font-black bg-red-900/20 px-3 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
+            <h1 class="text-lg font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
             <div class="flex gap-2">
                 <div class="relative">
-                    <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400"><i class="fas fa-bell"></i></button>
-                    <span id="notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-[#0f172a] rounded-full animate-pulse"></span>
+                    <button onclick="openNotifications()" class="w-9 h-9 rounded-full glass flex items-center justify-center text-yellow-400"><i class="fas fa-bell text-sm"></i></button>
+                    <span id="notif-badge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-[#0f172a] rounded-full animate-pulse"></span>
                 </div>
-                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-circle-info"></i></button>
-                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes"></i></button>
+                <button onclick="openInfo()" class="w-9 h-9 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-circle-info text-sm"></i></button>
+                <button onclick="shareApp()" class="w-9 h-9 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes text-sm"></i></button>
             </div>
         </header>
-        <div id="profile-section" class="glass p-6 rounded-3xl mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
-            <div class="relative"><img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800"></div>
-            <div class="flex-1">
-                <p id="greeting-msg" class="text-sky-400 text-[9px] font-black uppercase tracking-widest mb-1"></p>
-                <h3 id="user-name" class="text-lg font-black text-white leading-tight mb-0.5">Loading...</h3>
-                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-2 italic opacity-60"></p>
+
+        <div id="profile-section" class="glass profile-card p-6 rounded-3xl mb-6 flex items-center gap-4 border-l-4 border-sky-500 shadow-2xl">
+            <div class="relative"><img id="user-img" src="./SNT.jpg" class="w-16 h-16 rounded-full border-2 border-sky-500 object-cover bg-slate-800"></div>
+            <div class="flex-1 min-w-0">
+                <p id="greeting-msg" class="text-sky-400 text-[8px] font-black uppercase tracking-widest mb-0.5"></p>
+                <h3 id="user-name" class="text-base font-black text-white leading-tight truncate">Loading...</h3>
+                <p id="user-email" class="text-slate-400 text-[9px] font-mono mb-1.5 italic opacity-60 truncate"></p>
                 <div class="flex gap-2">
-                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded border border-sky-500/20 font-black uppercase">ID: ...</span>
-                    <span id="user-status-badge" class="text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase">Loading</span>
+                    <span id="user-roll" class="text-[8px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded border border-sky-500/20 font-black uppercase">ID: ...</span>
+                    <span id="user-status-badge" class="text-[8px] px-2 py-0.5 rounded font-black uppercase">Loading</span>
                 </div>
             </div>
         </div>
+
         <div class="mb-6 relative">
             <div class="search-box flex items-center px-4 py-3 rounded-2xl">
-                <i class="fas fa-search text-sky-500 mr-3 text-sm"></i>
-                <input type="text" id="appSearch" placeholder="SEARCH SERVICES..." class="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-widest w-full text-white placeholder:text-slate-500">
+                <i class="fas fa-search text-sky-500 mr-3 text-xs"></i>
+                <input type="text" id="appSearch" placeholder="SEARCH SERVICES..." class="bg-transparent border-none outline-none text-[10px] font-bold uppercase tracking-widest w-full text-white placeholder:text-slate-500">
             </div>
         </div>
-        <div id="app-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-24"></div>
+        <div id="app-grid" class="grid grid-cols-2 gap-3 pb-24"></div>
     </div>
+
     <div id="info-modal" class="modal-overlay">
-        <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative">
-            <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white">System Info</h2>
+        <div class="glass p-8 rounded-[40px] w-[320px] border border-white/10 shadow-2xl relative">
+            <h2 class="text-2xl font-black text-center mb-6 uppercase tracking-widest text-white">System Info</h2>
             <div class="space-y-0 px-2">
                 <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">...</span></div>
                 <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.2.10 Pro</span></div>
                 <div class="info-row"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
                 <div class="info-row"><span class="info-label">Instagram</span><a href="https://www.instagram.com/invites/contact/?igsh=vucokp5w5lf4&utm_content=gji134o" target="_blank" class="text-pink-500 social-link-icon"><i class="fab fa-instagram"></i></a></div>
-                <div class="info-row"><span class="info-label">YouTube</span><a href="https://youtube.com/@programmingby-kaushalji?si=OuViX3t9PwjNHUMB" target="_blank" class="text-red-500 social-link-icon"><i class="fab fa-youtube"></i></a></div>
-                <div class="info-row"><span class="info-label">WhatsApp</span><a href="https://wa.me/919129191898" target="_blank" class="text-green-500 social-link-icon"><i class="fab fa-whatsapp"></i></a></div>
                 <div class="info-row border-none"><span class="info-label">Support UPI</span><i onclick="openQR()" class="fas fa-qrcode text-sky-400 social-link-icon"></i></div>
             </div>
-            <button onclick="closeInfo()" class="w-full mt-8 bg-slate-800/50 text-slate-400 p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-white/5 active:scale-95 transition-all">Close Panel</button>
+            <button onclick="closeInfo()" class="w-full mt-6 bg-slate-800/50 text-slate-400 p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-white/5 active:scale-95 transition-all">Close Panel</button>
         </div>
     </div>
+
     <div id="qr-modal" class="modal-overlay" onclick="closeQR()">
         <div class="qr-card animate-fade-in" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -108,16 +131,20 @@
             <p class="text-xs font-black text-sky-600 break-all text-center">mandavikaushal913@okaxis</p>
         </div>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue, get, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
         const firebaseConfig = { apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", authDomain: "snt-computer-institute.firebaseapp.com", projectId: "snt-computer-institute", databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com", appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
+
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+
         function triggerLockScreenNotification(title, message) {
             if ('serviceWorker' in navigator && Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(reg => {
@@ -125,12 +152,14 @@
                 });
             }
         }
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 const hr = new Date().getHours();
                 document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
+                
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
@@ -142,7 +171,8 @@
                             document.getElementById('user-roll').innerText = "ID: " + (sData.studentId || "NEW");
                             const statusEl = document.getElementById('user-status-badge');
                             statusEl.innerText = sData.registrationStatus || "Guest";
-                            statusEl.className = sData.registrationStatus === "Active" ? "text-[9px] bg-green-500/10 text-green-400 px-3 py-1 rounded border border-green-500/20 font-black uppercase" : "text-[9px] bg-slate-500/10 text-slate-400 px-3 py-1 rounded border border-slate-500/20 font-black uppercase";
+                            statusEl.className = sData.registrationStatus === "Active" ? "text-[8px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-black uppercase" : "text-[8px] bg-slate-500/10 text-slate-400 px-2 py-0.5 rounded border border-slate-500/20 font-black uppercase";
+                            
                             onValue(ref(db, 'notifications'), (notifSnap) => {
                                 if (notifSnap.exists()) {
                                     const notices = Object.values(notifSnap.val());
@@ -165,6 +195,7 @@
                 renderMenu();
             }
         });
+
         function renderMenu() {
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
@@ -186,11 +217,13 @@
             ];
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `<div class="app-card p-4" onclick="location.href='${item.url}'"><i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p></div>`).join('');
+            
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('.app-card').forEach(card => card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none');
             });
         }
+
         window.loginWithGoogle = async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -201,6 +234,7 @@
                 else { await set(ref(db, `students/${user.uid}`), { name: user.displayName, email: user.email, profilePic: user.photoURL, registrationStatus: "Guest User", joinDate: new Date().toLocaleString(), studentId: "NEW" }); }
             } catch (err) { console.error(err); }
         };
+
         window.logout = () => signOut(auth).then(() => location.reload());
         window.openNotifications = () => { location.href = './notifications_view.html'; };
         window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
@@ -209,74 +243,41 @@
         window.closeQR = () => document.getElementById('qr-modal').style.display = "none";
         window.shareApp = () => { if (navigator.share) navigator.share({ title: 'SNT Portal', url: window.location.href }); };
 
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US'; 
+        recognition.continuous = true;
+        recognition.interimResults = false;
 
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = 'en-US'; 
-recognition.continuous = true; // इसे परमानेंट चालू रखने के लिए
-recognition.interimResults = false;
+        const aiStatus = document.getElementById('ai-status-text');
+        const aiWave = document.getElementById('ai-wave');
 
-const aiStatus = document.getElementById('ai-status-text');
-const aiWave = document.getElementById('ai-wave');
+        function startAssistant() {
+            try {
+                recognition.start();
+                aiStatus.classList.remove('opacity-0');
+                aiWave.classList.remove('hidden');
+            } catch (e) { console.log("AI already active"); }
+        }
 
-// Voice Assistant Start Logic
-function startAssistant() {
-    try {
-        recognition.start();
-        aiStatus.classList.remove('opacity-0');
-        aiWave.classList.remove('hidden');
-    } catch (e) { console.log("AI already active"); }
-}
+        recognition.onend = () => { recognition.start(); };
 
-// Auto-Restart Logic (ताकि यह कभी बंद न हो)
-recognition.onend = () => {
-    recognition.start(); 
-};
+        recognition.onresult = (event) => {
+            const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            if(command.includes("login")){window.loginWithGoogle();}
+            else if(command.includes("logout")||command.includes("exit")){window.logout();}
+            else if(command.includes("open info")||command.includes("system info")){window.openInfo();}
+            else if(command.includes("close info")){window.closeInfo();}
+            else if(command.includes("open scanner")){window.openQR();}
+            else if(command.includes("close qr")){window.closeQR();}
+            else if(command.includes("open dashboard")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/Index.html';}
+            else if(command.includes("open attendance")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';}
+            else if(command.includes("open certificate")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/basic.html';}
+            else if(command.includes("open id card")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html';}
+            else if(command.includes("open pdf")||command.includes("notes")){location.href='https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';}
+            else if(command.includes("refresh")){location.reload();}
+        };
 
-recognition.onresult = (event) => {
-    const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-    console.log("Command Received:", command);
-
-    if(command.includes("login")){window.loginWithGoogle();}
-else if(command.includes("logout")||command.includes("exit")){window.logout();}
-else if(command.includes("open info")||command.includes("system info")){window.openInfo();}
-else if(command.includes("close info")||command.includes("close panel")){window.closeInfo();}
-else if(command.includes("open scanner")||command.includes("show qr")){window.openQR();}
-else if(command.includes("close qr")||command.includes("close scanner")){window.closeQR();}
-else if(command.includes("open dashboard")||command.includes("go home")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/Index.html';}
-else if(command.includes("open attendance")||command.includes("show my attendance")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';}
-else if(command.includes("open certificate")||command.includes("show my security")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/basic.html';}
-else if(command.includes("open id card")||command.includes("show my identity")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html';}
-else if(command.includes("open pdf")||command.includes("study material")||command.includes("open notes")){location.href='https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';}
-else if(command.includes("open receipt")||command.includes("show my bill")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html';}
-else if(command.includes("open display")||command.includes("show screen")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html';}
-else if(command.includes("open calendar")||command.includes("show holidays")){location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html';}
-else if(command.includes("open exam")||command.includes("start quiz")||command.includes("online test")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html';}
-else if(command.includes("open exam form")||command.includes("fill registration")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/examination.html';}
-else if(command.includes("open admit card")||command.includes("show my admit card")){location.href='https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html';}
-else if(command.includes("open results")||command.includes("show my marks")){location.href='./result-history.html';}
-else if(command.includes("open help")||command.includes("ask query")){location.href='./Query-box.html';}
-else if(command.includes("open fee status")||command.includes("check my fees")){location.href='./Fee-history.html';}
-else if(command.includes("open rankings")||command.includes("show toppers")){location.href='./ranking.html';}
-else if(command.includes("open admin")||command.includes("admin settings")){location.href='./admin-queries.html';}
-else if(command.includes("share app")){window.shareApp();}
-else if(command.includes("scroll down")||command.includes("go down")){window.scrollBy({top:400,behavior:'smooth'});}
-else if(command.includes("scroll up")||command.includes("go up")){window.scrollBy({top:-400,behavior:'smooth'});}
-else if(command.includes("go back")){window.history.back();}
-else if(command.includes("refresh page")||command.includes("reload")){location.reload();}
-
-};
-
-// Start on Load
-window.addEventListener('load', () => {
-    // ब्राउज़र पॉलिसी के कारण पहली बार यूजर इंटरैक्शन जरूरी हो सकता है
-    document.body.addEventListener('click', startAssistant, { once: true });
-});
-
-
-
-
-        
-    
+        window.addEventListener('load', () => { document.body.addEventListener('click', startAssistant, { once: true }); });
     </script>
     <script>
         (function() {
