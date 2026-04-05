@@ -19,7 +19,7 @@ self.addEventListener('push', function(event) {
     const options = {
         body: data.body,
         icon: './SNT.jpg', 
-        badge: './SNT.png', 
+        badge: './SNT.jpg', 
         vibrate: [500, 110, 500],
         tag: 'snt-notification',
         renotify: true,
