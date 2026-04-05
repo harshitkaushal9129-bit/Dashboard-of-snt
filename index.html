@@ -148,6 +148,14 @@
             <button onclick="logout()" class="w-full mt-10 bg-red-500/10 text-red-500 p-4 rounded-2xl border border-red-500/20 font-black text-[11px] uppercase tracking-widest">Sign Out Account</button>
         </div>
     </div>
+    <div class="px-4 mb-6">
+    <button onclick="document.getElementById('voice-guide-modal').style.display='flex'" 
+            class="w-full bg-sky-500/10 text-sky-400 p-3 rounded-2xl border border-sky-500/30 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
+        <i class="fas fa-microphone-alt animate-pulse"></i> 
+        How to use Voice Assistant? (Commands List)
+    </button>
+</div>
+
 <div id="voice-guide-modal" class="modal-overlay">
     <div class="glass p-6 rounded-[35px] w-full max-w-[380px] border border-white/10 shadow-2xl animate-fade-in">
         <div class="text-center mb-6">
