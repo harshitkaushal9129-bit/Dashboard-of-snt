@@ -276,6 +276,9 @@
                         <a href="https://youtube.com/@programmingby-kaushalji?si=upy9Y55Ijd4xNPJ7" target="_blank" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
+                    <button onclick="shareApp()" class="w-10 h-10 bg-sky-500/20 rounded-full flex items-center justify-center text-sky-400 border border-sky-500/30 active:scale-90 transition-all">
+                            <i class="fas fa-share-nodes"></i>
+                    </button>
                 <div class="info-row border-none">
                     <span class="info-label">Payments</span>
                     <button onclick="openPaymentQR()" class="bg-sky-500/20 text-sky-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-sky-500/30">Open QR Code</button>
@@ -530,6 +533,10 @@
             document.getElementById('ai-wave').classList.add('hidden');
         };
 
+            window.shareApp=async()=>{const d={title:'SNT Official Portal',text:'SNT Institute ke official student portal ko access karein. Register, PDF Notes aur Results ke liye install karein.',url:'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/'};try{if(navigator.share){await navigator.share(d);}else{navigator.clipboard.writeText(d.url);alert("Portal Link Copied!");}}catch(e){console.log("Share failed:",e);}};
+
+
+            
     </script>
     <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(reg=>{if("Notification" in window){Notification.requestPermission().then(p=>{if(p==="granted")console.log("Notif Active");});}}).catch(e=>console.log("SW Error:",e));});}
