@@ -15,34 +15,39 @@
         body { background-color: #0f172a; color: white; overflow-x: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; }
-        .app-card:active { border-color: #38bdf8; transform: scale(0.95); background: rgba(56, 189, 248, 0.1); }
+        /* Attractive Card Design */
+        .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .app-card:active { border-color: #38bdf8; transform: scale(0.92); background: rgba(56, 189, 248, 0.15); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
         
-        /* Layout Switch Modes */
-        .view-android #app-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 450px; margin: 0 auto; }
-        .view-laptop #app-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        /* View Switching Logic */
+        .view-android #app-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; max-width: 420px; margin: 0 auto; padding: 10px; }
+        .view-laptop #app-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         
-        .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; }
-        #view-selector { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; font-size: 10px; font-weight: 900; padding: 6px 12px; border-radius: 10px; outline: none; }
+        .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        #view-selector { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 10px; font-weight: 900; padding: 8px 12px; border-radius: 12px; outline: none; cursor: pointer; }
         .hidden { display: none !important; }
+        
+        /* Floating AI Circle Glow */
+        #ai-circle { box-shadow: 0 0 25px rgba(56, 189, 248, 0.5); animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); } 50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7); } 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); } }
     </style>
 </head>
 <body oncontextmenu="return false;" class="view-laptop" id="main-body">
 
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="glass p-10 rounded-3xl w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
-            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl">
+        <div class="glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
+            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
-            <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Digital Student Portal</p>
-            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95">
+            <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Official Student Portal</p>
+            <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95 shadow-lg">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">LOGIN WITH GOOGLE
             </button>
         </div>
@@ -50,49 +55,52 @@
 
     <div id="ai-assistant-ui" class="fixed bottom-6 right-6 z-[5000] flex flex-col items-center gap-3">
         <div id="ai-status-text" class="text-[9px] font-black text-sky-400 uppercase tracking-widest opacity-0 transition-opacity">Listening...</div>
-        <div onclick="startAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.4)] cursor-pointer overflow-hidden relative">
+        <div onclick="startAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center cursor-pointer overflow-hidden relative">
             <i class="fas fa-microphone text-sky-500 text-xl z-10"></i>
             <div id="ai-wave" class="absolute inset-0 bg-sky-500/20 scale-0 rounded-full animate-ping hidden"></div>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden w-full max-w-5xl mx-auto p-4 md:p-8 animate-fade-in">
+    <div id="dashboard" class="hidden w-full max-w-6xl mx-auto p-4 md:p-8 animate-fade-in">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
-                <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest">Logout</button>
+                <button onclick="logout()" class="text-red-400 text-[9px] font-black bg-red-900/20 px-4 py-2 rounded-lg border border-red-900/40 uppercase tracking-widest active:scale-90">Logout</button>
                 <select id="view-selector" onchange="switchView(this.value)">
-                    <option value="view-laptop">LAPTOP VIEW</option>
-                    <option value="view-android">ANDROID VIEW</option>
+                    <option value="view-laptop">💻 LAPTOP VIEW</option>
+                    <option value="view-android">📱 ANDROID VIEW</option>
                 </select>
             </div>
             <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
             <div class="flex gap-2">
-                <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400 relative">
+                <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400 relative active:scale-90">
                     <i class="fas fa-bell"></i>
-                    <span id="notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    <span id="notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-[#0f172a]"></span>
                 </button>
-                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-circle-info"></i></button>
-                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400"><i class="fas fa-share-nodes"></i></button>
+                <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90"><i class="fas fa-circle-info"></i></button>
+                <button onclick="shareApp()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90"><i class="fas fa-share-nodes"></i></button>
             </div>
         </header>
 
-        <div id="profile-section" class="glass p-6 rounded-3xl mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
-            <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800">
+        <div id="profile-section" class="glass p-6 rounded-[32px] mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
+            <div class="relative">
+                <img id="user-img" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800 shadow-lg">
+                <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-[#1e293b] rounded-full"></div>
+            </div>
             <div class="flex-1">
                 <p id="greeting-msg" class="text-sky-400 text-[9px] font-black uppercase tracking-widest mb-1"></p>
-                <h3 id="user-name" class="text-lg font-black text-white leading-tight">Loading...</h3>
-                <p id="user-email" class="text-slate-400 text-[10px] font-mono mb-2 italic opacity-60"></p>
-                <div class="flex gap-2">
-                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded border border-sky-500/20 font-black uppercase">ID: ...</span>
-                    <span id="user-status-badge" class="text-[9px] px-3 py-1 rounded font-black uppercase">Loading</span>
+                <h3 id="user-name" class="text-xl font-black text-white leading-tight mb-0.5">Loading...</h3>
+                <p id="user-email" class="text-slate-400 text-[10px] font-mono italic opacity-60"></p>
+                <div class="flex gap-2 mt-2">
+                    <span id="user-roll" class="text-[9px] bg-sky-500/10 text-sky-400 px-3 py-1 rounded-lg border border-sky-500/20 font-black">ID: ...</span>
+                    <span id="user-status-badge" class="text-[9px] px-3 py-1 rounded-lg font-black uppercase">Loading</span>
                 </div>
             </div>
         </div>
 
         <div class="mb-6 relative">
-            <div class="search-box flex items-center px-4 py-3 rounded-2xl">
-                <i class="fas fa-search text-sky-500 mr-3 text-sm"></i>
-                <input type="text" id="appSearch" placeholder="SEARCH SERVICES..." class="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-widest w-full text-white">
+            <div class="search-box flex items-center px-5 py-4 rounded-2xl">
+                <i class="fas fa-search text-sky-500 mr-4 text-sm"></i>
+                <input type="text" id="appSearch" placeholder="SEARCH SERVICES (EXAM, ID, FEE...)" class="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-widest w-full text-white placeholder:text-slate-500">
             </div>
         </div>
 
@@ -100,31 +108,32 @@
     </div>
 
     <div id="info-modal" class="modal-overlay">
-        <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative">
-            <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white">System Info</h2>
+        <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative animate-fade-in">
+            <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white italic">System Info</h2>
             <div class="space-y-0 px-2">
-                <div class="info-row"><span class="info-label">Battery</span><span id="info-battery" class="info-value">...</span></div>
-                <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.2.10 Pro</span></div>
+                <div class="info-row"><span class="info-label">Power Status</span><span id="info-battery" class="info-value">...</span></div>
+                <div class="info-row"><span class="info-label">Software</span><span class="info-value">v2.2.10 Ultra</span></div>
                 <div class="info-row"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
                 <div class="info-row">
-                    <span class="info-label">Contact</span>
-                    <div class="flex gap-3">
-                        <a href="https://www.instagram.com/invites/contact/?igsh=vucokp5w5lf4&utm_content=gji134o" target="_blank" class="text-pink-500 text-xl"><i class="fab fa-instagram"></i></a>
-                        <a href="https://youtube.com/@programmingby-kaushalji?si=OuViX3t9PwjNHUMB" target="_blank" class="text-red-500 text-xl"><i class="fab fa-youtube"></i></a>
-                        <a href="https://wa.me/919129191898" target="_blank" class="text-green-500 text-xl"><i class="fab fa-whatsapp"></i></a>
-                        <a href="tel:919129191898" class="text-sky-400 text-xl"><i class="fas fa-phone"></i></a>
+                    <span class="info-label">Connectivity</span>
+                    <div class="flex gap-4">
+                        <a href="https://www.instagram.com/invites/contact/?igsh=vucokp5w5lf4&utm_content=gji134o" target="_blank" class="text-pink-500 text-xl hover:scale-110 transition-transform"><i class="fab fa-instagram"></i></a>
+                        <a href="https://youtube.com/@programmingby-kaushalji?si=OuViX3t9PwjNHUMB" target="_blank" class="text-red-500 text-xl hover:scale-110 transition-transform"><i class="fab fa-youtube"></i></a>
+                        <a href="https://wa.me/919129191898" target="_blank" class="text-green-500 text-xl hover:scale-110 transition-transform"><i class="fab fa-whatsapp"></i></a>
+                        <a href="tel:919129191898" class="text-sky-400 text-xl hover:scale-110 transition-transform"><i class="fas fa-phone"></i></a>
                     </div>
                 </div>
                 <div class="info-row border-none"><span class="info-label">Support UPI</span><i onclick="openQR()" class="fas fa-qrcode text-sky-400 cursor-pointer text-xl"></i></div>
             </div>
-            <button onclick="closeInfo()" class="w-full mt-8 bg-slate-800/50 text-slate-400 p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Close Panel</button>
+            <button onclick="closeInfo()" class="w-full mt-8 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-lg shadow-sky-500/20">Close Panel</button>
         </div>
     </div>
 
     <div id="qr-modal" class="modal-overlay" onclick="closeQR()">
-        <div class="qr-card animate-fade-in bg-white p-6 rounded-3xl" onclick="event.stopPropagation()">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=mandavikaushal913@okaxis&pn=Harshit%20Kaushal&cu=INR" class="mx-auto w-44 h-44 mb-4">
-            <p class="text-[10px] font-black text-sky-600 break-all text-center">mandavikaushal913@okaxis</p>
+        <div class="qr-card bg-white p-8 rounded-[40px] animate-fade-in text-center" onclick="event.stopPropagation()">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=mandavikaushal913@okaxis&pn=Harshit%20Kaushal&cu=INR" class="mx-auto w-48 h-48 mb-4 rounded-2xl">
+            <p class="text-[10px] font-black text-sky-600 mb-2">mandavikaushal913@okaxis</p>
+            <p class="text-[9px] font-bold text-slate-400 uppercase">Scan to Pay with Any UPI App</p>
         </div>
     </div>
 
@@ -172,12 +181,16 @@
                 { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
                 { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
                 { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
+                { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
+                { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
                 { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
+                { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
                 { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
                 { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
                 { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
                 { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
-                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' }
+                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400' },
+                { name: 'Admin Inbox', url: './admin-queries.html', icon: 'fa-user-cog', color: 'text-red-500' }
             ];
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `<div class="app-card p-4" onclick="location.href='${item.url}'"><i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p></div>`).join('');
@@ -212,14 +225,18 @@
             else if(command.includes("laptop view")) { switchView('view-laptop'); document.getElementById('view-selector').value = 'view-laptop'; }
             else if(command.includes("android view")) { switchView('view-android'); document.getElementById('view-selector').value = 'view-android'; }
             else if(command.includes("attendance")) location.href='https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html';
-            else if(command.includes("pdf") || command.includes("notes")) location.href='https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';
+            else if(command.includes("pdf") || command.includes("notes") || command.includes("study material")) location.href='https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html';
             else if(command.includes("exam") || command.includes("quiz")) location.href='https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html';
             else if(command.includes("admit card")) location.href='https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html';
-            else if(command.includes("refresh")) location.reload();
+            else if(command.includes("results")) location.href='./result-history.html';
+            else if(command.includes("admin")) location.href='./admin-queries.html';
+            else if(command.includes("fee")) location.href='./Fee-history.html';
+            else if(command.includes("id card")) location.href='https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html';
+            else if(command.includes("refresh") || command.includes("reload")) location.reload();
         };
     </script>
     <script>
-        // Security Controls
+        // Security Controls (SNT Standard)
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && [85, 83].includes(e.keyCode))) return false; };
         setInterval(() => { if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) window.location.reload(); }, 500);
