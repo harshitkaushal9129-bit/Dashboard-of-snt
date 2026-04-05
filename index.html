@@ -200,7 +200,18 @@
         <span class="text-[11px] font-bold text-white italic">"ID Card"</span>
         <span class="text-[9px] text-slate-400 font-bold italic">Student ID</span>
     </div>
-    <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+ 
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">System</p>
+<div class="flex justify-between items-center bg-sky-500/10 p-3 rounded-xl border border-sky-500/20">
+    <span class="text-[11px] font-bold text-sky-400 italic">"List" / "Show Commands"</span>
+    <span class="text-[9px] text-slate-400 font-bold italic">Open Helper</span>
+</div>
+<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+    <span class="text-[11px] font-bold text-white italic">"Close"</span>
+    <span class="text-[9px] text-slate-400 font-bold italic">All Modals</span>
+</div>
+      
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
         <span class="text-[11px] font-bold text-white italic">"Result"</span>
         <span class="text-[9px] text-slate-400 font-bold italic">History</span>
     </div>
@@ -498,7 +509,9 @@
             // Modals
             else if(command.includes("notification") || command.includes("message")) { window.openNotifications(); }
             else if(command.includes("info")) { window.openInfo(); }
-            
+            // --- New Command to Open List ---
+            else if(command.includes("list") || command.includes("show commands")) { document.getElementById('voice-guide-modal').style.display = 'flex'; }
+
             // --- QR Commands ---
             else if(command.includes("snt qr") || command.includes("registration")) { window.openPaymentQR('snt'); }
             else if(command.includes("fees qr") || command.includes("six hundred")) { window.openPaymentQR('fees'); }
