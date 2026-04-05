@@ -144,7 +144,45 @@
                 <p class="info-label mb-2">Registered Address</p>
                 <p id="p-addr" class="info-value italic leading-relaxed">---</p>
             </div>
-            
+            <div id="voice-guide-modal" class="modal-overlay hidden">
+    <div class="glass p-6 rounded-[35px] w-full max-w-[380px] border border-white/10 shadow-2xl animate-fade-in">
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 bg-sky-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <i class="fas fa-microphone text-sky-500 text-xl"></i>
+            </div>
+            <h2 class="text-xl font-black italic tracking-tighter">VOICE COMMANDS</h2>
+            <p class="text-[9px] text-sky-400 font-bold uppercase tracking-[0.2em]">SNT Smart Assistant Guide</p>
+        </div>
+
+        <div class="space-y-3 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar text-left">
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1">Navigation</p>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"Home" / "Portal"</span><span class="text-[9px] text-slate-400 font-bold">Dashboard</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"Profile"</span><span class="text-[9px] text-slate-400 font-bold">My Profile</span></div>
+
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Payments & QRs</p>
+            <div class="flex justify-between items-center bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20"><span class="text-[11px] font-bold text-yellow-500 italic">"SNT QR"</span><span class="text-[9px] text-slate-400 font-bold italic">Reg. (₹100)</span></div>
+            <div class="flex justify-between items-center bg-sky-500/10 p-3 rounded-xl border border-sky-500/20"><span class="text-[11px] font-bold text-sky-400 italic">"Fees QR"</span><span class="text-[9px] text-slate-400 font-bold italic">Monthly (₹600)</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"My QR" / "Pay"</span><span class="text-[9px] text-slate-400 font-bold italic">Personal</span></div>
+
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Services</p>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"Attendance"</span><span class="text-[9px] text-slate-400 font-bold italic">Check-in</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"Exam" / "Quiz"</span><span class="text-[9px] text-slate-400 font-bold italic">Start CBT</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl"><span class="text-[11px] font-bold text-white italic">"PDF" / "Notes"</span><span class="text-[9px] text-slate-400 font-bold italic">Vault</span></div>
+        </div>
+
+        <button onclick="document.getElementById('voice-guide-modal').style.display='none'" class="w-full mt-6 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Got it!</button>
+    </div>
+</div>
+
+            <div class="mt-8 mb-4">
+    <p class="section-tag">Voice Control Guide</p>
+    <button onclick="document.getElementById('voice-guide-modal').style.display='flex'" 
+            class="w-full bg-sky-500/10 text-sky-400 p-4 rounded-2xl border border-sky-500/20 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
+        <i class="fas fa-microphone-alt animate-pulse"></i> 
+        Voice Commands List
+    </button>
+</div>
+
             <button onclick="logout()" class="w-full mt-10 bg-red-500/10 text-red-500 p-4 rounded-2xl border border-red-500/20 font-black text-[11px] uppercase tracking-widest">Sign Out Account</button>
         </div>
     </div>
@@ -212,77 +250,7 @@
             <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
         </div>
     </div>
-<div class="px-4 mb-6">
-    <button onclick="document.getElementById('voice-guide-modal').style.display='flex'" 
-            class="w-full bg-sky-500/10 text-sky-400 p-3 rounded-2xl border border-sky-500/30 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
-        <i class="fas fa-microphone-alt animate-pulse"></i> 
-        How to use Voice Assistant? (Commands List)
-    </button>
-</div>
 
-<div id="voice-guide-modal" class="modal-overlay">
-    <div class="glass p-6 rounded-[35px] w-full max-w-[380px] border border-white/10 shadow-2xl animate-fade-in">
-        <div class="text-center mb-6">
-            <div class="w-12 h-12 bg-sky-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-microphone text-sky-500 text-xl"></i>
-            </div>
-            <h2 class="text-xl font-black italic tracking-tighter">VOICE COMMANDS</h2>
-            <p class="text-[9px] text-sky-400 font-bold uppercase tracking-[0.2em]">SNT Smart Assistant Guide</p>
-        </div>
-
-        <div class="space-y-3 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar text-left">
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1">Navigation</p>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"Home" / "Portal"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Go to Dashboard</span>
-            </div>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"Profile"</span>
-                <span class="text-[9px] text-slate-400 font-bold">View My Profile</span>
-            </div>
-
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Payments & QRs</p>
-            <div class="flex justify-between items-center bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20">
-                <span class="text-[11px] font-bold text-yellow-500 italic">"SNT QR"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Registration (₹100)</span>
-            </div>
-            <div class="flex justify-between items-center bg-sky-500/10 p-3 rounded-xl border border-sky-500/20">
-                <span class="text-[11px] font-bold text-sky-400 italic">"Fees QR"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Monthly Fees (₹600)</span>
-            </div>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"My QR" / "Pay"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Open Personal QR</span>
-            </div>
-
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Services</p>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"Attendance"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Open Attendance</span>
-            </div>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"Exam" / "Quiz"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Start CBT Exam</span>
-            </div>
-            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"PDF" / "Notes"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Open PDF Vault</span>
-            </div>
-
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">System</p>
-            <div class="flex justify-between items-center bg-red-500/10 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-red-500 italic">"Logout"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Sign Out Account</span>
-            </div>
-            <div class="flex justify-between items-center bg-white/10 p-3 rounded-xl">
-                <span class="text-[11px] font-bold text-white italic">"Close"</span>
-                <span class="text-[9px] text-slate-400 font-bold">Close Any Modal</span>
-            </div>
-        </div>
-
-        <button onclick="document.getElementById('voice-guide-modal').style.display='none'" class="w-full mt-6 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-lg shadow-sky-500/20">Got it!</button>
-    </div>
-</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
