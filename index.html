@@ -21,7 +21,7 @@
         .view-android #app-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; max-width: 420px; margin: 0 auto; padding: 10px; }
         .view-laptop #app-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         
@@ -32,6 +32,10 @@
         .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
         #view-selector { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 10px; font-weight: 900; padding: 8px 12px; border-radius: 12px; outline: none; cursor: pointer; }
         
+        /* Notification Item Style */
+        .notif-item { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #38bdf8; transition: 0.3s; }
+        .notif-item:hover { background: rgba(56, 189, 248, 0.1); }
+
         /* Bottom Navigation Bar */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 4000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; transition: 0.3s; cursor: pointer; }
@@ -171,6 +175,19 @@
         </div>
     </div>
 
+    <div id="notif-modal" class="modal-overlay">
+        <div class="glass p-6 rounded-[35px] w-full max-w-[400px] h-[70vh] flex flex-col border border-white/10 shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black italic tracking-tighter">NOTIFICATIONS</h2>
+                <button onclick="location.href='./notifications_view.html'" class="text-[10px] text-sky-400 font-black uppercase tracking-widest bg-sky-400/10 px-3 py-1 rounded-lg">View Full</button>
+            </div>
+            <div id="notif-list" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                <p class="text-slate-500 text-center text-[11px] font-bold py-10">No new alerts from SNT...</p>
+            </div>
+            <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -192,20 +209,17 @@
                 const hr = new Date().getHours();
                 document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
                 
+                // Student Data Sync
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
                         if (sData) {
-                            // Sync Home
                             document.getElementById('user-name-home').innerText = sData.name;
                             document.getElementById('user-email-home').innerText = user.email;
                             document.getElementById('user-img-home').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            
-                            // Sync Full Profile
                             document.getElementById('user-name-profile').innerText = sData.name;
                             document.getElementById('user-img-profile').src = sData.profilePic || sData.profilePicture || user.photoURL;
                             document.getElementById('user-roll-profile').innerText = "ID: " + (sData.studentId || "NEW");
-                            
                             document.getElementById('p-father').innerText = sData.fatherName || '---';
                             document.getElementById('p-gender').innerText = sData.gender || '---';
                             document.getElementById('p-dob').innerText = sData.dob || '---';
@@ -214,7 +228,6 @@
                             document.getElementById('p-batch').innerText = Array.isArray(sData.batches) ? sData.batches.join(', ') : (sData.batches || '---');
                             document.getElementById('p-adm').innerText = sData.admissionDate || '---';
                             document.getElementById('p-addr').innerText = sData.address || '---';
-
                             const statusEl = document.getElementById('user-status-profile');
                             statusEl.innerText = sData.registrationStatus || "Guest";
                             statusEl.style.borderColor = sData.registrationStatus === "Active" ? "#10b981" : "#64748b";
@@ -222,6 +235,27 @@
                         }
                     }
                 });
+
+                // Real-time Notifications Logic
+                onValue(ref(db, 'notifications'), (snapshot) => {
+                    const list = document.getElementById('notif-list');
+                    const badge = document.getElementById('notif-badge');
+                    if (snapshot.exists()) {
+                        const notifs = Object.values(snapshot.val()).reverse(); // Newest first
+                        badge.classList.remove('hidden');
+                        list.innerHTML = notifs.map(n => `
+                            <div class="notif-item">
+                                <p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p>
+                                <p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p>
+                                <p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        badge.classList.add('hidden');
+                        list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`;
+                    }
+                });
+
                 renderMenu();
             }
         });
@@ -265,9 +299,13 @@
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
         window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
+        
+        // Notification Handlers
+        window.openNotifications = () => { document.getElementById('notif-modal').style.display = "flex"; document.getElementById('notif-badge').classList.add('hidden'); };
+        window.closeNotifications = () => { document.getElementById('notif-modal').style.display = "none"; };
 
         // Voice recognition
-                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US'; 
         recognition.continuous = true;
 
@@ -276,40 +314,29 @@
                 recognition.start(); 
                 document.getElementById('ai-status-text').classList.remove('opacity-0'); 
                 document.getElementById('ai-wave').classList.remove('hidden'); 
-            } catch (e) {
-                console.log("Assistant already active or not supported");
-            } 
+            } catch (e) { console.log("Assistant active"); } 
         };
 
-        
-                
         recognition.onresult = (event) => {
             const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            if(command.includes("profile") || command.includes("my account")) { switchTab('profile', document.querySelectorAll('.nav-item')[1]); }
-            else if(command.includes("home") || command.includes("portal") || command.includes("dashboard")) { switchTab('home', document.querySelectorAll('.nav-item')[0]); }
-            else if(command.includes("logout") || command.includes("sign out")) { window.logout(); }
+            if(command.includes("profile")) { switchTab('profile', document.querySelectorAll('.nav-item')[1]); }
+            else if(command.includes("home") || command.includes("portal")) { switchTab('home', document.querySelectorAll('.nav-item')[0]); }
+            else if(command.includes("logout")) { window.logout(); }
             else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
-            else if(command.includes("exam") || command.includes("quiz") || command.includes("cbt")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'; }
-            else if(command.includes("id card")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; }
-            else if(command.includes("pdf") || command.includes("notes") || command.includes("study material")) { location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html'; }
-            else if(command.includes("receipt") || command.includes("fee")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html'; }
-            else if(command.includes("admit card")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html'; }
-            else if(command.includes("result")) { location.href = './result-history.html'; }
-            else if(command.includes("help") || command.includes("support")) { location.href = './Query-box.html'; }
+            else if(command.includes("notification") || command.includes("message")) { window.openNotifications(); }
             else if(command.includes("open info")) { window.openInfo(); }
-            else if(command.includes("close info")) { window.closeInfo(); }
-            else if(command.includes("refresh") || command.includes("reload")) { location.reload(); }
+            else if(command.includes("close")) { window.closeInfo(); window.closeNotifications(); }
         };
 
         recognition.onend = () => {
             document.getElementById('ai-status-text').classList.add('opacity-0');
             document.getElementById('ai-wave').classList.add('hidden');
         };
-
     </script>
     <script>
-    if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(e=>console.log("SW Error:",e));});}
-(function(){document.addEventListener('contextmenu',e=>e.preventDefault());document.onkeydown=(e)=>{if(e.keyCode===123||(e.ctrlKey&&e.shiftKey&&(e.keyCode===73||e.keyCode===74||e.keyCode===67))||(e.ctrlKey&&(e.keyCode===85||e.keyCode===83))){return false;}};const blockDev=()=>{const t=160;if(window.outerWidth-window.innerWidth>t||window.outerHeight-window.innerHeight>t){window.location.reload();}};setInterval(blockDev,500);setInterval(()=>{ (function(){(function a(){try{(function b(i){if((''+(i/i)).length!==1||i%20===0){(function(){}).constructor('debugger')();}else{debugger;}b(++i);})(0);}catch(e){setTimeout(a,50);}})();})();},1000);})();
-</script>
+        // Security & Service Worker
+        if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(e=>console.log("SW Error:",e));});}
+        (function(){document.addEventListener('contextmenu',e=>e.preventDefault());document.onkeydown=(e)=>{if(e.keyCode===123||(e.ctrlKey&&e.shiftKey&&(e.keyCode===73||e.keyCode===74||e.keyCode===67))||(e.ctrlKey&&(e.keyCode===85||e.keyCode===83))){return false;}};const blockDev=()=>{const t=160;if(window.outerWidth-window.innerWidth>t||window.outerHeight-window.innerHeight>t){window.location.reload();}};setInterval(blockDev,500);})();
+    </script>
 </body>
 </html>
