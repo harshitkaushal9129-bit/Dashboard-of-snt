@@ -440,18 +440,24 @@
             }, 5000);
         };
 
-        // --- UPDATED VOICE ASSISTANT CODE ---
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'en-US'; 
-        recognition.continuous = true;
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US'; 
+recognition.continuous = true;
+recognition.interimResults = false; // Isse result tabhi aayega jab sentence poora ho
 
-        window.startAssistant = () => { 
-            try { 
-                recognition.start(); 
-                document.getElementById('ai-status-text').classList.remove('opacity-0'); 
-                document.getElementById('ai-wave').classList.remove('hidden'); 
-            } catch (e) { console.log("Assistant already active"); } 
-        };
+window.startAssistant = () => { 
+    try { 
+        recognition.start(); 
+        document.getElementById('ai-status-text').classList.remove('opacity-0'); 
+        document.getElementById('ai-wave').classList.remove('hidden'); 
+    } catch (e) { console.log("Assistant already active"); } 
+};
+
+// --- YE HAI MAIN CHANGE ---
+recognition.onend = () => {
+    // Bina UI hide kiye wapas start kar dega
+    recognition.start(); 
+};
 
         // QR Logic for multiple types
         window.openPaymentQR = (type) => {
