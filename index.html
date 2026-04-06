@@ -512,19 +512,59 @@ window.startAssistant = () => {
             else if(command.includes("snt qr") || command.includes("registration")) { window.openPaymentQR('snt'); }
             else if(command.includes("fees qr") || command.includes("six hundred")) { window.openPaymentQR('fees'); }
             else if(command.includes("my qr") || command.includes("pay")) { window.openPaymentQR('kaushal'); }
-            
-            // Close
-            else if(command.includes("close")) { 
-                window.closeInfo(); 
-                window.closeNotifications(); 
-                document.getElementById('payment-modal').style.display = "none";
-            }
+            else if(command.includes("stop assistant") || command.includes("sleep")) { isAssistantEnabled = false; recognition.stop(); updateUI(false);}
+            else if(command.includes("close")) {  window.closeInfo();window.closeNotifications();document.getElementById('payment-modal').style.display = "none";}
         };
 
-        recognition.onend = () => {
-            document.getElementById('ai-status-text').classList.add('opacity-0');
-            document.getElementById('ai-wave').classList.add('hidden');
-        };
+        // --- UPDATED PERMANENT VOICE LOGIC ---
+let isAssistantEnabled = false; // Flag to track manual start
+
+window.startAssistant = () => { 
+    isAssistantEnabled = true; // User ne ek baar start kiya
+    try { 
+        recognition.start(); 
+        updateUI(true);
+    } catch (e) { 
+        console.log("Assistant already active or restarting..."); 
+    } 
+};
+
+// UI update karne ke liye helper function
+function updateUI(isActive) {
+    if(isActive) {
+        document.getElementById('ai-status-text').classList.remove('opacity-0'); 
+        document.getElementById('ai-wave').classList.remove('hidden');
+        document.getElementById('ai-status-text').innerText = "Listening...";
+    } else {
+        document.getElementById('ai-status-text').innerText = "Paused...";
+    }
+}
+
+// JAISE HI BAND HO, WAPAS START KARO
+recognition.onend = () => {
+    if (isAssistantEnabled) {
+        console.log("Restarting Voice Recognition...");
+        // Chhota sa delay taaki browser crash na kare
+        setTimeout(() => {
+            try {
+                recognition.start();
+                updateUI(true);
+            } catch (e) {
+                console.error("Restart failed:", e);
+            }
+        }, 1000); 
+    }
+};
+
+// Error handling (agar mic permission ya network issue ho)
+recognition.onerror = (event) => {
+    console.error("Speech Recognition Error:", event.error);
+    if(event.error === 'not-allowed') {
+        isAssistantEnabled = false;
+        alert("Please allow Microphone access for Voice Commands.");
+    }
+};
+
 
             window.shareApp=async()=>{const d={title:'SNT Official Portal',text:'SNT Institute ke official student portal ko access karein. Register, PDF Notes aur Results ke liye install karein.',url:'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/'};try{if(navigator.share){await navigator.share(d);}else{navigator.clipboard.writeText(d.url);alert("Portal Link Copied!");}}catch(e){console.log("Share failed:",e);}};
 
