@@ -498,7 +498,13 @@ const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognit
 recognition.lang = 'en-US'; 
 recognition.continuous = true;
 recognition.interimResults = false; // Isse result tabhi aayega jab sentence poora ho
-
+Window.speak = (text) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+};
+            
 window.startAssistant = () => { 
     try { 
         recognition.start(); 
@@ -641,15 +647,7 @@ else if(command.includes("night mode") || command.includes("dark mode")) {
         // --- UPDATED PERMANENT VOICE LOGIC ---
 let isAssistantEnabled = false; // Flag to track manual start
 
-window.startAssistant = () => { 
-    isAssistantEnabled = true; // User ne ek baar start kiya
-    try { 
-        recognition.start(); 
-        updateUI(true);
-    } catch (e) { 
-        console.log("Assistant already active or restarting..."); 
-    } 
-};
+
 
 // UI update karne ke liye helper function
 function updateUI(isActive) {
