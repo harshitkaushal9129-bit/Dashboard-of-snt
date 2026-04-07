@@ -487,34 +487,92 @@ window.startAssistant = () => {
         };
 
         recognition.onresult = (event) => {
-            const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            
-            // Navigation
-            if(command.includes("profile")) { switchTab('profile', document.querySelectorAll('.nav-item')[1]); }
-            else if(command.includes("home") || command.includes("portal")) { switchTab('home', document.querySelectorAll('.nav-item')[0]); }
-            else if(command.includes("logout")) { window.logout(); }
-            
-            // Links & External Pages
-            else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
-            else if(command.includes("dashboard")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; }
-            else if(command.includes("id card")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; }
-            else if(command.includes("pdf") || command.includes("notes")) { location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html'; }
-            else if(command.includes("exam") || command.includes("quiz")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'; }
-            else if(command.includes("result")) { location.href = './result-history.html'; }
-            
-            // Modals
-            else if(command.includes("notification") || command.includes("message")) { window.openNotifications(); }
-            else if(command.includes("info")) { window.openInfo(); }
-            // --- New Command to Open List ---
-            else if(command.includes("list") || command.includes("show commands")) { document.getElementById('voice-guide-modal').style.display = 'flex'; }
+    const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+    
+    // --- Navigation Commands ---
+    if(command.includes("profile")) { 
+        window.speak("Opening your profile");
+        window.switchTab('profile', document.querySelectorAll('.nav-item')[1]); 
+    }
+    else if(command.includes("home") || command.includes("portal")) { 
+        window.speak("Switching to Dashboard");
+        window.switchTab('home', document.querySelectorAll('.nav-item')[0]); 
+    }
+    else if(command.includes("logout")) { 
+        window.speak("Logging out. Goodbye!");
+        window.logout(); 
+    }
+    
+    // --- Services & External Pages ---
+    else if(command.includes("attendance")) { 
+        window.speak("Opening attendance portal");
+        location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; 
+    }
+    else if(command.includes("dashboard")) { 
+        window.speak("Loading main dashboard");
+        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; 
+    }
+    else if(command.includes("id card")) { 
+        window.speak("Opening ID Card generator");
+        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; 
+    }
+    else if(command.includes("pdf") || command.includes("notes")) { 
+        window.speak("Opening PDF center and notes");
+        location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html'; 
+    }
+    else if(command.includes("exam") || command.includes("quiz")) { 
+        window.speak("Starting CBT Exam portal");
+        location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'; 
+    }
+    else if(command.includes("result")) { 
+        window.speak("Checking your result history");
+        location.href = './result-history.html'; 
+    }
+    
+    // --- System Modals ---
+    else if(command.includes("notification") || command.includes("message")) { 
+        window.speak("Showing your notifications");
+        window.openNotifications(); 
+    }
+    else if(command.includes("info")) { 
+        window.speak("Opening system information");
+        window.openInfo(); 
+    }
+    else if(command.includes("list") || command.includes("show commands")) { 
+        window.speak("Displaying voice command list");
+        document.getElementById('voice-guide-modal').style.display = 'flex'; 
+    }
 
-            // --- QR Commands ---
-            else if(command.includes("snt qr") || command.includes("registration")) { window.openPaymentQR('snt'); }
-            else if(command.includes("fees qr") || command.includes("six hundred")) { window.openPaymentQR('fees'); }
-            else if(command.includes("my qr") || command.includes("pay")) { window.openPaymentQR('kaushal'); }
-            else if(command.includes("stop assistant") || command.includes("sleep")) { isAssistantEnabled = false; recognition.stop(); updateUI(false);}
-            else if(command.includes("close")) {  window.closeInfo();window.closeNotifications();document.getElementById('payment-modal').style.display = "none";}
-        };
+    // --- QR & Payment Commands ---
+    else if(command.includes("snt qr") || command.includes("registration")) { 
+        window.speak("Showing SNT Registration QR for 100 rupees");
+        window.openPaymentQR('snt'); 
+    }
+    else if(command.includes("fees qr") || command.includes("six hundred")) { 
+        window.speak("Showing Monthly Fees QR for 600 rupees");
+        window.openPaymentQR('fees'); 
+    }
+    else if(command.includes("my qr") || command.includes("pay")) { 
+        window.speak("Opening personal payment QR");
+        window.openPaymentQR('kaushal'); 
+    }
+
+    // --- Control Commands ---
+    else if(command.includes("stop assistant") || command.includes("sleep")) { 
+        window.speak("Voice assistant is now sleeping");
+        isAssistantEnabled = false; 
+        recognition.stop(); 
+        updateUI(false);
+    }
+    else if(command.includes("close") || command.includes("exit")) {  
+        window.speak("Closing all active windows");
+        window.closeInfo();
+        window.closeNotifications();
+        document.getElementById('payment-modal').style.display = "none";
+        document.getElementById('voice-guide-modal').style.display = "none";
+    }
+};
+
 
         // --- UPDATED PERMANENT VOICE LOGIC ---
 let isAssistantEnabled = false; // Flag to track manual start
