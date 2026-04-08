@@ -71,7 +71,16 @@ body.light-mode .nav-item.active { color: #FF8C00 !important; }
     .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
     .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); width: 100%; }
     #view-selector { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 10px; font-weight: 900; padding: 8px 12px; border-radius: 12px; outline: none; cursor: pointer; }
-    .notif-item { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
+    .notif-item { position: relative; transition: 0.3s; }
+.notif-item:hover { background: rgba(255,255,255,0.06); }
+.clear-single { 
+    position: absolute; top: 10px; right: 10px; 
+    width: 24px; height: 24px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; 
+    background: rgba(239, 68, 68, 0.1); color: #ef4444; 
+    cursor: pointer; transition: 0.2s; font-size: 10px;
+}
+.clear-single:active { transform: scale(0.8); background: #ef4444; color: white; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 4000; }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; transition: 0.3s; cursor: pointer; }
     .nav-item.active { color: #38bdf8; }
@@ -347,17 +356,22 @@ body.light-mode .nav-item.active { color: #FF8C00 !important; }
     </div>
 
     <div id="notif-modal" class="modal-overlay">
-        <div class="glass p-6 rounded-[35px] w-full max-w-[400px] h-[70vh] flex flex-col border border-white/10 shadow-2xl animate-fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black italic tracking-tighter">NOTIFICATIONS</h2>
-                <button onclick="location.href='./notifications_view.html'" class="text-[10px] text-sky-400 font-black uppercase tracking-widest bg-sky-400/10 px-3 py-1 rounded-lg">View Full</button>
+    <div class="glass p-6 rounded-[35px] w-full max-w-[400px] h-[70vh] flex flex-col border border-white/10 shadow-2xl animate-fade-in">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-black italic tracking-tighter">NOTIFICATIONS</h2>
+            <div class="flex gap-2">
+                <button onclick="clearAllNotifications()" class="text-[9px] text-red-400 font-black uppercase tracking-widest bg-red-400/10 px-3 py-1.5 rounded-lg border border-red-900/20">Clear All</button>
+                <button onclick="location.href='./notifications_view.html'" class="text-[9px] text-sky-400 font-black uppercase tracking-widest bg-sky-400/10 px-3 py-1.5 rounded-lg border border-sky-900/20">View Full</button>
             </div>
-            <div id="notif-list" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-500 text-center text-[11px] font-bold py-10">No new alerts from SNT...</p>
-            </div>
-            <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
         </div>
+        
+        <div id="notif-list" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            </div>
+        
+        <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
     </div>
+</div>
+
 
 
     <script type="module">
@@ -466,28 +480,66 @@ window.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                onValue(ref(db, 'notifications'), (snapshot) => {
-                    const list = document.getElementById('notif-list');
-                    const badge = document.getElementById('notif-badge');
-                    if (snapshot.exists()) {
-                        const notifs = Object.values(snapshot.val()).reverse();
-                        badge.classList.remove('hidden');
-                        list.innerHTML = notifs.map(n => `
-                            <div class="notif-item">
-                                <p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p>
-                                <p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p>
-                                <p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p>
-                            </div>
-                        `).join('');
-                    } else {
-                        badge.classList.add('hidden');
-                        list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`;
-                    }
-                });
+                // Notifications ko store karne ke liye local array
+let localNotifs = [];
 
-                renderMenu();
-            }
-        });
+onValue(ref(db, 'notifications'), (snapshot) => {
+    if (snapshot.exists()) {
+        const data = snapshot.val();
+        // Firebase keys ke saath data map karna taaki delete karne mein asani ho
+        localNotifs = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })).reverse();
+        renderNotifications();
+    } else {
+        localNotifs = [];
+        renderNotifications();
+    }
+});
+
+window.renderNotifications = () => {
+    const list = document.getElementById('notif-list');
+    const badge = document.getElementById('notif-badge');
+
+    if (localNotifs.length > 0) {
+        badge.classList.remove('hidden');
+        list.innerHTML = localNotifs.map(n => `
+            <div class="notif-item" id="notif-${n.id}">
+                <div class="clear-single" onclick="clearNotification('${n.id}')">
+                    <i class="fas fa-times"></i>
+                </div>
+                <p class="text-white text-[12px] font-bold mb-1 pr-6">${n.title || 'Official Update'}</p>
+                <p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p>
+                <p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p>
+            </div>
+        `).join('');
+    } else {
+        badge.classList.add('hidden');
+        list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`;
+    }
+};
+
+// Single notification clear function
+window.clearNotification = (id) => {
+    const element = document.getElementById(`notif-${id}`);
+    element.style.transform = "translateX(50px)";
+    element.style.opacity = "0";
+    
+    setTimeout(() => {
+        localNotifs = localNotifs.filter(n => n.id !== id);
+        renderNotifications();
+    }, 300);
+};
+
+// Clear All function
+window.clearAllNotifications = () => {
+    if(confirm("Kya aap saare alerts hatana chahte hain?")) {
+        localNotifs = [];
+        renderNotifications();
+    }
+};
+
 
         window.renderMenu = () => {
             const menuItems = [
