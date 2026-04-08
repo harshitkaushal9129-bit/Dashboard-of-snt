@@ -114,7 +114,6 @@
                 Object.values(studentSnap.val()).forEach(s => studentMap[s.email] = s.mobile || s.phone || "No Num");
             }
 
-            // Realtime Queries
             onValue(ref(db, 'queries'), (snap) => {
                 const list = document.getElementById('queries-list');
                 if(!snap.exists()) { list.innerHTML = "<p class='text-center opacity-30 uppercase text-[10px] mt-10'>No Queries</p>"; return; }
@@ -139,7 +138,6 @@
                 `).join('');
             });
 
-            // Realtime Notifs
             onValue(ref(db, 'notifications'), (snap) => {
                 const list = document.getElementById('active-notifs-list');
                 list.innerHTML = '<h3 class="text-[9px] font-bold text-slate-500 uppercase mb-3">Active Notices</h3>';
@@ -160,6 +158,7 @@
             });
         }
 
+        // --- UPDATED PUSH LOGIC ---
         window.uploadNotice = async () => {
             const text = document.getElementById('notifText').value;
             const expiry = document.getElementById('notifExpiry').value;
@@ -170,14 +169,37 @@
             btn.innerText = "PUSHING..."; btn.disabled = true;
 
             let imageUrl = "";
-            if(file) {
-                const storageRef = sRef(storage, `notices/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                imageUrl = await getDownloadURL(storageRef);
-            }
+            try {
+                if(file) {
+                    const storageRef = sRef(storage, `notices/${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    imageUrl = await getDownloadURL(storageRef);
+                }
 
-            push(ref(db, 'notifications'), { message: text, expiry: expiry, imageUrl: imageUrl, timestamp: new Date().toISOString() })
-            .then(() => { alert("Published!"); location.reload(); });
+                // 1. History save karna
+                await push(ref(db, 'notifications'), { 
+                    message: text, 
+                    expiry: expiry, 
+                    imageUrl: imageUrl, 
+                    timestamp: new Date().toISOString() 
+                });
+
+                // 2. Real-time signal bhejna (Students ke phone ke liye)
+                await set(ref(db, 'live_signal'), {
+                    title: "SNT Official Update",
+                    body: text,
+                    imageUrl: imageUrl,
+                    timestamp: Date.now()
+                });
+
+                alert("Published & Pushed Successfully!");
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("Upload Failed!");
+                btn.innerText = "Push Notification";
+                btn.disabled = false;
+            }
         };
 
         window.deleteNotice = (key) => { if(confirm("Delete?")) remove(ref(db, `notifications/${key}`)); };
