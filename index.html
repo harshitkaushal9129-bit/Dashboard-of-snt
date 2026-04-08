@@ -11,79 +11,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-/* --- THEME INDEPENDENT STYLES --- */
+            
 * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
-body { transition: background 0.4s, color 0.4s; margin: 0; padding: 0; width: 100vw; overflow-x: hidden; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; }
-
-
-body.light-mode {
-    background-color: #f1f5f9; /* SIDH Light Gray Bg */
-    color: #1e293b;
-}
-
-/* SIDH Style Cards in Light Mode */
-body.light-mode .glass, 
-body.light-mode #profile-summary,
-body.light-mode .profile-data-card {
-    background: #ffffff !important;
-    backdrop-filter: none;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
-}
-
-body.light-mode #profile-summary {
-    border-left: 6px solid #2563eb !important; /* SIDH Blue Accent */
-}
-
-body.light-mode .app-card {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-}
-
-body.light-mode .app-card p {
-    color: #475569 !important; /* SIDH Text Color */
-    font-weight: 700;
-}
-
-body.light-mode .app-card:active {
-    background: #f8fafc !important;
-    border-color: #2563eb !important;
-}
-
-body.light-mode .search-box {
-    background: #ffffff !important;
-    border: 2px solid #cbd5e1 !important;
-}
-
+body { transition: background 0.4s, color 0.4s; margin: 0; padding: 0; width: 100vw; overflow-x: hidden; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #000000 !important; color: white; }
+.glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+.app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); color: white; }
+body.light-mode { background-color: #f1f5f9 !important; color: #1e293b; }
+body.light-mode .app-card, body.light-mode .glass, body.light-mode #profile-summary, body.light-mode .profile-data-card, body.light-mode .search-box { background: #ffffff !important; backdrop-filter: none; border: 2px solid #FF8C00 !important; box-shadow: 0 4px 12px rgba(255, 140, 0, 0.1) !important; color: #1e293b !important; }
+body.light-mode #profile-summary { border-left: 8px solid #FF8C00 !important; }
+body.light-mode .app-card p { color: #1e293b !important; font-weight: 800; text-transform: uppercase; }
+body.light-mode .app-card:active { background: #fff7ed !important; transform: scale(0.95); }
 body.light-mode .search-box input { color: #1e293b !important; }
-body.light-mode .search-box i { color: #2563eb !important; }
+body.light-mode .search-box i { color: #FF8C00 !important; }
+body.light-mode .bottom-nav { background: #ffffff !important; border-top: 2px solid #FF8C00 !important; }
+body.light-mode .nav-item.active { color: #FF8C00 !important; }
+/* --- THEME TOGGLE UI --- */
+#theme-toggle { position: fixed; top: 15px; right: 120px; z-index: 5000; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
 
-body.light-mode .bottom-nav {
-    background: #ffffff !important;
-    border-top: 1px solid #e2e8f0 !important;
-}
 
-body.light-mode .nav-item.active { color: #2563eb !important; }
-body.light-mode h1, body.light-mode h2, body.light-mode h3 { color: #1e293b !important; }
-body.light-mode .info-label { color: #64748b; }
-body.light-mode .info-value { color: #1e293b; }
 
-/* --- THEME TOGGLE BUTTON --- */
-#theme-toggle {
-    position: fixed;
-    top: 15px;
-    right: 120px; /* Adjust according to your layout */
-    z-index: 5000;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.3s;
-}
+            
     #dashboard { width: 100%; max-width: 1200px; margin: 0 auto; padding: 15px; padding-bottom: 100px; }
     .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     #app-grid { display: grid; width: 100%; gap: 15px; margin-top: 10px; }
