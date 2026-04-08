@@ -371,31 +371,35 @@ body.light-mode .nav-item.active { color: #FF8C00 !important; }
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-           // index.html ke script section mein ise add karein
-
-
 // Index.html ke script mein ye wala listener update karein
 onValue(ref(db, 'live_signal'), (snapshot) => {
     const data = snapshot.val();
     if (data && data.timestamp) {
-        // Sirf 30-40 seconds purana hi signal uthayein
         const currentTime = Date.now();
         const signalTime = data.timestamp;
         
+        // Sirf 40 seconds purana signal hi uthayein
         if ((currentTime - signalTime) < 40000) {
             if (Notification.permission === "granted") {
+                
+                // Dashboard se user ka naam nikalne ka logic
+                const nameElement = document.getElementById('user-name-home');
+                const userName = (nameElement && nameElement.innerText !== "Loading...") 
+                                 ? nameElement.innerText 
+                                 : "Student";
+
                 navigator.serviceWorker.ready.then(reg => {
                     reg.showNotification(data.title, {
-                        body: data.body,
-                        icon: './SNT.jpg',
-                        badge: './SNT.jpg',
+                        // Personal greeting add ki gayi hai
+                        body: `Namaste ${userName}! ${data.body}`, 
+                        icon: './SNT_logo.png',   // Transparent PNG file
+                        badge: './SNT_badge.png', // Android Status Bar PNG
                         image: data.imageUrl || null,
                         vibrate: [300, 100, 300],
                         data: { url: './index.html' }
                     });
                 });
             } else if (Notification.permission !== "denied") {
-                // Agar permission abhi tak nahi li, toh maangein
                 Notification.requestPermission();
             }
         }
