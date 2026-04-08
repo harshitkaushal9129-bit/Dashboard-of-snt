@@ -370,7 +370,33 @@ body.light-mode .nav-item.active { color: #FF8C00 !important; }
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
-// --- THEME TOGGLE LOGIC ---
+
+           // index.html ke script section mein ise add karein
+
+
+onValue(ref(db, 'live_signal'), (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Sirf 30 seconds ke andar wale signal par trigger karein
+        const isFresh = (Date.now() - data.timestamp) < 30000;
+        
+        if (isFresh && Notification.permission === "granted") {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(data.title, {
+                    body: data.body,
+                    icon: './SNT.jpg',
+                    image: data.imageUrl || null,
+                    badge: './SNT.jpg',
+                    vibrate: [200, 100, 200],
+                    data: { url: './index.html' }
+                });
+            });
+        }
+    }
+});
+ 
+            
+            // --- THEME TOGGLE LOGIC ---
 window.toggleTheme = () => {
     document.body.classList.toggle('light-mode');
     const icon = document.querySelector('#theme-toggle i');
