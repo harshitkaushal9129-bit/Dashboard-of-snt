@@ -391,8 +391,8 @@ onValue(ref(db, 'live_signal'), (snapshot) => {
                 navigator.serviceWorker.ready.then(reg => {
                     reg.showNotification(data.title, {
                         // Personal greeting add ki gayi hai
-                        body: `Namaste ${userName}! ${data.body}`, 
-                        icon: './SNT.jpg',   // Transparent PNG file
+                        body: `Dear ${userName}! ${data.body}`, 
+                        icon: './SNT.png',   // Transparent PNG file
                         badge: './SNT.jpg', // Android Status Bar PNG
                         image: data.imageUrl || null,
                         vibrate: [300, 100, 300],
