@@ -711,6 +711,9 @@ window.enableNotifications = () => {
     });
 };
 </script>
+<script>
+(function(){document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());document.onselectstart=()=>false;document.onkeydown=function(e){const k=e.keyCode;const c=e.ctrlKey;const s=e.shiftKey;const a=e.altKey;if(k==123||(c&&s&&(k==73||k==74||k==67||k==75||k==77))||(c&&k==85)||(c&&k==83)||(c&&k==80)||(c&&k==65)||(c&&k==70)||(c&&k==71)||(a&&c&&k==73)||(c&&k==117)||(s&&k==121)){e.preventDefault();return false;}};setInterval(()=>{const d=new Date();debugger;if(new Date()-d>100){document.body.innerHTML='<div style="background:#000;color:red;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-weight:900;text-align:center;padding:20px;"><h1>SECURITY BREACH: SNT PROTECTED MODE ACTIVE</h1></div>';}},500);setInterval(()=>{console.clear();console.log("%cSTOP!","color:red;font-size:3rem;font-weight:bold;");},1000);})();
+</script>
 
 </body>
 </html>
