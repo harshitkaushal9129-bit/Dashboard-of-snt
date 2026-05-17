@@ -11,11 +11,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
-       .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-       .paid-card { border-left: 4px solid #10b981; animation: slideIn 0.4s ease-out; }
-       .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); animation: slideIn 0.4s ease-out; }
-       .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-       .review-card { border-left: 4px solid #facc15; background: rgba(250, 204, 21, 0.05); }
+      .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+      .paid-card { border-left: 4px solid #10b981; animation: slideIn 0.4s ease-out; }
+      .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); animation: slideIn 0.4s ease-out; }
+      .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+      .review-card { border-left: 4px solid #facc15; background: rgba(250, 204, 21, 0.05); }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
@@ -61,6 +61,7 @@
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const MONTHLY_FEE = 500;
+        const MAX_MONTHS = 12; // 12 month limit
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -90,11 +91,10 @@
                         let html = '';
                         let totalPendingAmount = 0;
 
-                        // 1. Admission Status Card - UPDATED RECEIPT LINK
+                        // 1. Admission Status Card
                         if (student.registrationStatus === "Paid" || student.registrationStatus === "Pending") {
                             const statusColor = student.registrationStatus === "Paid"? "text-yellow-500" : "text-red-400";
                             const utrDisplay = student.utrNumber? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white selection:bg-sky-500">${student.utrNumber}</span></p>` : '';
-                            // YAHAN CHANGE KIYA - receipt.html pe bheja
                             const screenshotDisplay = student.paymentScreenshot? `<a href="https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(student.name)}" target="_blank" class="inline-block mt-2 text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded hover:bg-sky-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-file-invoice mr-1"></i> View Receipt</a>` : '';
 
                             html += `
@@ -109,16 +109,17 @@
                             </div>`;
                         }
 
-                        // 2. Monthly Logic
-                        const regDate = student.registrationDate? new Date(student.registrationDate) : new Date(2026, 0, 1);
+                        // 2. Monthly Logic - 12 MONTH LIMIT ADDED
+                        const regDate = student.admissionDate? new Date(student.admissionDate) : student.registrationDate? new Date(student.registrationDate) : new Date(2026, 0, 1);
                         const currentDate = new Date();
                         let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
+                        let monthCount = 0; // Counter for 12 months
 
-                        while (checkDate <= currentDate) {
+                        while (checkDate <= currentDate && monthCount < MAX_MONTHS) {
                             const mName = MONTHS[checkDate.getMonth()];
                             const year = checkDate.getFullYear();
 
-                            const isPaidHistory = history.find(p => p.month === mName);
+                            const isPaidHistory = history.find(p => p.month === mName && p.year === year);
                             const isPaidRequest = requests.find(r => r.month === mName && r.status!== "Rejected");
                             const isPaid = isPaidHistory || isPaidRequest;
 
@@ -136,7 +137,7 @@
                                     <div>
                                         <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${isPaid.date || mName + ' ' + year}</p>
                                         <h3 class="font-black text-white text-lg tracking-tighter">₹${isPaid.amount}</h3>
-                                        <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${mName}</p>
+                                        <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${mName} ${year}</p>
                                         ${monthlyUtr}
                                         ${monthlyScreenshot}
                                     </div>
@@ -151,7 +152,7 @@
                                     <div>
                                         <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">Fees Pending</p>
                                         <h3 class="font-black text-red-400 text-lg tracking-tighter">₹${MONTHLY_FEE}</h3>
-                                        <p class="text-[9px] text-red-500/60 font-bold uppercase">${mName}</p>
+                                        <p class="text-[9px] text-red-500/60 font-bold uppercase">${mName} ${year}</p>
                                     </div>
                                     <div class="text-right">
                                         <span class="text-[9px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/20 font-black uppercase italic tracking-tighter">UNPAID ⏳</span>
@@ -160,6 +161,17 @@
                             }
 
                             checkDate.setMonth(checkDate.getMonth() + 1);
+                            monthCount++; // Increment counter
+                        }
+
+                        // 3. Agar 12 month complete ho gaye to message dikhao
+                        if (monthCount === MAX_MONTHS) {
+                            html += `
+                            <div class="glass p-4 rounded-2xl text-center mt-6 border border-sky-500/20">
+                                <i class="fas fa-check-circle text-sky-400 text-2xl mb-2"></i>
+                                <p class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">12 Months Completed</p>
+                                <p class="text-[9px] text-slate-500 mt-1">Course Duration Complete. Contact Admin for Extension.</p>
+                            </div>`;
                         }
 
                         balElement.innerText = `BAL: ₹${totalPendingAmount}`;
