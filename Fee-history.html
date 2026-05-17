@@ -11,10 +11,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .paid-card { border-left: 4px solid #10b981; animation: slideIn 0.4s ease-out; }
-        .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); animation: slideIn 0.4s ease-out; }
-        .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+       .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+       .paid-card { border-left: 4px solid #10b981; animation: slideIn 0.4s ease-out; }
+       .pending-card { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); animation: slideIn 0.4s ease-out; }
+       .admission-card { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+       .review-card { border-left: 4px solid #facc15; background: rgba(250, 204, 21, 0.05); }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
@@ -46,7 +47,6 @@
     </div>
 
     <script>
-        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
             authDomain: "snt-computer-institute.firebaseapp.com",
@@ -60,7 +60,7 @@
         const auth = firebase.auth();
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const MONTHLY_FEE = 500; 
+        const MONTHLY_FEE = 500;
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -74,85 +74,100 @@
             db.ref('students').orderByChild('email').equalTo(email).on('value', (snapshot) => {
                 const container = document.getElementById('fee-container');
                 const balElement = document.getElementById('total-balance');
-                
+
                 if (snapshot.exists()) {
                     const student = Object.values(snapshot.val())[0];
                     const history = student.paymentHistory || [];
-                    let html = '';
-                    let totalPendingAmount = 0;
 
-                    // 1. Admission Status Card (With UTR & Screenshot metadata)
-                    if (student.registrationStatus === "Paid" || student.registrationStatus === "Pending") {
-                        const statusColor = student.registrationStatus === "Paid" ? "text-yellow-500" : "text-red-400";
-                        const utrDisplay = student.utrNumber ? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white selection:bg-sky-500">${student.utrNumber}</span></p>` : '';
-                        const screenshotDisplay = student.paymentScreenshot ? `<a href="${student.paymentScreenshot}" target="_blank" class="inline-block mt-2 text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded hover:bg-sky-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-image mr-1"></i> View Reciept</a>` : '';
+                    // NAYA: paymentRequests bhi fetch karo
+                    db.ref('paymentRequests').orderByChild('studentId').equalTo(student.studentId).once('value', (reqSnap) => {
+                        const requests = [];
+                        if (reqSnap.exists()) {
+                            reqSnap.forEach(child => {
+                                requests.push({...child.val(), key: child.key});
+                            });
+                        }
 
-                        html += `
-                        <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-6">
-                            <div>
-                                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Enrollment Node</p>
-                                <h3 class="font-black text-white text-lg italic">REGISTRATION FEE (${student.registrationStatus.toUpperCase()})</h3>
-                                ${utrDisplay}
-                                ${screenshotDisplay}
-                            </div>
-                            <i class="fas fa-id-badge ${statusColor}/40 text-3xl"></i>
-                        </div>`;
-                    }
+                        let html = '';
+                        let totalPendingAmount = 0;
 
-                    // 2. Automated Monthly Logic
-                    const regDate = student.registrationDate ? new Date(student.registrationDate) : new Date(2026, 0, 1);
-                    const currentDate = new Date(); 
-
-                    let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
-
-                    while (checkDate <= currentDate) {
-                        const mName = MONTHS[checkDate.getMonth()];
-                        const year = checkDate.getFullYear();
-                        
-                        // Monthly database filtering
-                        const isPaid = history.find(p => p.month === mName);
-
-                        if (isPaid) {
-                            // Paid dynamic card structure with verification outputs
-                            const monthlyUtr = isPaid.utrNumber ? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white">${isPaid.utrNumber}</span></p>` : '';
-                            const monthlyScreenshot = isPaid.paymentScreenshot ? `<a href="${isPaid.paymentScreenshot}" target="_blank" class="inline-block mt-2 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded hover:bg-emerald-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-eye mr-1"></i> Screenshot </a>` : '';
+                        // 1. Admission Status Card
+                        if (student.registrationStatus === "Paid" || student.registrationStatus === "Pending") {
+                            const statusColor = student.registrationStatus === "Paid"? "text-yellow-500" : "text-red-400";
+                            const utrDisplay = student.utrNumber? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white selection:bg-sky-500">${student.utrNumber}</span></p>` : '';
+                            const screenshotDisplay = student.paymentScreenshot? `<a href="${student.paymentScreenshot}" target="_blank" class="inline-block mt-2 text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded hover:bg-sky-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-image mr-1"></i> View Receipt</a>` : '';
 
                             html += `
-                            <div class="glass p-5 rounded-2xl paid-card flex justify-between items-center mb-3">
+                            <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-6">
                                 <div>
-                                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${isPaid.date || mName + ' ' + year}</p>
-                                    <h3 class="font-black text-white text-lg tracking-tighter">₹${isPaid.amount}</h3>
-                                    <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${mName}</p>
-                                    ${monthlyUtr}
-                                    ${monthlyScreenshot}
+                                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Enrollment Node</p>
+                                    <h3 class="font-black text-white text-lg italic">REGISTRATION FEE (${student.registrationStatus.toUpperCase()})</h3>
+                                    ${utrDisplay}
+                                    ${screenshotDisplay}
                                 </div>
-                                <div class="text-right">
-                                    <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20 font-black uppercase">PAID ✅</span>
-                                </div>
-                            </div>`;
-                        } else {
-                            totalPendingAmount += MONTHLY_FEE;
-                            html += `
-                            <div class="glass p-5 rounded-2xl pending-card flex justify-between items-center mb-3">
-                                <div>
-                                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">Fees Pending</p>
-                                    <h3 class="font-black text-red-400 text-lg tracking-tighter">₹${MONTHLY_FEE}</h3>
-                                    <p class="text-[9px] text-red-500/60 font-bold uppercase">${mName}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[9px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/20 font-black uppercase italic tracking-tighter">UNPAID ⏳</span>
-                                </div>
+                                <i class="fas fa-id-badge ${statusColor}/40 text-3xl"></i>
                             </div>`;
                         }
 
-                        checkDate.setMonth(checkDate.getMonth() + 1);
-                    }
+                        // 2. Monthly Logic - Ab requests bhi check karo
+                        const regDate = student.registrationDate? new Date(student.registrationDate) : new Date(2026, 0, 1);
+                        const currentDate = new Date();
+                        let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
 
-                    // 3. Render and Update Balance UI
-                    balElement.innerText = `BAL: ₹${totalPendingAmount}`;
-                    balElement.style.color = totalPendingAmount > 0 ? '#ef4444' : '#10b981';
-                    balElement.className = `glass px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border ${totalPendingAmount > 0 ? 'border-red-500/30 text-red-400' : 'border-emerald-500/30 text-emerald-400'}`;
-                    container.innerHTML = html;
+                        while (checkDate <= currentDate) {
+                            const mName = MONTHS[checkDate.getMonth()];
+                            const year = checkDate.getFullYear();
+
+                            // Check paymentHistory + paymentRequests dono me
+                            const isPaidHistory = history.find(p => p.month === mName);
+                            const isPaidRequest = requests.find(r => r.month === mName && r.status!== "Rejected");
+                            const isPaid = isPaidHistory || isPaidRequest;
+
+                            if (isPaid) {
+                                const isUnderReview = isPaidRequest && isPaidRequest.status === "Review Required";
+                                const cardClass = isUnderReview? 'review-card' : 'paid-card';
+                                const statusText = isUnderReview? 'UNDER REVIEW ⏳' : 'PAID ✅';
+                                const statusColor = isUnderReview? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+
+                                const monthlyUtr = isPaid.utrNumber? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white">${isPaid.utrNumber}</span></p>` : '';
+                                const monthlyScreenshot = isPaid.paymentScreenshot? `<a href="${isPaid.paymentScreenshot}" target="_blank" class="inline-block mt-2 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded hover:bg-emerald-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-eye mr-1"></i> Screenshot </a>` : '';
+
+                                html += `
+                                <div class="glass p-5 rounded-2xl ${cardClass} flex justify-between items-center mb-3">
+                                    <div>
+                                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">${isPaid.date || mName + ' ' + year}</p>
+                                        <h3 class="font-black text-white text-lg tracking-tighter">₹${isPaid.amount}</h3>
+                                        <p class="text-[9px] text-emerald-400 font-bold uppercase italic">${mName}</p>
+                                        ${monthlyUtr}
+                                        ${monthlyScreenshot}
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[9px] ${statusColor} px-3 py-1 rounded-full border font-black uppercase">${statusText}</span>
+                                    </div>
+                                </div>`;
+                            } else {
+                                totalPendingAmount += MONTHLY_FEE;
+                                html += `
+                                <div class="glass p-5 rounded-2xl pending-card flex justify-between items-center mb-3">
+                                    <div>
+                                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest italic">Fees Pending</p>
+                                        <h3 class="font-black text-red-400 text-lg tracking-tighter">₹${MONTHLY_FEE}</h3>
+                                        <p class="text-[9px] text-red-500/60 font-bold uppercase">${mName}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[9px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/20 font-black uppercase italic tracking-tighter">UNPAID ⏳</span>
+                                    </div>
+                                </div>`;
+                            }
+
+                            checkDate.setMonth(checkDate.getMonth() + 1);
+                        }
+
+                        balElement.innerText = `BAL: ₹${totalPendingAmount}`;
+                        balElement.style.color = totalPendingAmount > 0? '#ef4444' : '#10b981';
+                        balElement.className = `glass px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border ${totalPendingAmount > 0? 'border-red-500/30 text-red-400' : 'border-emerald-500/30 text-emerald-400'}`;
+                        container.innerHTML = html;
+                    });
 
                 } else {
                     container.innerHTML = '<div class="text-center py-20 opacity-30 text-[10px] font-black uppercase">User Record Missing in Database.</div>';
@@ -160,7 +175,6 @@
             });
         }
 
-        // --- Admin Access ---
         window.askAdmin = () => {
             const pin = prompt("ENTER MASTER PIN:");
             if (pin === "912919") {
