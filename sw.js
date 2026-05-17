@@ -1,5 +1,5 @@
-// sw.js - SNT Official Portal
-const CACHE_NAME = 'snt-portal-v2'; // Version update for fresh caching
+// sw.js - SNT Official Portal (Ultra Offline Mode)
+const CACHE_NAME = 'snt-portal-v3';
 const assets = [
     './',
     './index.html',
@@ -9,81 +9,90 @@ const assets = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
-// --- 1. INSTALLATION: Assets ko cache mein save karna ---
+// Install Phase
 self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            console.log("SNT Cache: Files saved!");
+            console.log("SNT Cache: Premium Offline Assets Stored!");
             return cache.addAll(assets);
         })
     );
 });
 
-// --- 2. ACTIVATION: Purane cache ko delete karna ---
+// Activate Phase
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys => {
             return Promise.all(
-                keys.filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
             );
         })
     );
 });
 
-// --- 3. FETCH: Offline mode ke liye assets provide karna ---
+// Smart Fetch Strategy: Network with Cache Fallback
 self.addEventListener('fetch', event => {
+    // Firebase database/auth bypass karne ke liye
+    if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com')) {
+        return; 
+    }
+
     event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request);
-        })
+        fetch(event.request)
+            .then(networkResponse => {
+                // Agar network sahi hai, toh naye responses ko cache mein update karte jao
+                if (networkResponse && networkResponse.status === 200) {
+                    const cacheCopy = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, cacheCopy));
+                }
+                return networkResponse;
+            })
+            .catch(() => {
+                // Internet na hone par cache se return karo
+                return caches.match(event.request).then(fallbackResponse => {
+                    if (fallbackResponse) return fallbackResponse;
+                    
+                    // Agar koi external link (jaise external attendance page) click hua ho aur internet na ho
+                    if (event.request.mode === 'navigate') {
+                        return new Response(`
+                            <div style="background:#0f172a;color:#38bdf8;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px;">
+                                <i class="fas fa-wifi-slash" style="font-size:3rem;margin-bottom:15px;color:#ef4444;"></i>
+                                <h1 style="font-weight:900;text-transform:uppercase;">Offline Mode Active</h1>
+                                <p style="color:#94a3b8;font-size:14px;max-width:300px;">Yeh feature (${event.request.url.split('/').pop()}) pehle se synced nahi tha. Offline chalane ke liye is page ko ek baar internet ke sath open karein.</p>
+                                <button onclick="location.reload()" style="background:#38bdf8;color:#0f172a;border:none;padding:10px 20px;border-radius:12px;font-weight:bold;margin-top:15px;cursor:pointer;">Retry Connection</button>
+                            </div>
+                        `, { headers: { 'Content-Type': 'text/html' } });
+                    }
+                });
+            })
     );
 });
 
-// --- 4. PUSH: Firebase/Server se aane wali notifications ---
-self.addEventListener('push', function(event) {
+// Push & Notification Click handlers (Aapka purana code bilkul sahi kaam karega yahan)
+self.addEventListener('push', event => {
     let data = { title: 'SNT Institute', body: 'Naya Update Aaya Hai!' };
     if (event.data) {
-        try {
-            data = event.data.json();
-        } catch (e) {
-            data = { title: 'SNT Institute', body: event.data.text() };
-        }
+        try { data = event.data.json(); } catch (e) { data = { title: 'SNT Institute', body: event.data.text() }; }
     }
-
     const options = {
         body: data.body,
-        icon: './SNT.png', 
-        badge: './SNT.png', 
-        vibrate: [500, 110, 500, 110, 500],
-        tag: 'snt-notification',
-        renotify: true,
-        data: { url: data.url || './index.html' },
-        actions: [
-            { action: 'open', title: 'Check Now', icon: 'https://img.icons8.com/ios-filled/50/ffffff/visible.png' }
-        ]
+        icon: './SNT.jpg',
+        badge: './SNT.jpg',
+        vibrate: [500, 110, 500],
+        data: { url: data.url || './index.html' }
     };
-
     event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// --- 5. NOTIFICATION CLICK: Tap karne par portal khulna ---
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', event => {
     event.notification.close();
-    
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-            // Agar pehle se tab khula hai toh uspar focus karo
             for (const client of clientList) {
-                if (client.url.includes('index.html') && 'focus' in client) {
-                    return client.focus();
-                }
+                if (client.url.includes('index.html') && 'focus' in client) return client.focus();
             }
-            // Warna naya portal kholo
-            if (clients.openWindow) {
-                return clients.openWindow(event.notification.data.url || './index.html');
-            }
+            if (clients.openWindow) return clients.openWindow(event.notification.data.url || './index.html');
         })
     );
 });
