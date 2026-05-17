@@ -79,7 +79,6 @@
                     const student = Object.values(snapshot.val())[0];
                     const history = student.paymentHistory || [];
 
-                    // NAYA: paymentRequests bhi fetch karo
                     db.ref('paymentRequests').orderByChild('studentId').equalTo(student.studentId).once('value', (reqSnap) => {
                         const requests = [];
                         if (reqSnap.exists()) {
@@ -91,11 +90,12 @@
                         let html = '';
                         let totalPendingAmount = 0;
 
-                        // 1. Admission Status Card
+                        // 1. Admission Status Card - UPDATED RECEIPT LINK
                         if (student.registrationStatus === "Paid" || student.registrationStatus === "Pending") {
                             const statusColor = student.registrationStatus === "Paid"? "text-yellow-500" : "text-red-400";
                             const utrDisplay = student.utrNumber? `<p class="text-[11px] text-slate-400 mt-1">UTR: <span class="font-mono text-white selection:bg-sky-500">${student.utrNumber}</span></p>` : '';
-                            const screenshotDisplay = student.paymentScreenshot? `<a href="${student.paymentScreenshot}" target="_blank" class="inline-block mt-2 text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded hover:bg-sky-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-image mr-1"></i> View Receipt</a>` : '';
+                            // YAHAN CHANGE KIYA - receipt.html pe bheja
+                            const screenshotDisplay = student.paymentScreenshot? `<a href="https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html?search=${encodeURIComponent(student.name)}" target="_blank" class="inline-block mt-2 text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded hover:bg-sky-500 hover:text-white transition-all font-bold uppercase"><i class="fas fa-file-invoice mr-1"></i> View Receipt</a>` : '';
 
                             html += `
                             <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-6">
@@ -109,7 +109,7 @@
                             </div>`;
                         }
 
-                        // 2. Monthly Logic - Ab requests bhi check karo
+                        // 2. Monthly Logic
                         const regDate = student.registrationDate? new Date(student.registrationDate) : new Date(2026, 0, 1);
                         const currentDate = new Date();
                         let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
@@ -118,7 +118,6 @@
                             const mName = MONTHS[checkDate.getMonth()];
                             const year = checkDate.getFullYear();
 
-                            // Check paymentHistory + paymentRequests dono me
                             const isPaidHistory = history.find(p => p.month === mName);
                             const isPaidRequest = requests.find(r => r.month === mName && r.status!== "Rejected");
                             const isPaid = isPaidHistory || isPaidRequest;
