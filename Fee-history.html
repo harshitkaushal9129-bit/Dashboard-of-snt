@@ -11,13 +11,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
-       .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-       .paid-card { border-left: 4px solid #10b981; }
-       .pending-card { border-left: 4px solid #ef4444; }
-       .admission-card { border-left: 4px solid #f59e0b; }
+     .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+     .paid-card { border-left: 4px solid #10b981; }
+     .pending-card { border-left: 4px solid #ef4444; }
+     .admission-card { border-left: 4px solid #f59e0b; }
         #admin-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; overflow-y:auto; }
-       .admin-content { background:#1e293b; margin:20px auto; padding:20px; border-radius:15px; max-width:900px; }
-       .calc-btn { background: #334155; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; }
+     .admin-content { background:#1e293b; margin:20px auto; padding:20px; border-radius:15px; max-width:900px; }
+     .calc-btn { background: #334155; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -25,7 +25,7 @@
     <div class="max-w-2xl mx-auto">
         <header class="flex justify-between items-center mb-8">
             <h1 ondblclick="openAdminModal()" class="text-xl font-black italic cursor-pointer select-none">Fee <span class="text-emerald-500">Ledger</span></h1>
-            <div id="total-balance" class="glass px-4 py-2 rounded-xl text-[10px] font-black tracking-widest">BAL: ₹0</div>
+            <div id="total-balance" class="glass px-4 py-2 rounded-xl text- font-black tracking-widest">BAL: ₹0</div>
         </header>
 
         <div id="fee-container" class="space-y-4"></div>
@@ -62,11 +62,6 @@
         </div>
     </div>
 
-    <!-- Image View Modal -->
-    <div id="img-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center;" onclick="closeImgModal()">
-        <img id="modal-img" style="max-width:90%; max-height:90%; border-radius:10px;">
-    </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -81,7 +76,6 @@
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let adminPin = "";
-        let allStudentsData = [];
 
         auth.onAuthStateChanged((user) => {
             if (user) loadSmartLedger(user.email);
@@ -100,10 +94,9 @@
                     let html = '';
                     let totalPending = 0;
 
-                    // 1. Admission Card with UTR + Screenshot
+                    // 1. Admission Card - Only UTR, No Screenshot
                     let admPaid = student.registrationStatus === "Paid";
                     const admUtr = student.utrNumber? `<p class="text-xs text-slate-400 mt-1">UTR: <span class="font-mono">${student.utrNumber}</span></p>` : '';
-                    const admImg = student.paymentScreenshot? `<button onclick="viewImage('${student.paymentScreenshot}')" class="text-[10px] bg-sky-500/20 text-sky-400 px-2 py-1 rounded mt-2"><i class="fas fa-image mr-1"></i>View Receipt</button>` : '';
 
                     html += `
                     <div class="glass p-5 rounded-2xl admission-card mb-4">
@@ -111,13 +104,12 @@
                             <div>
                                 <h3 class="font-black text-white text-md">REGISTRATION FEE</h3>
                                 ${admUtr}
-                                ${admImg}
                             </div>
                             <span class="text-xs ${admPaid?'text-emerald-400':'text-red-400'} font-bold">${admPaid?'PAID ✅':'PENDING ⏳'}</span>
                         </div>
                     </div>`;
 
-                    // 2. Monthly Calculation Loop with UTR + Screenshot
+                    // 2. Monthly Calculation Loop - Only UTR, No Screenshot
                     let regDateStr = student.admissionDate || student.registrationDate || student.date;
                     let regDate = regDateStr? new Date(regDateStr) : new Date();
                     if(isNaN(regDate.getTime())) regDate = new Date();
@@ -130,8 +122,7 @@
                         let isPaid = history.find(p => p.month === mName);
 
                         if(isPaid) {
-                            const utrDisplay = isPaid.utrNumber? `<p class="text-[10px] text-slate-400 mt-1">UTR: <span class="font-mono">${isPaid.utrNumber}</span></p>` : '';
-                            const imgBtn = isPaid.paymentScreenshot? `<button onclick="viewImage('${isPaid.paymentScreenshot}')" class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded mt-1"><i class="fas fa-eye mr-1"></i>Screenshot</button>` : '';
+                            const utrDisplay = isPaid.utrNumber? `<p class="text- text-slate-400 mt-1">UTR: <span class="font-mono">${isPaid.utrNumber}</span></p>` : '';
 
                             html += `
                             <div class="glass p-4 rounded-xl paid-card">
@@ -139,7 +130,6 @@
                                     <div class="flex-1">
                                         <h4 class="font-bold text-sm">${mName} Fee</h4>
                                         ${utrDisplay}
-                                        ${imgBtn}
                                     </div>
                                     <span class="text-xs text-emerald-400 font-bold">₹${isPaid.amount} PAID</span>
                                 </div>
@@ -159,15 +149,6 @@
                     container.innerHTML = html;
                 }
             });
-        }
-
-        // View Image Function
-        function viewImage(src) {
-            document.getElementById('modal-img').src = src;
-            document.getElementById('img-modal').style.display = 'flex';
-        }
-        function closeImgModal() {
-            document.getElementById('img-modal').style.display = 'none';
         }
 
         // Admin Modal Functions
