@@ -11,21 +11,60 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .paid-card { border-left: 4px solid #10b981; }
-        .pending-card { border-left: 4px solid #ef4444; }
-        .admission-card { border-left: 4px solid #f59e0b; }
+       .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+       .paid-card { border-left: 4px solid #10b981; }
+       .pending-card { border-left: 4px solid #ef4444; }
+       .admission-card { border-left: 4px solid #f59e0b; }
+        #admin-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; overflow-y:auto; }
+       .admin-content { background:#1e293b; margin:20px auto; padding:20px; border-radius:15px; max-width:900px; }
+       .calc-btn { background: #334155; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-2xl mx-auto">
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-xl font-black italic">Fee <span class="text-emerald-500">Ledger</span></h1>
+            <h1 ondblclick="openAdminModal()" class="text-xl font-black italic cursor-pointer select-none">Fee <span class="text-emerald-500">Ledger</span></h1>
             <div id="total-balance" class="glass px-4 py-2 rounded-xl text-[10px] font-black tracking-widest">BAL: ₹0</div>
         </header>
 
         <div id="fee-container" class="space-y-4"></div>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="admin-modal">
+        <div class="admin-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">🔒 Admin Access</h2>
+                <button onclick="closeAdminModal()" class="text-2xl">&times;</button>
+            </div>
+
+            <div id="pin-section">
+                <p class="text-sm text-slate-400 mb-3">Enter Master PIN to view all students</p>
+                <input type="password" id="admin-pin" readonly placeholder="******" class="w-full p-3 text-center text-xl bg-slate-800 rounded-lg border border-slate-600 mb-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <button class="calc-btn" onclick="addAdminPin('1')">1</button>
+                    <button class="calc-btn" onclick="addAdminPin('2')">2</button>
+                    <button class="calc-btn" onclick="addAdminPin('3')">3</button>
+                    <button class="calc-btn" onclick="addAdminPin('4')">4</button>
+                    <button class="calc-btn" onclick="addAdminPin('5')">5</button>
+                    <button class="calc-btn" onclick="addAdminPin('6')">6</button>
+                    <button class="calc-btn" onclick="addAdminPin('7')">7</button>
+                    <button class="calc-btn" onclick="addAdminPin('8')">8</button>
+                    <button class="calc-btn" onclick="addAdminPin('9')">9</button>
+                    <button class="calc-btn" style="color:#ef4444" onclick="clearAdminPin()">C</button>
+                    <button class="calc-btn" onclick="addAdminPin('0')">0</button>
+                    <button class="calc-btn" style="color:#10b981" onclick="verifyAdminPin()">OK</button>
+                </div>
+            </div>
+
+            <div id="all-students-data" style="display:none;" class="mt-4 space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Image View Modal -->
+    <div id="img-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center;" onclick="closeImgModal()">
+        <img id="modal-img" style="max-width:90%; max-height:90%; border-radius:10px;">
     </div>
 
     <script>
@@ -41,6 +80,8 @@
         const auth = firebase.auth();
 
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        let adminPin = "";
+        let allStudentsData = [];
 
         auth.onAuthStateChanged((user) => {
             if (user) loadSmartLedger(user.email);
@@ -59,20 +100,26 @@
                     let html = '';
                     let totalPending = 0;
 
-                    // 1. Admission Card
+                    // 1. Admission Card with UTR + Screenshot
                     let admPaid = student.registrationStatus === "Paid";
+                    const admUtr = student.utrNumber? `<p class="text-xs text-slate-400 mt-1">UTR: <span class="font-mono">${student.utrNumber}</span></p>` : '';
+                    const admImg = student.paymentScreenshot? `<button onclick="viewImage('${student.paymentScreenshot}')" class="text-[10px] bg-sky-500/20 text-sky-400 px-2 py-1 rounded mt-2"><i class="fas fa-image mr-1"></i>View Receipt</button>` : '';
+
                     html += `
-                    <div class="glass p-5 rounded-2xl admission-card flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="font-black text-white text-md">REGISTRATION FEE</h3>
-                            ${student.utrNumber ? `<p class="text-xs text-slate-400">UTR: ${student.utrNumber}</p>` : ''}
+                    <div class="glass p-5 rounded-2xl admission-card mb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-black text-white text-md">REGISTRATION FEE</h3>
+                                ${admUtr}
+                                ${admImg}
+                            </div>
+                            <span class="text-xs ${admPaid?'text-emerald-400':'text-red-400'} font-bold">${admPaid?'PAID ✅':'PENDING ⏳'}</span>
                         </div>
-                        <span class="text-xs ${admPaid?'text-emerald-400':'text-red-400'} font-bold">${admPaid?'PAID ✅':'PENDING ⏳'}</span>
                     </div>`;
 
-                    // 2. Monthly Calculation Loop
+                    // 2. Monthly Calculation Loop with UTR + Screenshot
                     let regDateStr = student.admissionDate || student.registrationDate || student.date;
-                    let regDate = regDateStr ? new Date(regDateStr) : new Date();
+                    let regDate = regDateStr? new Date(regDateStr) : new Date();
                     if(isNaN(regDate.getTime())) regDate = new Date();
 
                     let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
@@ -83,19 +130,25 @@
                         let isPaid = history.find(p => p.month === mName);
 
                         if(isPaid) {
+                            const utrDisplay = isPaid.utrNumber? `<p class="text-[10px] text-slate-400 mt-1">UTR: <span class="font-mono">${isPaid.utrNumber}</span></p>` : '';
+                            const imgBtn = isPaid.paymentScreenshot? `<button onclick="viewImage('${isPaid.paymentScreenshot}')" class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded mt-1"><i class="fas fa-eye mr-1"></i>Screenshot</button>` : '';
+
                             html += `
-                            <div class="glass p-4 rounded-xl paid-card flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold">${mName} Fee</h4>
-                                    <p class="text-xs text-slate-400">UTR: ${isPaid.utrNumber || 'N/A'}</p>
+                            <div class="glass p-4 rounded-xl paid-card">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-sm">${mName} Fee</h4>
+                                        ${utrDisplay}
+                                        ${imgBtn}
+                                    </div>
+                                    <span class="text-xs text-emerald-400 font-bold">₹${isPaid.amount} PAID</span>
                                 </div>
-                                <span class="text-xs text-emerald-400 font-bold">₹${isPaid.amount} PAID</span>
                             </div>`;
                         } else {
                             totalPending += 500;
                             html += `
                             <div class="glass p-4 rounded-xl pending-card flex justify-between items-center">
-                                <div><h4 class="font-bold text-red-400">${mName} Fee</h4></div>
+                                <div><h4 class="font-bold text-red-400 text-sm">${mName} Fee</h4></div>
                                 <span class="text-xs text-red-500 font-bold">₹500 UNPAID</span>
                             </div>`;
                         }
@@ -105,6 +158,87 @@
                     balElement.innerText = `BAL: ₹${totalPending}`;
                     container.innerHTML = html;
                 }
+            });
+        }
+
+        // View Image Function
+        function viewImage(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('img-modal').style.display = 'flex';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').style.display = 'none';
+        }
+
+        // Admin Modal Functions
+        function openAdminModal() {
+            document.getElementById('admin-modal').style.display = 'block';
+            document.getElementById('pin-section').style.display = 'block';
+            document.getElementById('all-students-data').style.display = 'none';
+            clearAdminPin();
+        }
+        function closeAdminModal() {
+            document.getElementById('admin-modal').style.display = 'none';
+        }
+        function addAdminPin(num) {
+            if(adminPin.length < 6) {
+                adminPin += num;
+                document.getElementById('admin-pin').value = adminPin.replace(/./g, '●');
+            }
+        }
+        function clearAdminPin() {
+            adminPin = "";
+            document.getElementById('admin-pin').value = "";
+        }
+        function verifyAdminPin() {
+            if(adminPin === "912919") {
+                loadAllStudentsData();
+            } else {
+                alert("गलत पिन!");
+                clearAdminPin();
+            }
+        }
+
+        function loadAllStudentsData() {
+            document.getElementById('pin-section').style.display = 'none';
+            const container = document.getElementById('all-students-data');
+            container.style.display = 'block';
+            container.innerHTML = '<p class="text-center text-slate-400">Loading...</p>';
+
+            db.ref('students').once('value', (snapshot) => {
+                const data = snapshot.val();
+                let html = '<h3 class="text-lg font-bold mb-4">All Students Monthly Fees</h3>';
+
+                if(data) {
+                    Object.keys(data).forEach((key) => {
+                        const s = data[key];
+                        const history = s.paymentHistory || [];
+                        let paidMonths = history.length;
+                        let totalPaid = history.reduce((sum, p) => sum + parseInt(p.amount || 0), 0);
+
+                        html += `
+                        <div class="glass p-4 rounded-xl mb-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-bold">${s.name}</h4>
+                                    <p class="text-xs text-slate-400">${s.studentId} | ${s.mobile || s.phone}</p>
+                                </div>
+                                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">${paidMonths} Months</span>
+                            </div>
+                            <div class="text-xs">
+                                <span class="text-slate-400">Total Paid: </span>
+                                <span class="text-emerald-400 font-bold">₹${totalPaid}</span>
+                            </div>
+                            <div class="mt-2 flex flex-wrap gap-1">
+                                ${MONTHS.map(m => {
+                                    const paid = history.find(p => p.month === m);
+                                    return `<span class="text-[9px] px-2 py-0.5 rounded ${paid?'bg-emerald-500/20 text-emerald-400':'bg-red-500/20 text-red-400'}">${m.substring(0,3)}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>`;
+                    });
+                }
+                container.innerHTML = html;
             });
         }
     </script>
