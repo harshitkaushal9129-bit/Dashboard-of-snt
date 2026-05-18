@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SNT - Smart Register</title>
+    <title>SNT - Smart Register & Calendar</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,16 +13,20 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .row-item { display: grid; grid-template-columns: 1fr 2fr 1.5fr; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        .btn-p { color: #4ade80; border: 1.5px solid #22c55e; background: rgba(34, 197, 94, 0.1); }
-        .btn-a { color: #f87171; border: 1.5px solid #ef4444; background: rgba(239, 68, 68, 0.1); }
-        .btn-l { color: #fbbf24; border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.1); }
-        .btn-h { color: #fbbf24; border: 1.5px solid #eab308; background: rgba(234, 179, 8, 0.05); cursor: not-allowed; }
-        .btn-lock { color: #64748b; border: 1.5px solid #334155; background: rgba(51, 65, 85, 0.1); opacity: 0.5; cursor: not-allowed; }
+        /* Status Theme Styles */
+        .btn-p, .status-p { color: #4ade80; border: 1.5px solid #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .btn-a, .status-a { color: #f87171; border: 1.5px solid #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-l, .status-l { color: #fbbf24; border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .btn-h, .status-h { color: #fbbf24; border: 1.5px solid #eab308; background: rgba(234, 179, 8, 0.05); }
+        .btn-lock { color: #64748b; border: 1.5px solid #334155; background: rgba(51, 65, 85, 0.1); opacity: 0.5; }
+
+        /* Calendar Grid Specifics */
+        .cal-box { aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; font-weight: 700; font-size: 13px; position: relative; transition: 0.2s; border: 1px solid rgba(255,255,255,0.03); background: rgba(30, 41, 59, 0.3); }
+        .cal-dot { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 6px; }
 
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; text-align: center; display: inline-block; min-width: 70px; }
         #admin-controls { display: none; }
         
-        /* Logo Styling */
         .snt-logo-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; items-center; justify-center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
         .snt-logo-btn img { width: 100%; height: 100%; object-fit: cover; }
     </style>
@@ -32,7 +36,7 @@
     <!-- Top Header -->
     <div class="p-4 max-w-2xl mx-auto flex items-center justify-between sticky top-0 bg-[#0f172a] z-50">
         <button onclick="history.back()" class="text-sky-400 text-xl w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-        <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Register</span></h1>
+        <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Smart Grid</span></h1>
         
         <div id="admin-toggle-btn" onclick="handleAdminToggle()" class="snt-logo-btn glass">
             <div id="icon-container" class="flex items-center justify-center w-full h-full">
@@ -81,6 +85,18 @@
         </button>
     </div>
 
+    <!-- Graphical Month Calendar Layout Block -->
+    <div class="px-4 max-w-2xl mx-auto mb-6">
+        <div class="glass p-4 rounded-[2rem] border border-slate-800 shadow-2xl">
+            <!-- Week Days Header Label -->
+            <div class="grid grid-cols-7 text-center text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 py-1 border-b border-white/5">
+                <div class="text-red-400">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <!-- Dynamic Calendar Days Grid Matrix -->
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+        </div>
+    </div>
+
     <!-- Attendance Sheet/Register Log -->
     <div class="px-4 max-w-2xl mx-auto">
         <div class="glass rounded-[2rem] overflow-hidden border border-slate-800">
@@ -114,7 +130,7 @@
         let adminHolidays = {};
         let attendanceData = {};
         
-        // Date Logic States
+        // Date Logic Tracking Configurations
         const realToday = new Date();
         let currentSelectedDate = new Date(realToday.getFullYear(), realToday.getMonth(), 1);
         let admissionDate = null; 
@@ -153,21 +169,18 @@
         };
 
         function loadData() {
-            // 1. Fetch Student Profile for dynamic admissionDate mapping
             onValue(ref(db, 'students'), (snapshot) => {
                 if (snapshot.exists()) {
                     const sData = Object.values(snapshot.val()).find(s => s.email === currentUser.email);
                     if (sData && sData.admissionDate) {
                         admissionDate = new Date(sData.admissionDate);
                     } else {
-                        // Fallback agar mapping block absent ho (Default 3 mahine pehle)
                         admissionDate = new Date(realToday.getFullYear(), realToday.getMonth() - 3, 1);
                     }
                 } else {
                     admissionDate = new Date(realToday.getFullYear(), realToday.getMonth(), 1);
                 }
 
-                // 2. Fetch Administration Holidays & Attendance Entries
                 onValue(ref(db, 'admin_holidays'), (holSnapshot) => {
                     adminHolidays = holSnapshot.val() || {};
                     onValue(ref(db, 'attendance'), (attSnapshot) => {
@@ -205,6 +218,7 @@
 
         function renderUI() {
             const list = document.getElementById('register-list');
+            const calGrid = document.getElementById('calendar-grid');
             const actionArea = document.getElementById('action-area');
             const monthDisplay = document.getElementById('current-month-display');
             const prevBtn = document.getElementById('prev-month-btn');
@@ -213,24 +227,20 @@
             const viewYear = currentSelectedDate.getFullYear();
             const viewMonth = currentSelectedDate.getMonth();
 
-            // Month display formatting
             monthDisplay.innerText = currentSelectedDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-            // --- LIMIT MANAGEMENT & LOCK SYSTEM ---
+            // --- PAST & FUTURE LOCK LIMITATION RULES ---
             const admMonthLimit = new Date(admissionDate.getFullYear(), admissionDate.getMonth(), 1);
             const twelveMonthsLimit = new Date(realToday.getFullYear(), realToday.getMonth() - 11, 1);
-            
-            // Whichever comes later stands as the absolute past barrier
             const dynamicPastLimit = admMonthLimit > twelveMonthsLimit ? admMonthLimit : twelveMonthsLimit;
 
             const viewCurrentCompare = new Date(viewYear, viewMonth, 1);
             const viewNextCompare = new Date(viewYear, viewMonth + 1, 1);
 
-            // Button state triggers
             prevBtn.disabled = viewCurrentCompare <= dynamicPastLimit;
             nextBtn.disabled = viewNextCompare > realToday;
 
-            // --- TODAY CONTAINER RENDER CONTROLS ---
+            // --- TODAY CONTAINER ACTION GENERATION ---
             const isSunToday = realToday.getDay() === 0;
             const holToday = adminHolidays[todayStr];
             const attID = currentUser.uid + "_" + todayStr;
@@ -251,18 +261,65 @@
                     </div>`;
             }
 
-            // --- GRID DAYS GENERATOR LOGIC ---
+            // --- 1. DYNAMIC GRID CALENDAR MATRIX SYSTEM ---
+            let calHtml = '';
+            const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay(); 
             const totalDaysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-            let html = '';
 
-            // Agar active current month hai toh aaj tak chalega loop, warna pichle mahino ke liye poore din dikhayega
+            // Render Empty Grid Slots for First Week Alignment Matching
+            for (let e = 0; e < firstDayIndex; e++) {
+                calHtml += `<div class="opacity-0 pointer-events-none"></div>`;
+            }
+
+            // Generate Functional Calendar Blocks day by day
+            for (let d = 1; d <= totalDaysInMonth; d++) {
+                const dayStrLoop = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const loopDateObj = new Date(dayStrLoop);
+                
+                let boxClass = "cal-box";
+                let dotHtml = "";
+                
+                const isSun = loopDateObj.getDay() === 0;
+                const isHoliday = adminHolidays[dayStrLoop];
+                const hasRecord = Object.values(attendanceData).find(r => r.email === currentUser.email && r.date === dayStrLoop);
+
+                if (loopDateObj < new Date(admissionDate.getFullYear(), admissionDate.getMonth(), admissionDate.getDate())) {
+                    // Lock slots completely if date falls before student enrollment
+                    boxClass += " btn-lock text-slate-600";
+                } else if (hasRecord) {
+                    if (hasRecord.status === 'Present') { boxClass += " status-p font-black"; dotHtml = '<div class="cal-dot bg-green-400"></div>'; }
+                    else if (hasRecord.status === 'Absent') { boxClass += " status-a font-black"; dotHtml = '<div class="cal-dot bg-red-400"></div>'; }
+                    else if (hasRecord.status === 'Leave') { boxClass += " status-l font-black"; dotHtml = '<div class="cal-dot bg-amber-400"></div>'; }
+                } else if (isSun) {
+                    boxClass += " status-h text-red-400";
+                    dotHtml = '<div class="cal-dot bg-red-500/50"></div>';
+                } else if (isHoliday) {
+                    boxClass += " status-h text-amber-500";
+                    dotHtml = '<div class="cal-dot bg-amber-500/50"></div>';
+                } else if (loopDateObj > realToday) {
+                    boxClass += " opacity-40 text-slate-500"; // Future Unmarked Dates
+                } else {
+                    boxClass += " text-slate-400"; // Past Unmarked System Logs
+                }
+
+                // Append highlights if rendered cell matches system physical today
+                if (viewYear === realToday.getFullYear() && viewMonth === realToday.getMonth() && d === realToday.getDate()) {
+                    boxClass += " ring-2 ring-sky-500 ring-offset-2 ring-offset-slate-950";
+                }
+
+                calHtml += `<div class="${boxClass}">${d}${dotHtml}</div>`;
+            }
+            calGrid.innerHTML = calHtml;
+
+
+            // --- 2. LIST REGISTER LOGIC (CLEAN DOWNWARD SCROLL) ---
+            let listHtml = '';
             let startDay = (viewYear === realToday.getFullYear() && viewMonth === realToday.getMonth()) ? realToday.getDate() : totalDaysInMonth;
 
             for (let d = startDay; d >= 1; d--) {
                 const dayDateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const dateObj = new Date(dayDateStr);
                 
-                // Dynamic check: Admission date se pehle ka data hide/skip kar dena hai
                 if (dateObj < admissionDate) continue;
 
                 const sun = dateObj.getDay() === 0;
@@ -284,7 +341,7 @@
                     reasonText = hol.reason;
                 }
 
-                html += `
+                listHtml += `
                     <div class="row-item">
                         <div class="font-bold text-xs text-slate-300">${d} ${dateObj.toLocaleString('default', { month: 'short' })}</div>
                         <div class="text-center text-[9px] font-bold text-slate-500 uppercase tracking-tighter italic overflow-hidden whitespace-nowrap px-1">${reasonText}</div>
@@ -292,7 +349,7 @@
                     </div>`;
             }
             
-            list.innerHTML = html || `<p class="text-slate-500 text-center text-[10px] font-bold py-8 uppercase tracking-widest">No records available</p>`;
+            list.innerHTML = listHtml || `<p class="text-slate-500 text-center text-[10px] font-bold py-8 uppercase tracking-widest">No records available</p>`;
         }
 
         window.markAttendance = (status) => {
