@@ -420,63 +420,80 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('auth-container').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('navbar').classList.remove('hidden');
-                document.getElementById('ai-assistant-ui').classList.remove('hidden');
-                
-                const hr = new Date().getHours();
-                document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
-                
-                onValue(ref(db, 'students'), (snapshot) => {
-                    if (snapshot.exists()) {
-                        const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
-                        if (sData) {
-                            document.getElementById('user-name-home').innerText = sData.name;
-                            document.getElementById('user-email-home').innerText = user.email;
-                            document.getElementById('user-img-home').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            document.getElementById('user-name-profile').innerText = sData.name;
-                            document.getElementById('user-img-profile').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            document.getElementById('user-roll-profile').innerText = "ID: " + (sData.studentId || "NEW");
-                            document.getElementById('p-father').innerText = sData.fatherName || '---';
-                            document.getElementById('p-gender').innerText = sData.gender || '---';
-                            document.getElementById('p-dob').innerText = sData.dob || '---';
-                            document.getElementById('p-phone').innerText = sData.mobile || sData.phone || '---';
-                            document.getElementById('p-course').innerText = Array.isArray(sData.courses) ? sData.courses.join(', ') : (sData.courses || '---');
-                            document.getElementById('p-batch').innerText = Array.isArray(sData.batches) ? sData.batches.join(', ') : (sData.batches || '---');
-                            document.getElementById('p-adm').innerText = sData.admissionDate || '---';
-                            document.getElementById('p-addr').innerText = sData.address || '---';
-                            const statusEl = document.getElementById('user-status-profile');
-                            statusEl.innerText = sData.registrationStatus || "Guest";
-                            statusEl.style.borderColor = sData.registrationStatus === "Active" ? "#10b981" : "#64748b";
-                            statusEl.style.color = sData.registrationStatus === "Active" ? "#10b981" : "#64748b";
-                        }
+    if (user) {
+        document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('navbar').classList.remove('hidden');
+        document.getElementById('ai-assistant-ui').classList.remove('hidden');
+        
+        const hr = new Date().getHours();
+        document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
+        
+        // --- UPDATED STUDENT DATA LISTENER ---
+        onValue(ref(db, 'students'), (snapshot) => {
+            if (snapshot.exists()) {
+                const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
+                if (sData) {
+                    // Home Tab Data Binding
+                    document.getElementById('user-name-home').innerText = sData.name;
+                    document.getElementById('user-email-home').innerText = user.email;
+                    document.getElementById('user-img-home').src = sData.profilePic || sData.profilePicture || user.photoURL;
+                    
+                    // --- NEW: Bakaya Fees Dynamic Injection ---
+                    // Firebase Database mein se pendingFees ya dueFees check karega, nahi toh default ₹0 dikhayega
+                    const pendingAmount = sData.pendingFees || sData.dueFees || "0";
+                    const feesElement = document.getElementById('user-pending-fees');
+                    if (feesElement) {
+                        feesElement.innerText = "₹" + pendingAmount;
                     }
-                });
 
-                onValue(ref(db, 'notifications'), (snapshot) => {
-                    const list = document.getElementById('notif-list');
-                    const badge = document.getElementById('notif-badge');
-                    if (snapshot.exists()) {
-                        const notifs = Object.values(snapshot.val()).reverse();
-                        badge.classList.remove('hidden');
-                        list.innerHTML = notifs.map(n => `
-                            <div class="notif-item">
-                                <p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p>
-                                <p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p>
-                                <p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p>
-                            </div>
-                        `).join('');
-                    } else {
-                        badge.classList.add('hidden');
-                        list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`;
+                    // Profile Tab Data Binding
+                    document.getElementById('user-name-profile').innerText = sData.name;
+                    document.getElementById('user-img-profile').src = sData.profilePic || sData.profilePicture || user.photoURL;
+                    document.getElementById('user-roll-profile').innerText = "ID: " + (sData.studentId || "NEW");
+                    document.getElementById('p-father').innerText = sData.fatherName || '---';
+                    document.getElementById('p-gender').innerText = sData.gender || '---';
+                    document.getElementById('p-dob').innerText = sData.dob || '---';
+                    document.getElementById('p-phone').innerText = sData.mobile || sData.phone || '---';
+                    document.getElementById('p-course').innerText = Array.isArray(sData.courses) ? sData.courses.join(', ') : (sData.courses || '---');
+                    document.getElementById('p-batch').innerText = Array.isArray(sData.batches) ? sData.batches.join(', ') : (sData.batches || '---');
+                    document.getElementById('p-adm').innerText = sData.admissionDate || '---';
+                    document.getElementById('p-addr').innerText = sData.address || '---';
+                    
+                    // Registration Status UI Handle
+                    const statusEl = document.getElementById('user-status-profile');
+                    if (statusEl) {
+                        statusEl.innerText = sData.registrationStatus || "Guest";
+                        statusEl.style.borderColor = sData.registrationStatus === "Active" ? "#10b981" : "#64748b";
+                        statusEl.style.color = sData.registrationStatus === "Active" ? "#10b981" : "#64748b";
                     }
-                });
-
-                renderMenu();
+                }
             }
         });
+
+        // Notifications Listener
+        onValue(ref(db, 'notifications'), (snapshot) => {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+            if (snapshot.exists()) {
+                const notifs = Object.values(snapshot.val()).reverse();
+                badge.classList.remove('hidden');
+                list.innerHTML = notifs.map(n => `
+                    <div class="notif-item">
+                        <p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p>
+                        <p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p>
+                    </div>
+                `).join('');
+            } else {
+                badge.classList.add('hidden');
+                list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`;
+            }
+        });
+
+        renderMenu();
+    }
+});
 
         window.renderMenu = () => {
             const menuItems = [
