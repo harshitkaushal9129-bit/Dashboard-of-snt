@@ -124,6 +124,27 @@ body.light-mode .nav-item.active { color: #FF8C00 !important; }
                 </div>
             </div>
 
+                
+                <!-- PROFILE SUMMARY KHATAM HONE KE BAAD AUR SEARCH BOX SE PEHLE ISSE LAGAYEIN -->
+<div id="fees-summary-card" class="glass p-5 rounded-[32px] mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-l-4 border-orange-500 shadow-2xl animate-fade-in">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 text-xl">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div>
+            <p class="text-orange-400 text-[9px] font-black uppercase tracking-widest mb-1">Fee Status</p>
+            <h4 class="text-lg font-black text-white leading-tight">Bakaya Fees (Pending)</h4>
+        </div>
+    </div>
+    <div class="text-left sm:text-right w-full sm:w-auto flex sm:flex-col justify-between sm:justify-center items-center sm:items-end border-t border-white/5 sm:border-none pt-3 sm:pt-0">
+        <span class="info-label sm:hidden">Amount Due</span>
+        <!-- Yeh ID dynamic data load karegi -->
+        <span id="user-pending-fees" class="text-2xl font-black text-orange-500 tracking-tight">₹---</span>
+    </div>
+</div>
+
+
+                
             <div class="mb-6 relative">
                 <div class="search-box flex items-center px-5 py-4 rounded-2xl">
                     <i class="fas fa-search text-sky-500 mr-4 text-sm"></i>
