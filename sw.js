@@ -1,9 +1,10 @@
-// sw.js - SNT Official Portal (Ultra Offline Mode)
+// sw.js - SNT Official Portal (Ultra Offline Mode & High-Priority Notifications)
 const CACHE_NAME = 'snt-portal-v3';
 const assets = [
     './',
     './index.html',
     './SNT.jpg',
+    './SNT.png', // Transparent White Icon for Android Status Bar
     './manifest.json',
     'https://cdn.tailwindcss.com',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
@@ -53,7 +54,7 @@ self.addEventListener('fetch', event => {
                 return caches.match(event.request).then(fallbackResponse => {
                     if (fallbackResponse) return fallbackResponse;
                     
-                    // Agar koi external link (jaise external attendance page) click hua ho aur internet na ho
+                    // Agar koi external link click hua ho aur internet na ho
                     if (event.request.mode === 'navigate') {
                         return new Response(`
                             <div style="background:#0f172a;color:#38bdf8;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px;">
@@ -69,22 +70,31 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Push & Notification Click handlers (Aapka purana code bilkul sahi kaam karega yahan)
+// Push Notification Handler (Optimized for Android Notification Bar)
 self.addEventListener('push', event => {
     let data = { title: 'SNT Institute', body: 'Naya Update Aaya Hai!' };
     if (event.data) {
-        try { data = event.data.json(); } catch (e) { data = { title: 'SNT Institute', body: event.data.text() }; }
+        try { 
+            data = event.data.json(); 
+        } catch (e) { 
+            data = { title: 'SNT Institute', body: event.data.text() }; 
+        }
     }
+    
     const options = {
         body: data.body,
-        icon: './SNT.jpg',
-        badge: './SNT.jpg',
-        vibrate: [500, 110, 500],
+        icon: './SNT.jpg',         // Large display logo inside notification drawer
+        badge: './SNT.png',        // Pure White Transparent Logo for Mobile Status Bar
+        vibrate: [300, 100, 300],  // Smooth vibration pattern
+        tag: 'snt-alert-notification', // Overwrites old notifications instead of piling up
+        renotify: true,            // Sound & vibrate for new notifications under same tag
         data: { url: data.url || './index.html' }
     };
+
     event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
+// Notification Click Handler
 self.addEventListener('notificationclick', event => {
     event.notification.close();
     event.waitUntil(
