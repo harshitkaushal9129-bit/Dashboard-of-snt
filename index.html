@@ -379,16 +379,16 @@ onValue(ref(db, 'live_signal'), (snapshot) => {
                                  : "Student";
 
                 navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(data.title, {
-                        // Personal greeting add ki gayi hai
-                        body: `Dear ${userName}! ${data.body}`, 
-                        icon: './SNT.jpg',   // Transparent PNG file
-                        badge: './SNT.png', // Android Status Bar PNG
-                        image: data.imageUrl || null,
-                        vibrate: [300, 100, 300],
-                        data: { url: './index.html' }
-                    });
-                });
+    reg.showNotification(data.title, {
+        body: `Dear ${userName}! ${data.body}`, 
+        icon: './SNT.jpg',   // App Icon panel ke liye
+        badge: './SNT.png',  // Status bar ke liye fixed (Transparent white icon)
+        image: data.imageUrl || null,
+        vibrate: [300, 100, 300],
+        data: { url: './index.html' }
+    });
+});
+
             } else if (Notification.permission !== "denied") {
                 Notification.requestPermission();
             }
