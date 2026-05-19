@@ -1,4 +1,4 @@
-// sw.js - SNT Official Portal (Ultra Offline Mode & High-Priority Notifications)
+
 const CACHE_NAME = 'snt-portal-v3';
 const assets = [
     './',
