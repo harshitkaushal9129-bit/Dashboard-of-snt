@@ -601,7 +601,7 @@
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if(el) el.classList.add('active');
             if(tab === 'academics') {
-                setTimeout(drawWheel, 100);
+                setTimeout(window.drawWheel, 100);
             }
         };
         
@@ -649,7 +649,7 @@
 
         window.openArcadeZone = () => {
             document.getElementById('game-modal').style.display = "flex";
-            setTimeout(drawWheel, 100);
+            setTimeout(window.drawWheel, 100);
         };
 
         window.closeArcadeZone = () => {
@@ -664,14 +664,14 @@
             if(game === 'wheel') {
                 document.getElementById('tab-wheel').classList.remove('hidden');
                 document.getElementById('btn-tab-wheel').className = "bg-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
-                drawWheel();
+                window.drawWheel();
             } else {
                 document.getElementById('tab-rps').classList.remove('hidden');
                 document.getElementById('btn-tab-rps').className = "bg-sky-500 text-slate-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
             }
         };
 
-        function drawWheel() {
+        window.drawWheel = () => {
             const canvas = document.getElementById("wheelCanvas");
             if(!canvas) return;
             const ctx = canvas.getContext("2d");
@@ -687,7 +687,7 @@
                 ctx.fillStyle = i % 2 === 0 ? "#fbbf24" : "#ffffff"; ctx.font = "bold 8px sans-serif";
                 ctx.textAlign = "right"; ctx.fillText(rewards[i], 100, 3); ctx.restore();
             }
-        }
+        };
 
         window.spinTheWheel = () => {
             if (isSpinning) return; isSpinning = true;
@@ -748,9 +748,9 @@
 
         recognition.onresult = (event) => {
             const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            if(command.includes("profile")) { switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
-            else if(command.includes("home") || command.includes("portal")) { switchTab('home', document.querySelectorAll('.nav-item')[0]); }
-            else if(command.includes("desk") || command.includes("academics")) { switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
+            if(command.includes("profile")) { window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
+            else if(command.includes("home") || command.includes("portal")) { window.switchTab('home', document.querySelectorAll('.nav-item')[0]); }
+            else if(command.includes("desk") || command.includes("academics")) { window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
             else if(command.includes("logout")) { window.logout(); }
             else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
             else if(command.includes("dashboard")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; }
