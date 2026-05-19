@@ -21,7 +21,8 @@
         body.light-mode #profile-summary, 
         body.light-mode .profile-data-card, 
         body.light-mode .search-box,
-        body.light-mode .info-value { 
+        body.light-mode .info-value,
+        body.light-mode .academic-item { 
             background: #ffffff !important; 
             backdrop-filter: none; 
             border: 2px solid #FF8C00 !important; /* Premium Orange Border */
@@ -31,7 +32,9 @@
 
         body.light-mode #profile-summary { border-left: 10px solid #FF8C00 !important; }
         body.light-mode .app-card p { color: #1e293b !important; font-weight: 800; text-transform: uppercase; }
-        body.light-mode .app-card:active { background: #fff7ed !important; transform: scale(0.95); }
+        body.light-mode .academic-item p { color: #1e293b !important; }
+        body.light-mode .academic-item span { color: #64748b !important; }
+        body.light-mode .app-card:active, body.light-mode .academic-item:active { background: #fff7ed !important; transform: scale(0.95); }
         body.light-mode .search-box input { color: #1e293b !important; }
         body.light-mode .search-box i { color: #FF8C00 !important; }
         body.light-mode .bottom-nav { background: #ffffff !important; border-top: 3px solid #FF8C00 !important; }
@@ -44,6 +47,11 @@
         .view-laptop #app-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .app-card:active { border-color: #38bdf8; transform: scale(0.92); background: rgba(56, 189, 248, 0.15); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+        
+        /* Academic List Style */
+        .academic-item { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); transition: 0.2s; cursor: pointer; }
+        .academic-item:active { transform: scale(0.98); background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.3); }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
@@ -64,6 +72,11 @@
         @keyframes pulse-glow { 0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); } 50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7); } 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); } }
         #qr-progress { transition: width 5s linear; width: 100%; }
         #profile-tab .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        
+        /* Spin Wheel Style overrides */
+        #wheelCanvas { max-width: 100%; height: auto; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body oncontextmenu="return false;" class="view-laptop" id="main-body">
@@ -153,6 +166,87 @@
             <div id="app-grid" class="grid pb-24"></div>
         </div>
 
+        <!-- NEW TAB: ACADEMICS & DESK CONTENTS -->
+        <div id="academics-tab" class="tab-content hidden pb-24 animate-fade-in">
+            <span class="section-tag">Student Desk & Examination</span>
+            <div class="flex flex-col gap-3">
+                <!-- ID Card Option -->
+                <div onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'" class="academic-item flex items-center justify-between p-4 rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-yellow-500/10 text-yellow-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-id-card"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">Student ID Card</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Download Identity Card</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
+                </div>
+                
+                <!-- Certificate Option -->
+                <div onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/basic.html'" class="academic-item flex items-center justify-between p-4 rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-red-500/10 text-red-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-user-shield"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">Course Certificate</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Verification & Certificate view</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
+                </div>
+
+                <!-- CBT Exam Option -->
+                <div onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'" class="academic-item flex items-center justify-between p-4 rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-laptop-code"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">Computer Based Test (CBT)</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Live Examination & Quiz Portal</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
+                </div>
+
+                <!-- Exam Form Option -->
+                <div onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/examination.html'" class="academic-item flex items-center justify-between p-4 rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-orange-500/10 text-orange-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-file-signature"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">Examination Form</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Fill Term End Exam Form</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
+                </div>
+
+                <!-- Admit Card Option -->
+                <div onclick="location.href='https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html'" class="academic-item flex items-center justify-between p-4 rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-address-card"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">Examination Admit Card</p>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Download Hall Ticket</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
+                </div>
+            </div>
+
+            <span class="section-tag">Entertainment & Arcade</span>
+            <div class="flex flex-col gap-3">
+                <!-- Arcade Games Option -->
+                <div onclick="openArcadeZone()" class="academic-item flex items-center justify-between p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-gamepad"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-amber-400 tracking-wide">SNT Arcade Zone</p>
+                            <span class="text-[9px] text-amber-500/60 font-bold uppercase tracking-wider">Play Lucky Wheel & Rock Paper Scissors</span>
+                        </div>
+                    </div>
+                    <div class="bg-amber-500 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Play</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Profile View Tab Contents -->
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
@@ -194,6 +288,53 @@
         </div>
     </div>
 
+    <!-- SNT Multi-Game Arcade Zone Modal -->
+    <div id="game-modal" class="modal-overlay" style="display: none;">
+        <div class="glass p-5 rounded-[35px] w-full max-w-[380px] text-center border border-white/10 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeArcadeZone()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm z-50">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <!-- Tab Selector Icons -->
+            <div class="flex justify-center gap-2 mb-4 mt-2">
+                <button onclick="switchGameTab('wheel')" id="btn-tab-wheel" class="bg-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">Lucky Wheel</button>
+                <button onclick="switchGameTab('rps')" id="btn-tab-rps" class="bg-slate-800 text-slate-400 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">Stone Paper Scissors</button>
+            </div>
+
+            <!-- GAME 1: SPIN THE WHEEL -->
+            <div id="tab-wheel" class="game-sub-tab">
+                <h3 class="text-amber-400 font-black italic text-base tracking-tighter uppercase mb-4"><i class="fas fa-circle-notch mr-1"></i> SNT Reward Wheel</h3>
+                <div class="relative w-64 h-64 mx-auto flex items-center justify-center">
+                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-red-500 z-50 drop-shadow"></div>
+                    <canvas id="wheelCanvas" width="240" height="240" class="rounded-full shadow-2xl transition-transform cubic-bezier(0.1, 0.8, 0.1, 1)"></canvas>
+                </div>
+                <div id="wheel-result" class="text-[11px] font-black text-emerald-400 uppercase tracking-widest mt-4 h-4"></div>
+                <button id="spin-btn" onclick="spinTheWheel()" class="w-full mt-4 bg-amber-500 text-slate-950 p-3 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Spin Wheel</button>
+            </div>
+
+            <!-- GAME 2: STONE PAPER SCISSORS -->
+            <div id="tab-rps" class="game-sub-tab hidden">
+                <h3 class="text-sky-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-hand-rock mr-1"></i> Beat the SNT AI</h3>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-4">Score - You: <span id="player-score" class="text-white">0</span> | AI: <span id="ai-score" class="text-white">0</span></p>
+                
+                <div class="grid grid-cols-3 gap-3 my-6">
+                    <button onclick="playRPS('stone')" class="bg-slate-800/80 border border-white/5 p-4 rounded-2xl active:scale-90 transition-all text-2xl"><i class="fas fa-hand-rock text-slate-300"></i><p class="text-[8px] font-black text-slate-400 mt-1 uppercase">Stone</p></button>
+                    <button onclick="playRPS('paper')" class="bg-slate-800/80 border border-white/5 p-4 rounded-2xl active:scale-90 transition-all text-2xl"><i class="fas fa-hand-paper text-sky-400"></i><p class="text-[8px] font-black text-slate-400 mt-1 uppercase">Paper</p></button>
+                    <button onclick="playRPS('scissors')" class="bg-slate-800/80 border border-white/5 p-4 rounded-2xl active:scale-90 transition-all text-2xl"><i class="fas fa-hand-scissors text-amber-400"></i><p class="text-[8px] font-black text-slate-400 mt-1 uppercase">Scissors</p></button>
+                </div>
+
+                <div class="bg-slate-950/60 border border-white/5 rounded-2xl p-4 flex justify-around items-center min-h-[80px]">
+                    <div class="text-center"><p class="text-[8px] font-black text-slate-500 uppercase tracking-wider">You Chose</p><span id="rps-player-pick" class="text-xl font-bold mt-1 block">-</span></div>
+                    <div class="text-amber-500 font-black italic text-sm">VS</div>
+                    <div class="text-center"><p class="text-[8px] font-black text-slate-500 uppercase tracking-wider">AI Chose</p><span id="rps-ai-pick" class="text-xl font-bold mt-1 block">-</span></div>
+                </div>
+                
+                <div id="rps-match-result" class="text-[11px] font-black uppercase tracking-widest mt-4 h-4"></div>
+                <button onclick="resetRPS()" class="w-full mt-4 bg-slate-800 text-slate-300 p-2 rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 border border-white/5">Reset Score</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Voice Assist Modal Guide -->
     <div id="voice-guide-modal" class="modal-overlay hidden">
         <div class="glass p-6 rounded-[35px] w-full max-w-[380px] border border-white/10 shadow-2xl animate-fade-in">
@@ -212,6 +353,10 @@
                     <span class="text-[9px] text-slate-400 font-bold">Dashboard</span>
                 </div>
                 <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                    <span class="text-[11px] font-bold text-white italic">"Desk" / "Academics"</span>
+                    <span class="text-[9px] text-slate-400 font-bold">Desk Tab</span>
+                </div>
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
                     <span class="text-[11px] font-bold text-white italic">"Profile"</span>
                     <span class="text-[9px] text-slate-400 font-bold">My Profile</span>
                 </div>
@@ -219,70 +364,20 @@
                     <span class="text-[11px] font-bold text-red-400 italic">"Logout"</span>
                     <span class="text-[9px] text-slate-400 font-bold">Exit</span>
                 </div>
-
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Payments & QRs</p>
-                <div class="flex justify-between items-center bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20">
-                    <span class="text-[11px] font-bold text-yellow-500 italic">"SNT QR" / "Registration"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Reg. (₹100)</span>
-                </div>
-                <div class="flex justify-between items-center bg-sky-500/10 p-3 rounded-xl border border-sky-500/20">
-                    <span class="text-[11px] font-bold text-sky-400 italic">"Fees QR" / "Six Hundred"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Monthly (₹600)</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"My QR" / "Pay"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Personal</span>
-                </div>
-
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">Services & Academics</p>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Attendance"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Check-in</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Exam" / "Quiz"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Start CBT</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"PDF" / "Notes"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Vault</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"ID Card"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Student ID</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Result"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">History</span>
-                </div>
-
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-1 mt-4">System</p>
-                <div class="flex justify-between items-center bg-sky-500/10 p-3 rounded-xl border border-sky-500/20">
-                    <span class="text-[11px] font-bold text-sky-400 italic">"List" / "Show Commands"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Open Helper</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Notification" / "Message"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Inbox</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Info"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">Details</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold text-white italic">"Close"</span>
-                    <span class="text-[9px] text-slate-400 font-bold italic">All Modals</span>
-                </div>
             </div>
             <button onclick="document.getElementById('voice-guide-modal').style.display='none'" class="w-full mt-6 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Got it!</button>
         </div>
     </div>
     
-    <!-- Navigation Tabs Base -->
+    <!-- Navigation Tabs Base (MODIFIED: Added 3rd Tab) -->
     <nav id="navbar" class="bottom-nav hidden">
         <div class="nav-item active" onclick="switchTab('home', this)">
             <i class="fas fa-th-large"></i>
             <span>Portal</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('academics', this)">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Desk</span>
         </div>
         <div class="nav-item" onclick="switchTab('profile', this)">
             <i class="fas fa-user-circle"></i>
@@ -307,15 +402,9 @@
                         <a href="https://www.youtube.com/@computer-skills9129" target="_blank" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-                <div class="info-row justify-between">
-                    <span class="info-label">Share Hub</span>
-                    <button onclick="shareApp()" class="w-10 h-10 bg-sky-500/20 rounded-full flex items-center justify-center text-sky-400 border border-sky-500/30 active:scale-90 transition-all">
-                        <i class="fas fa-share-nodes"></i>
-                    </button>
-                </div>
                 <div class="info-row border-none">
-                    <span class="info-label">Payments</span>
-                    <button onclick="openPaymentQR()" class="bg-sky-500/20 text-sky-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-sky-500/30">Open QR Code</button>
+                    <span class="info-label">Arcade Zone</span>
+                    <button onclick="openArcadeZone()" class="bg-amber-500/20 text-amber-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/30">Open Games</button>
                 </div>
             </div>
             <button onclick="closeInfo()" class="w-full mt-8 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Close Panel</button>
@@ -364,7 +453,6 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        // [FIXED] Live Signal Stream Dynamic Drawer Dispatcher Setup 
         onValue(ref(db, 'live_signal'), (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp) {
@@ -405,7 +493,6 @@
             }
         };
 
-        // Sync local storage dynamic colors
         const savedTheme = localStorage.getItem('snt-theme');
         if (savedTheme === 'light') {
             document.body.classList.add('light-mode');
@@ -425,7 +512,6 @@
                 const hr = new Date().getHours();
                 document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
                 
-                // Student Node Reference Parsing
                 onValue(ref(db, 'students'), (snapshot) => {
                     if (snapshot.exists()) {
                         const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
@@ -460,7 +546,6 @@
                     }
                 });
 
-                // Updates System Broadcaster
                 onValue(ref(db, 'notifications'), (snapshot) => {
                     const list = document.getElementById('notif-list');
                     const badge = document.getElementById('notif-badge');
@@ -488,15 +573,10 @@
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400' },
                 { name: 'Attendance', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html', icon: 'fa-calendar-check', color: 'text-green-400' },
-                { name: 'Certificate', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/basic.html', icon: 'fa-user-shield', color: 'text-red-400' },
-                { name: 'ID Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html', icon: 'fa-id-card', color: 'text-yellow-400' },
                 { name: 'PDF Center', url: 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html', icon: 'fa-file-pdf', color: 'text-red-500' },
                 { name: 'Receipt', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/receipt.html', icon: 'fa-file-invoice-dollar', color: 'text-orange-400' },
                 { name: 'Display', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/display.html', icon: 'fa-desktop', color: 'text-pink-400' },
                 { name: 'Calendar', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/calendar.html', icon: 'fa-calendar-alt', color: 'text-blue-400' },
-                { name: 'CBT Exam', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html', icon: 'fa-laptop-code', color: 'text-emerald-400' },
-                { name: 'Exam Form', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/examination.html', icon: 'fa-file-signature', color: 'text-orange-400' },
-                { name: 'Admit Card', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/admit_card.html', icon: 'fa-address-card', color: 'text-blue-400' },
                 { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400' },
                 { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400' },
                 { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400' },
@@ -514,12 +594,18 @@
 
         window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (err) { console.error(err); } };
         window.logout = () => signOut(auth).then(() => location.reload());
+        
         window.switchTab = (tab, el) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if(el) el.classList.add('active');
+            if(tab === 'academics') {
+                // Ensure wheel acts stable if modal pops out from desk layout
+                setTimeout(drawWheel, 100);
+            }
         };
+        
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
         window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
@@ -556,18 +642,100 @@
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
 
+        // --- ARCADE MULTI-GAME CONTROLLER CODES ---
+        let isSpinning = false;
+        let pScore = 0, aScore = 0;
+        const rewards = ["Free PDF Notes", "+5 Quiz Bonus", "Better Luck Next Time", "SNT Sticker Pack", "Try Again", "1 Day Lab Access"];
+        const rewardColors = ["#1e293b", "#0f172a", "#1e293b", "#0f172a", "#1e293b", "#0f172a"];
+
+        window.openArcadeZone = () => {
+            document.getElementById('game-modal').style.display = "flex";
+            setTimeout(drawWheel, 100);
+        };
+
+        window.closeArcadeZone = () => {
+            document.getElementById('game-modal').style.display = "none";
+        };
+
+        window.switchGameTab = (game) => {
+            document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('btn-tab-wheel').className = "bg-slate-800 text-slate-400 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
+            document.getElementById('btn-tab-rps').className = "bg-slate-800 text-slate-400 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
+            
+            if(game === 'wheel') {
+                document.getElementById('tab-wheel').classList.remove('hidden');
+                document.getElementById('btn-tab-wheel').className = "bg-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
+                drawWheel();
+            } else {
+                document.getElementById('tab-rps').classList.remove('hidden');
+                document.getElementById('btn-tab-rps').className = "bg-sky-500 text-slate-950 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider";
+            }
+        };
+
+        function drawWheel() {
+            const canvas = document.getElementById("wheelCanvas");
+            if(!canvas) return;
+            const ctx = canvas.getContext("2d");
+            const numSegments = rewards.length;
+            const anglePerSegment = (2 * Math.PI) / numSegments;
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            for (let i = 0; i < numSegments; i++) {
+                ctx.beginPath(); ctx.moveTo(120, 120);
+                ctx.arc(120, 120, 115, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.fillStyle = rewardColors[i]; ctx.fill();
+                ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.stroke();
+                ctx.save(); ctx.translate(120, 120); ctx.rotate(i * anglePerSegment + anglePerSegment / 2);
+                ctx.fillStyle = i % 2 === 0 ? "#fbbf24" : "#ffffff"; ctx.font = "bold 8px sans-serif";
+                ctx.textAlign = "right"; ctx.fillText(rewards[i], 100, 3); ctx.restore();
+            }
+        }
+
+        window.spinTheWheel = () => {
+            if (isSpinning) return; isSpinning = true;
+            document.getElementById('wheel-result').innerText = "Spinning...";
+            const canvas = document.getElementById("wheelCanvas");
+            const randomDegrees = Math.floor(Math.random() * 360) + 1800;
+            canvas.style.transform = `rotate(${randomDegrees}deg)`;
+            setTimeout(() => {
+                isSpinning = false;
+                const actualDegrees = randomDegrees % 360;
+                const normalizedAngle = (360 - actualDegrees + 90) % 360;
+                const segmentIndex = Math.floor(normalizedAngle / (360 / rewards.length)) % rewards.length;
+                document.getElementById('wheel-result').innerText = `🎉 WON: ${rewards[segmentIndex]}`;
+                canvas.style.transition = 'none'; canvas.style.transform = `rotate(${actualDegrees}deg)`;
+                setTimeout(() => { canvas.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)'; }, 50);
+            }, 4000);
+        };
+
+        const rpsIcons = { stone: '👊 Stone', paper: '✋ Paper', scissors: '✌️ Scissors' };
+        window.playRPS = (playerPick) => {
+            const options = ['stone', 'paper', 'scissors'];
+            const aiPick = options[Math.floor(Math.random() * 3)];
+            document.getElementById('rps-player-pick').innerText = rpsIcons[playerPick];
+            document.getElementById('rps-ai-pick').innerText = rpsIcons[aiPick];
+            let resMsg = ""; let resColor = "";
+            if (playerPick === aiPick) { resMsg = "🤝 MATCH DRAW!"; resColor = "text-slate-400"; }
+            else if ((playerPick === 'stone' && aiPick === 'scissors') || (playerPick === 'paper' && aiPick === 'stone') || (playerPick === 'scissors' && aiPick === 'paper')) {
+                resMsg = "🏆 YOU WIN!"; resColor = "text-green-400"; pScore++;
+            } else { resMsg = "💥 AI WINS!"; resColor = "text-red-400"; aScore++; }
+            document.getElementById('player-score').innerText = pScore; document.getElementById('ai-score').innerText = aScore;
+            const displayRes = document.getElementById('rps-match-result'); displayRes.innerText = resMsg; displayRes.className = `text-[11px] font-black uppercase tracking-widest mt-4 h-4 ${resColor}`;
+        };
+
+        window.resetRPS = () => {
+            pScore = 0; aScore = 0;
+            document.getElementById('player-score').innerText = pScore; document.getElementById('ai-score').innerText = aScore;
+            document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-";
+            document.getElementById('rps-match-result').innerText = "";
+        };
+
         // Voice Command Parsing Infrastructure Engine
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'en-US'; 
-        recognition.continuous = true;
-        recognition.interimResults = false;
+        recognition.lang = 'en-US'; recognition.continuous = true; recognition.interimResults = false;
 
         window.startAssistant = () => { 
             window.isAssistantEnabled = true; 
-            try { 
-                recognition.start(); 
-                updateUI(true);
-            } catch (e) { console.log("Assistant thread alive running..."); } 
+            try { recognition.start(); updateUI(true); } catch (e) { console.log("Assistant thread alive running..."); } 
         };
 
         function updateUI(isActive) {
@@ -576,16 +744,14 @@
             if(isActive) {
                 if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; }
                 if(wave) wave.classList.remove('hidden');
-            } else {
-                if(txt) txt.innerText = "Paused...";
-            }
+            } else { if(txt) txt.innerText = "Paused..."; }
         }
 
         recognition.onresult = (event) => {
             const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            
-            if(command.includes("profile")) { switchTab('profile', document.querySelectorAll('.nav-item')[1]); }
+            if(command.includes("profile")) { switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
             else if(command.includes("home") || command.includes("portal")) { switchTab('home', document.querySelectorAll('.nav-item')[0]); }
+            else if(command.includes("desk") || command.includes("academics")) { switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
             else if(command.includes("logout")) { window.logout(); }
             else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
             else if(command.includes("dashboard")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; }
@@ -599,22 +765,12 @@
             else if(command.includes("snt qr") || command.includes("registration")) { window.openPaymentQR('snt'); }
             else if(command.includes("fees qr") || command.includes("six hundred")) { window.openPaymentQR('fees'); }
             else if(command.includes("my qr") || command.includes("pay")) { window.openPaymentQR('kaushal'); }
-            else if(command.includes("stop assistant") || command.includes("sleep")) { window.isAssistantEnabled = false; recognition.stop(); updateUI(false);}
-            else if(command.includes("close")) { window.closeInfo(); window.closeNotifications(); document.getElementById('payment-modal').style.display = "none"; document.getElementById('voice-guide-modal').style.display = 'none';}
+            else if(command.includes("stop assistant") || command.includes("sleep")) { window.isAssistantEnabled = false; recognition.stop(); updateUI(false); }
+            else if(command.includes("close")) { window.closeInfo(); window.closeNotifications(); window.closeArcadeZone(); document.getElementById('payment-modal').style.display = "none"; document.getElementById('voice-guide-modal').style.display = 'none'; }
         };
 
-        recognition.onend = () => {
-            if (window.isAssistantEnabled) {
-                setTimeout(() => { try { recognition.start(); updateUI(true); } catch (e) {} }, 1000); 
-            }
-        };
-
-        recognition.onerror = (event) => {
-            if(event.error === 'not-allowed') {
-                window.isAssistantEnabled = false;
-                alert("Please grant Microphone permission for voice system features.");
-            }
-        };
+        recognition.onend = () => { if (window.isAssistantEnabled) { setTimeout(() => { try { recognition.start(); updateUI(true); } catch (e) {} }, 1000); } };
+        recognition.onerror = (event) => { if(event.error === 'not-allowed') { window.isAssistantEnabled = false; alert("Please grant Microphone permission."); } };
 
         window.shareApp = async () => {
             const d = {title: 'SNT Official Portal', text: 'SNT Institute student portal access endpoint.', url: 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/'};
@@ -626,9 +782,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log("SW Registered Context Binded!");
-                }).catch(e => console.log("SW Registry Fault:", e));
+                navigator.serviceWorker.register('./sw.js').then(reg => { console.log("SW Registered Context Binded!"); }).catch(e => console.log("SW Registry Fault:", e));
             });
         }
         window.enableNotifications = () => {
