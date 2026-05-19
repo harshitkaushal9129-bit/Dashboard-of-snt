@@ -166,7 +166,7 @@
             <div id="app-grid" class="grid pb-24"></div>
         </div>
 
-        <!-- NEW TAB: ACADEMICS & DESK CONTENTS -->
+        <!-- ACADEMICS & DESK CONTENTS -->
         <div id="academics-tab" class="tab-content hidden pb-24 animate-fade-in">
             <span class="section-tag">Student Desk & Examination</span>
             <div class="flex flex-col gap-3">
@@ -369,7 +369,7 @@
         </div>
     </div>
     
-    <!-- Navigation Tabs Base (MODIFIED: Added 3rd Tab) -->
+    <!-- Navigation Tabs Base -->
     <nav id="navbar" class="bottom-nav hidden">
         <div class="nav-item active" onclick="switchTab('home', this)">
             <i class="fas fa-th-large"></i>
@@ -601,7 +601,6 @@
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if(el) el.classList.add('active');
             if(tab === 'academics') {
-                // Ensure wheel acts stable if modal pops out from desk layout
                 setTimeout(drawWheel, 100);
             }
         };
