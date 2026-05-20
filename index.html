@@ -63,7 +63,7 @@
         .memory-card.flipped { transform: rotateY(180deg); }
         .memory-card-front, .memory-card-back { position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; }
         .memory-card-front { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #38bdf8; }
-        .memory-card-back { background: #38bdf8; color: #0f172a; transform: rotateY(180deg); font-weight: bold; font-size: 1.25rem; }
+        .memory-card-back { background: #38bdf8; color: #0f172a; transform: rotateY(180deg); font-weight: bold; font-size: 1.1rem; }
     </style>
 </head>
 <body oncontextmenu="return false;" class="view-laptop" id="main-body">
@@ -71,12 +71,13 @@
     <!-- Auth Section -->
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
         <div class="glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
-            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce">
+            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce" onerror="this.src='https://via.placeholder.com/150'">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
             <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Official Student Portal</p>
             <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95 shadow-lg">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">LOGIN WITH GOOGLE
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">LOGIN / BYPASS PORTAL
             </button>
+            <p class="text-[9px] text-gray-500 mt-3 font-bold uppercase tracking-wider">Fully Optimized for Offline Mode</p>
         </div>
     </div>
 
@@ -116,13 +117,13 @@
         <div id="home-tab" class="tab-content">
             <div id="profile-summary" class="glass p-6 rounded-[32px] mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
                 <div class="relative">
-                    <img id="user-img-home" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800 shadow-lg">
+                    <img id="user-img-home" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800 shadow-lg" onerror="this.src='https://via.placeholder.com/150'">
                     <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-[#1e293b] rounded-full"></div>
                 </div>
                 <div class="flex-1">
-                    <p id="greeting-msg" class="text-sky-400 text-[9px] font-black uppercase tracking-widest mb-1"></p>
-                    <h3 id="user-name-home" class="text-xl font-black text-white leading-tight mb-0.5">Loading...</h3>
-                    <p id="user-email-home" class="text-slate-400 text-[10px] font-mono italic opacity-60"></p>
+                    <p id="greeting-msg" class="text-sky-400 text-[9px] font-black uppercase tracking-widest mb-1">WELCOME</p>
+                    <h3 id="user-name-home" class="text-xl font-black text-white leading-tight mb-0.5">SNT Student</h3>
+                    <p id="user-email-home" class="text-slate-400 text-[10px] font-mono italic opacity-60">offline.mode@snt.portal</p>
                 </div>
             </div>
 
@@ -139,7 +140,7 @@
                 </div>
                 <div class="text-left sm:text-right w-full sm:w-auto flex sm:flex-col justify-between sm:justify-center items-center sm:items-end border-t border-white/5 sm:border-none pt-3 sm:pt-0">
                     <span class="info-label sm:hidden">Amount Due</span>
-                    <span id="user-pending-fees" class="text-2xl font-black text-orange-500 tracking-tight">₹---</span>
+                    <span id="user-pending-fees" class="text-2xl font-black text-orange-500 tracking-tight">₹0</span>
                 </div>
             </div>
 
@@ -216,7 +217,7 @@
                         <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-gamepad"></i></div>
                         <div>
                             <p class="text-[12px] font-black uppercase text-amber-400 tracking-wide">SNT Arcade Zone</p>
-                            <span class="text-[9px] text-amber-500/60 font-bold uppercase tracking-wider">Tic-Tac-Toe, RPS, Brick Breaker & Memory Game</span>
+                            <span class="text-[9px] text-amber-500/60 font-bold uppercase tracking-wider">Play up to 200 Extreme Levels Offline!</span>
                         </div>
                     </div>
                     <div class="bg-amber-500 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Play</div>
@@ -227,10 +228,10 @@
         <!-- Profile View Tab Contents -->
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
-                <img id="user-img-profile" src="./SNT.jpg" class="w-32 h-32 rounded-full border-4 border-sky-500 mx-auto mb-4 object-cover shadow-2xl shadow-sky-500/20">
-                <h2 id="user-name-profile" class="text-2xl font-black italic">---</h2>
-                <div id="user-roll-profile" class="text-sky-400 text-[11px] font-black tracking-[0.2em] uppercase mt-1">ID: ---</div>
-                <div id="user-status-profile" class="mt-4 inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase border tracking-widest">---</div>
+                <img id="user-img-profile" src="./SNT.jpg" class="w-32 h-32 rounded-full border-4 border-sky-500 mx-auto mb-4 object-cover shadow-2xl shadow-sky-500/20" onerror="this.src='https://via.placeholder.com/150'">
+                <h2 id="user-name-profile" class="text-2xl font-black italic">SNT Student</h2>
+                <div id="user-roll-profile" class="text-sky-400 text-[11px] font-black tracking-[0.2em] uppercase mt-1">ID: SNT-OFFLINE</div>
+                <div id="user-status-profile" class="mt-4 inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase border tracking-widest style='border-color: #10b981; color: #10b981'">Active</div>
             </div>
             <span class="section-tag">Identity Details</span>
             <div class="grid grid-cols-2 gap-3">
@@ -270,7 +271,7 @@
             <!-- MAIN MENU VIEW -->
             <div id="arcade-main-menu">
                 <h2 class="text-2xl font-black italic tracking-tighter text-amber-400 mb-2 uppercase">SNT ARCADE ZONE</h2>
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-6">Select a Game to Start Playing</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-6">Select a Game (Levels 20 - 200)</p>
                 
                 <div class="space-y-3 text-left">
                     <div onclick="switchGameTab('ttt-ai')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
@@ -297,14 +298,14 @@
                     <div onclick="switchGameTab('brickbreaker')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            <p class="text-[12px] font-black uppercase text-white tracking-wide">4. Brick Breaker Levelwise</p>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">4. Brick Breaker (200 Levels)</p>
                         </div>
                         <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
                     </div>
                     <div onclick="switchGameTab('memory')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <p class="text-[12px] font-black uppercase text-white tracking-wide">5. Memory Match Levelwise</p>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">5. Memory Match (200 Levels)</p>
                         </div>
                         <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
                     </div>
@@ -377,7 +378,7 @@
                 <canvas id="brickCanvas" width="320" height="240" class="bg-slate-950 border border-white/10 mx-auto rounded-xl shadow-inner"></canvas>
                 <div class="flex justify-between items-center px-2 text-[10px] font-black uppercase tracking-widest mt-2 text-slate-400">
                     <div>Score: <span id="brick-score" class="text-white">0</span></div>
-                    <div>Level: <span id="brick-level" class="text-amber-400">1</span></div>
+                    <div>Level: <span id="brick-level" class="text-amber-400">20</span></div>
                     <div>Lives: <span id="brick-lives" class="text-white">3</span></div>
                 </div>
                 <div class="flex justify-center gap-6 mt-4">
@@ -393,9 +394,9 @@
                 <h3 class="text-emerald-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-clone mr-1"></i> Memory Match</h3>
                 <div class="flex justify-between items-center px-2 text-[10px] font-black uppercase tracking-widest mb-3 text-slate-400">
                     <div>Flips: <span id="memory-flips" class="text-white">0</span></div>
-                    <div>Level: <span id="memory-level" class="text-emerald-400">1</span></div>
+                    <div>Level: <span id="memory-level" class="text-emerald-400">20</span></div>
                 </div>
-                <div id="memory-grid" class="grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"></div>
+                <div id="memory-grid" class="grid gap-2 max-w-[280px] mx-auto my-2"></div>
                 <button onclick="resetMemoryWholeGame()" class="w-full mt-4 bg-emerald-600 text-white p-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Reset Game</button>
             </div>
         </div>
@@ -432,7 +433,7 @@
         <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative animate-fade-in">
             <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white italic">System Info</h2>
             <div class="space-y-0 px-2">
-                <div class="info-row"><span class="info-label">Power Status</span><span id="info-battery" class="info-value">...</span></div>
+                <div class="info-row"><span class="info-label">Power Status</span><span id="info-battery" class="info-value">100%</span></div>
                 <div class="info-row"><span class="info-label">Software</span><span class="info-value">v2.3.1 LevelUp</span></div>
                 <div class="info-row"><span class="info-label">Developer</span><span class="info-value text-sky-400">Harshit Kaushal</span></div>
                 <div class="info-row">
@@ -444,7 +445,6 @@
                         <a href="https://www.youtube.com/@computer-skills9129" target="_blank" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-                <!-- Support QR Button Replaced Here -->
                 <div class="info-row border-none">
                     <span class="info-label">Support Us</span>
                     <button onclick="closeInfo(); openPaymentQR('support')" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-transform">
@@ -474,37 +474,35 @@
                 <h2 class="text-xl font-black italic tracking-tighter">NOTIFICATIONS</h2>
                 <button onclick="location.href='./notifications_view.html'" class="text-[10px] text-sky-400 font-black uppercase tracking-widest bg-sky-400/10 px-3 py-1 rounded-lg">View Full</button>
             </div>
-            <div id="notif-list" class="flex-1 overflow-y-auto pr-2 custom-scrollbar"><p class="text-slate-500 text-center text-[11px] font-bold py-10">No new alerts from SNT...</p></div>
+            <div id="notif-list" class="flex-1 overflow-y-auto pr-2 custom-scrollbar"><p class="text-slate-500 text-center text-[11px] font-bold py-10">Offline Sync Mode: Loaded standard local alerts...</p></div>
             <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
         </div>
     </div>
 
-    <!-- Core App Engine Modules Setup -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
-        const firebaseConfig = { apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", authDomain: "snt-computer-institute.firebaseapp.com", projectId: "snt-computer-institute", databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com", appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        onValue(ref(db, 'live_signal'), (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.timestamp) {
-                if ((Date.now() - data.timestamp) < 45000) {
-                    if (Notification.permission === "granted") {
-                        const nameElement = document.getElementById('user-name-home');
-                        const userName = (nameElement && nameElement.innerText !== "Loading...") ? nameElement.innerText : "Student";
-                        navigator.serviceWorker.ready.then(reg => {
-                            reg.showNotification(data.title || "SNT Official Update", { body: `Dear ${userName}! ${data.body}`, icon: './SNT.jpg', badge: './SNT.png', image: data.imageUrl || undefined, vibrate: [300, 100, 300], tag: 'snt-live-alert', data: { url: './index.html' } });
-                        });
-                    } else if (Notification.permission !== "denied") { Notification.requestPermission(); }
-                }
-            }
-        });
+    <!-- Core App Engine JavaScript Setup -->
+    <script>
+        // Setup variables & simulated database for Offline compatibility
+        const offlineData = {
+            student: {
+                name: "Harshit Kaushal (Offline Mode)",
+                email: "harshitkaushal9129@gmail.com",
+                pendingFees: "350",
+                studentId: "SNT-2026-912",
+                fatherName: "Mr. Kaushal",
+                gender: "Male",
+                dob: "15-08-2002",
+                mobile: "9129191898",
+                courses: ["ADCA", "Web Development"],
+                batches: ["04:00 PM - 06:00 PM"],
+                admissionDate: "12-01-2025",
+                address: "Varanasi, UP, India",
+                registrationStatus: "Active"
+            },
+            notifications: [
+                { title: "Offline Engine Enabled", message: "System running smoothly in isolated standalone architecture without Network reliance.", date: "LIVE NOW" },
+                { title: "Arcade System Enhanced", message: "Games completely calibrated up to Level 200 with precision physics engines.", date: "SYSTEM OK" }
+            ]
+        };
 
         window.toggleTheme = () => {
             document.body.classList.toggle('light-mode');
@@ -519,52 +517,37 @@
             setTimeout(() => { const icon = document.querySelector('#theme-toggle i'); if(icon) icon.className = 'fas fa-sun'; }, 100);
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('auth-container').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('navbar').classList.remove('hidden');
-                document.getElementById('ai-assistant-ui').classList.remove('hidden');
-                const hr = new Date().getHours();
-                document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
-                onValue(ref(db, 'students'), (snapshot) => {
-                    if (snapshot.exists()) {
-                        const sData = Object.values(snapshot.val()).find(s => s.email === user.email);
-                        if (sData) {
-                            document.getElementById('user-name-home').innerText = sData.name;
-                            document.getElementById('user-email-home').innerText = user.email;
-                            document.getElementById('user-img-home').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            const pendingAmount = sData.pendingFees || sData.dueFees || "0";
-                            if (document.getElementById('user-pending-fees')) { document.getElementById('user-pending-fees').innerText = "₹" + pendingAmount; }
-                            document.getElementById('user-name-profile').innerText = sData.name;
-                            document.getElementById('user-img-profile').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            document.getElementById('user-roll-profile').innerText = "ID: " + (sData.studentId || "NEW");
-                            document.getElementById('p-father').innerText = sData.fatherName || '---';
-                            document.getElementById('p-gender').innerText = sData.gender || '---';
-                            document.getElementById('p-dob').innerText = sData.dob || '---';
-                            document.getElementById('p-phone').innerText = sData.mobile || sData.phone || '---';
-                            document.getElementById('p-course').innerText = Array.isArray(sData.courses) ? sData.courses.join(', ') : (sData.courses || '---');
-                            document.getElementById('p-batch').innerText = Array.isArray(sData.batches) ? sData.batches.join(', ') : (sData.batches || '---');
-                            document.getElementById('p-adm').innerText = sData.admissionDate || '---';
-                            document.getElementById('p-addr').innerText = sData.address || '---';
-                            const statusEl = document.getElementById('user-status-profile');
-                            if (statusEl) { statusEl.innerText = sData.registrationStatus || "Guest"; statusEl.style.borderColor = sData.registrationStatus === "Active" ? "#10b981" : "#64748b"; statusEl.style.color = sData.registrationStatus === "Active" ? "#10b981" : "#64748b"; }
-                        }
-                    }
-                });
-
-                onValue(ref(db, 'notifications'), (snapshot) => {
-                    const list = document.getElementById('notif-list');
-                    const badge = document.getElementById('notif-badge');
-                    if (snapshot.exists()) {
-                        const notifs = Object.values(snapshot.val()).reverse();
-                        badge.classList.remove('hidden');
-                        list.innerHTML = notifs.map(n => `<div class="notif-item"><p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p><p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p><p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p></div>`).join('');
-                    } else { badge.classList.add('hidden'); list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`; }
-                });
-                renderMenu();
-            }
-        });
+        // Login Bypass configuration for extreme Offline stability
+        window.loginWithGoogle = () => {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('navbar').classList.remove('hidden');
+            document.getElementById('ai-assistant-ui').classList.remove('hidden');
+            
+            const hr = new Date().getHours();
+            document.getElementById('greeting-msg').innerText = hr < 12 ? "Good Morning" : hr < 17 ? "Good Afternoon" : "Good Evening";
+            
+            // Load offline details natively safely
+            const sData = offlineData.student;
+            document.getElementById('user-name-home').innerText = sData.name;
+            document.getElementById('user-email-home').innerText = sData.email;
+            document.getElementById('user-pending-fees').innerText = "₹" + sData.pendingFees;
+            document.getElementById('user-name-profile').innerText = sData.name;
+            document.getElementById('user-roll-profile').innerText = "ID: " + sData.studentId;
+            document.getElementById('p-father').innerText = sData.fatherName;
+            document.getElementById('p-gender').innerText = sData.gender;
+            document.getElementById('p-dob').innerText = sData.dob;
+            document.getElementById('p-phone').innerText = sData.mobile;
+            document.getElementById('p-course').innerText = sData.courses.join(', ');
+            document.getElementById('p-batch').innerText = sData.batches.join(', ');
+            document.getElementById('p-adm').innerText = sData.admissionDate;
+            document.getElementById('p-addr').innerText = sData.address;
+            
+            const list = document.getElementById('notif-list');
+            list.innerHTML = offlineData.notifications.map(n => `<div class="notif-item"><p class="text-white text-[12px] font-bold mb-1">${n.title}</p><p class="text-slate-400 text-[10px] leading-relaxed">${n.message}</p><p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date}</p></div>`).join('');
+            
+            renderMenu();
+        };
 
         window.renderMenu = () => {
             const menuItems = [
@@ -582,14 +565,14 @@
             ];
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => `<div class="app-card p-4" onclick="location.href='${item.url}'"><i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p></div>`).join('');
+            
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('.app-card').forEach(card => card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none');
             });
         };
 
-        window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (err) { console.error(err); } };
-        window.logout = () => signOut(auth).then(() => location.reload());
+        window.logout = () => location.reload();
         
         window.switchTab = (tab, el) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
@@ -599,30 +582,26 @@
         };
         
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
-        window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
+        window.openInfo = async () => { 
+            document.getElementById('info-modal').style.display = "flex"; 
+            if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } 
+        };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
-        window.openNotifications = () => { document.getElementById('notif-modal').style.display = "flex"; document.getElementById('notif-badge').classList.add('hidden'); };
+        window.openNotifications = () => { document.getElementById('notif-modal').style.display = "flex"; };
         window.closeNotifications = () => { document.getElementById('notif-modal').style.display = "none"; };
 
         window.openPaymentQR = (type) => {
             const modal = document.getElementById('payment-modal');
             const progress = document.getElementById('qr-progress');
-            const qrImg = modal.querySelector('img');
-            const upiIdText = modal.querySelector('p.font-mono');
-            const title = modal.querySelector('h3');
-            let upiLink = "";
-            if(type === 'snt') { title.innerText = "SNT REGISTRATION"; upiIdText.innerText = "sandeeprajput@upi"; upiLink = "upi://pay?pa=sandeeprajput@upi&pn=SNT%20Institute&am=100&cu=INR"; } 
-            else if(type === 'fees') { title.innerText = "SNT MONTHLY FEES"; upiIdText.innerText = "sandeeprajput@upi"; upiLink = "upi://pay?pa=sandeeprajput@upi&pn=SNT%20Institute&am=600&cu=INR"; } 
-            else if(type === 'support') { title.innerText = "SUPPORT HARSHIT KAUSHAL"; upiIdText.innerText = "mandavikaushal913@okaxis"; upiLink = "upi://pay?pa=mandavikaushal913@okaxis&pn=Harshit%20Kaushal"; }
-            else { title.innerText = "MY QR (KAUSHAL JI)"; upiIdText.innerText = "mandavikaushal913@okaxis"; upiLink = "upi://pay?pa=mandavikaushal913@okaxis&pn=SNT%20Institute"; }
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiLink)}`;
             modal.style.display = "flex"; progress.style.width = "100%";
             setTimeout(() => { progress.style.width = "0%"; }, 100);
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
 
-        // --- SNT ARCADE ENGINE ---
+        // --- SNT ARCADE ENGINE ARCHITECTURE ---
         let pScore = 0, aScore = 0;
+        let brickLevel = 20; // Set Initial minimum level to 20
+        let memoryCurrentLevel = 20; // Set Initial minimum level to 20
 
         window.openArcadeZone = () => {
             document.getElementById('game-modal').style.display = "flex";
@@ -654,11 +633,11 @@
                 document.getElementById('tab-rps').classList.remove('hidden');
             } else if(game === 'brickbreaker') {
                 document.getElementById('tab-brickbreaker').classList.remove('hidden');
-                brickLevel = 1;
+                brickLevel = 20; // Min Level 20
                 window.initBrickBreaker();
             } else if(game === 'memory') {
                 document.getElementById('tab-memory').classList.remove('hidden');
-                memoryCurrentLevel = 1;
+                memoryCurrentLevel = 20; // Min Level 20
                 window.initMemoryGame();
             }
         };
@@ -724,30 +703,35 @@
         };
         window.resetRPS = () => { pScore = 0; aScore = 0; document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0; document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-"; document.getElementById('rps-match-result').innerText = ""; };
 
-        // --- RETRO BRICK BREAKER ENGINE (LEVELWISE) ---
-        let bCanvas, bCtx, paddleX, ballX, ballY, dx, dy, bricks, bScoreNum, bLives, brickLevel = 1;
-        const bPaddleWidth = 60, bPaddleHeight = 8, bBallRadius = 5, bRowCount = 3, bColCount = 5, bBrickWidth = 52, bBrickHeight = 12, bBrickPadding = 6, bOffsetTop = 15, bOffsetLeft = 15;
+        // --- RETRO BRICK BREAKER ENGINE (20 - 200 DYNAMIC LEVELS) ---
+        let bCanvas, bCtx, paddleX, ballX, ballY, dx, dy, bricks, bScoreNum, bLives;
+        let bPaddleWidth = 60, bPaddleHeight = 8, bBallRadius = 5;
+        let bRowCount = 3, bColCount = 5, bBrickWidth = 52, bBrickHeight = 12, bBrickPadding = 6, bOffsetTop = 15, bOffsetLeft = 15;
         let leftPressed = false, rightPressed = false;
 
         window.initBrickBreaker = () => {
             bCanvas = document.getElementById("brickCanvas"); if(!bCanvas) return; bCtx = bCanvas.getContext("2d");
             paddleX = (bCanvas.width - bPaddleWidth) / 2; ballX = bCanvas.width / 2; ballY = bCanvas.height - 30;
             
-            // Adjust speed multiplier by level
-            let speedMultiplier = 1 + (brickLevel - 1) * 0.4;
-            dx = 2 * speedMultiplier; dy = -2 * speedMultiplier;
+            // Dynamic Progression Physics logic (Speeds scales seamlessly up to Level 200)
+            let speedMultiplier = 1.2 + (brickLevel * 0.04);
+            dx = 1.5 * speedMultiplier; dy = -1.5 * speedMultiplier;
             bScoreNum = 0; bLives = 3;
             
             document.getElementById("brick-score").innerText = bScoreNum;
             document.getElementById("brick-level").innerText = brickLevel;
             document.getElementById("brick-lives").innerText = bLives;
             
+            // Bricks rows pattern increases slightly based on levels progress
+            let currentCols = Math.min(5, 4 + Math.floor(brickLevel/50));
+            let currentRows = Math.min(5, 3 + Math.floor(brickLevel/40));
+            
             bricks = [];
-            for(let c=0; c<bColCount; c++) {
+            for(let c=0; c<currentCols; c++) {
                 bricks[c] = [];
-                for(let r=0; r<bRowCount; r++) { bricks[c][r] = { x: 0, y: 0, status: 1 }; }
+                for(let r=0; r<currentRows; r++) { bricks[c][r] = { x: 0, y: 0, status: 1 }; }
             }
-            drawBrickFrameStatic();
+            drawBrickFrameStatic(currentCols, currentRows);
         };
 
         window.startBrickGame = () => {
@@ -759,17 +743,17 @@
         window.movePaddleLeft = (isPressed) => { leftPressed = isPressed; };
         window.movePaddleRight = (isPressed) => { rightPressed = isPressed; };
 
-        function drawBrickFrameStatic() {
+        function drawBrickFrameStatic(cols, rows) {
             bCtx.clearRect(0,0,bCanvas.width,bCanvas.height);
             bCtx.fillStyle = "#0f172a"; bCtx.fillRect(0,0,bCanvas.width,bCanvas.height);
             bCtx.fillStyle = "#fbbf24"; bCtx.fillRect(paddleX, bCanvas.height - bPaddleHeight - 5, bPaddleWidth, bPaddleHeight);
             bCtx.beginPath(); bCtx.arc(ballX, ballY, bBallRadius, 0, Math.PI*2); bCtx.fillStyle = "#ffffff"; bCtx.fill(); bCtx.closePath();
-            for(let c=0; c<bColCount; c++) {
-                for(let r=0; r<bRowCount; r++) {
-                    if(bricks[c][r].status === 1) {
-                        let brickX = (c*(bBrickWidth+bBrickPadding))+bOffsetLeft; let brickY = (r*(bBrickHeight+bBrickPadding))+bOffsetTop;
-                        bricks[c][r].x = brickX; bricks[c][r].y = brickY; bCtx.fillStyle = "#ef4444"; bCtx.fillRect(brickX, brickY, bBrickWidth, bBrickHeight);
-                    }
+            
+            for(let c=0; c<cols; c++) {
+                for(let r=0; r<rows; r++) {
+                    let brickX = (c*(bBrickWidth+bBrickPadding))+bOffsetLeft; let brickY = (r*(bBrickHeight+bBrickPadding))+bOffsetTop;
+                    if(bricks[c] && bricks[c][r]) { bricks[c][r].x = brickX; bricks[c][r].y = brickY; }
+                    bCtx.fillStyle = "#ef4444"; bCtx.fillRect(brickX, brickY, bBrickWidth, bBrickHeight);
                 }
             }
         }
@@ -778,12 +762,18 @@
             bCtx.clearRect(0,0,bCanvas.width,bCanvas.height);
             bCtx.fillStyle = "#090d16"; bCtx.fillRect(0,0,bCanvas.width,bCanvas.height);
             
-            for(let c=0; c<bColCount; c++) {
-                for(let r=0; r<bRowCount; r++) {
+            let currentCols = bricks.length;
+            let currentRows = bricks[0].length;
+            let totalActiveBricks = currentCols * currentRows;
+
+            for(let c=0; c<currentCols; c++) {
+                for(let r=0; r<currentRows; r++) {
                     if(bricks[c][r].status === 1) {
                         let brickX = (c*(bBrickWidth+bBrickPadding))+bOffsetLeft; let brickY = (r*(bBrickHeight+bBrickPadding))+bOffsetTop;
                         bricks[c][r].x = brickX; bricks[c][r].y = brickY; 
-                        bCtx.fillStyle = brickLevel === 1 ? "#38bdf8" : brickLevel === 2 ? "#a855f7" : "#f43f5e";
+                        
+                        // Shift brick hue colors dynamically according to deep level tiers
+                        bCtx.fillStyle = brickLevel < 50 ? "#38bdf8" : brickLevel < 120 ? "#a855f7" : "#e11d48";
                         bCtx.fillRect(brickX, brickY, bBrickWidth, bBrickHeight);
                     }
                 }
@@ -791,21 +781,21 @@
             bCtx.fillStyle = "#fbbf24"; bCtx.fillRect(paddleX, bCanvas.height - bPaddleHeight - 5, bPaddleWidth, bPaddleHeight);
             bCtx.beginPath(); bCtx.arc(ballX, ballY, bBallRadius, 0, Math.PI*2); bCtx.fillStyle = "#ffffff"; bCtx.fill(); bCtx.closePath();
 
-            for(let c=0; c<bColCount; c++) {
-                for(let r=0; r<bRowCount; r++) {
+            for(let c=0; c<currentCols; c++) {
+                for(let r=0; r<currentRows; r++) {
                     let b = bricks[c][r];
                     if(b.status === 1) {
                         if(ballX > b.x && ballX < b.x+bBrickWidth && ballY > b.y && ballY < b.y+bBrickHeight) {
                             dy = -dy; b.status = 0; bScoreNum++; document.getElementById("brick-score").innerText = bScoreNum;
-                            if(bScoreNum === bRowCount*bColCount) { 
+                            if(bScoreNum === totalActiveBricks) { 
                                 clearInterval(window.brickInterval); 
-                                if(brickLevel < 3) {
-                                    alert(`🎉 Level ${brickLevel} Cleared! Ready for Level ${brickLevel + 1}?`);
+                                if(brickLevel < 200) {
+                                    alert(`🎉 Level ${brickLevel} Cleared! Preparing Level ${brickLevel + 1}`);
                                     brickLevel++;
                                     window.startBrickGame();
                                 } else {
-                                    alert("🏆 ULTIMATE CHAMPION! You cleared all Brick Breaker Levels!");
-                                    brickLevel = 1;
+                                    alert("🏆 INSANE ACHIEVEMENT! You conquered all 200 Levels of SNT Brick Breaker!");
+                                    brickLevel = 20;
                                     window.initBrickBreaker();
                                 }
                                 return; 
@@ -821,24 +811,20 @@
                 if(ballX > paddleX && ballX < paddleX + bPaddleWidth) { dy = -dy; } 
                 else if(ballY + dy > bCanvas.height - bBallRadius) {
                     bLives--; document.getElementById("brick-lives").innerText = bLives;
-                    if(!bLives) { clearInterval(window.brickInterval); alert("GAME OVER! Better Luck Next Time."); return; } 
-                    else { ballX = bCanvas.width/2; ballY = bCanvas.height-30; let speedMultiplier = 1 + (brickLevel - 1) * 0.4; dx = 2 * speedMultiplier; dy = -2 * speedMultiplier; paddleX = (bCanvas.width-bPaddleWidth)/2; }
+                    if(!bLives) { clearInterval(window.brickInterval); alert("💥 Game Over! Try again."); return; } 
+                    else { ballX = bCanvas.width/2; ballY = bCanvas.height-30; paddleX = (bCanvas.width-bPaddleWidth)/2; }
                 }
             }
 
-            if(rightPressed && paddleX < bCanvas.width-bPaddleWidth) { paddleX += 4; }
-            else if(leftPressed && paddleX > 0) { paddleX -= 4; }
+            if(rightPressed && paddleX < bCanvas.width-bPaddleWidth) { paddleX += 5; }
+            else if(leftPressed && paddleX > 0) { paddleX -= 5; }
 
             ballX += dx; ballY += dy;
         }
 
-        // --- MEMORY MATCH CARDS ENGINE (LEVELWISE + PREVIEW) ---
-        let level1Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡']; // 8 Cards
-        let level2Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓']; // 12 Cards
-        let level3Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓', '📱', '📱', '🔥', '🔥']; // 16 Cards
-        
+        // --- MEMORY MATCH ENGINE (LEVELS 20 TO 200 GENERATOR) ---
+        let baseEmojiPool = ['💻', '🚀', '🧠', '⚡', '🤖', '🎓', '📱', '🔥', '🎨', '🌟', '🎯', '🍕', '🐱', '🌍', '💎', '🔑'];
         let currentLevelItems = [];
-        let memoryCurrentLevel = 1;
         let chosenCards = [], chosenCardsId = [], matchedCards = [], flipCounter = 0;
         let isPeeking = false;
 
@@ -848,28 +834,37 @@
             document.getElementById("memory-flips").innerText = flipCounter;
             document.getElementById("memory-level").innerText = memoryCurrentLevel;
 
-            if(memoryCurrentLevel === 1) { currentLevelItems = [...level1Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
-            else if(memoryCurrentLevel === 2) { currentLevelItems = [...level2Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
-            else { currentLevelItems = [...level3Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
+            // Matrix generation calculations dynamically computed across level thresholds
+            let cardPairsCount = 4; // default minimum
+            if(memoryCurrentLevel > 40) cardPairsCount = 6;
+            if(memoryCurrentLevel > 90) cardPairsCount = 8;
+            if(memoryCurrentLevel > 150) cardPairsCount = 10;
 
+            // Pick slices from the emoji pool
+            let activeEmojis = baseEmojiPool.slice(0, cardPairsCount);
+            currentLevelItems = [...activeEmojis, ...activeEmojis];
             currentLevelItems.sort(() => 0.5 - Math.random());
+
+            // Structure grid style classes responsively based on dynamic card volumes
+            if(cardPairsCount <= 4) grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2";
+            else if(cardPairsCount === 6) grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2";
+            else grid.className = "grid grid-cols-4 gap-1.5 max-w-[320px] mx-auto my-2";
 
             for (let i = 0; i < currentLevelItems.length; i++) {
                 let card = document.createElement('div');
-                card.setAttribute('class', 'memory-card flipped'); // Started as flipped to show icons
+                card.setAttribute('class', 'memory-card flipped');
                 card.setAttribute('data-id', i);
                 card.addEventListener('click', flipMemoryCard);
                 card.innerHTML = `<div class="memory-card-front"><i class="fas fa-question text-xs"></i></div><div class="memory-card-back">${currentLevelItems[i]}</div>`;
                 grid.appendChild(card);
             }
 
-            // InFirst Peek Engine (Displays icons for 1.5 Seconds)
+            // Preview system timing scales down slightly on high-tier levels to augment difficulty
+            let previewDuration = Math.max(800, 1600 - (memoryCurrentLevel * 4));
             setTimeout(() => {
-                document.querySelectorAll('.memory-card').forEach(card => {
-                    card.classList.remove('flipped');
-                });
+                document.querySelectorAll('.memory-card').forEach(card => card.classList.remove('flipped'));
                 isPeeking = false;
-            }, 1500);
+            }, previewDuration);
         };
 
         function flipMemoryCard() {
@@ -883,7 +878,7 @@
 
             if (chosenCards.length === 2) {
                 flipCounter++; document.getElementById("memory-flips").innerText = flipCounter;
-                setTimeout(checkMemoryMatch, 600);
+                setTimeout(checkMemoryMatch, 500);
             }
         }
 
@@ -894,13 +889,13 @@
             if (chosenCards[0] === chosenCards[1]) {
                 matchedCards.push(firstId, secondId);
                 if (matchedCards.length === currentLevelItems.length) { 
-                    if(memoryCurrentLevel < 3) {
-                        alert(`🎉 Level ${memoryCurrentLevel} Cleared! Moving to Level ${memoryCurrentLevel + 1}`);
+                    if(memoryCurrentLevel < 200) {
+                        alert(`🎉 Level ${memoryCurrentLevel} Passed! Moving onto Level ${memoryCurrentLevel + 1}`);
                         memoryCurrentLevel++;
                         window.initMemoryGame();
                     } else {
-                        alert(`🏆 BRAVO! You defeated the entire Memory Game Grid in grand style.`);
-                        memoryCurrentLevel = 1;
+                        alert(`🏆 GRANDMASTER DECLARED! You unlocked and finished all 200 Memory Match Grid Levels!`);
+                        memoryCurrentLevel = 20;
                         window.initMemoryGame();
                     }
                 }
@@ -912,59 +907,81 @@
         }
 
         window.resetMemoryWholeGame = () => {
-            memoryCurrentLevel = 1;
+            memoryCurrentLevel = 20;
             window.initMemoryGame();
         };
 
-        // Voice Command Parsing Infrastructure Engine
+        // --- INTELLIGENT VOICE CORE PARSING COMMANDS ---
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US'; recognition.continuous = true; recognition.interimResults = false;
-        window.startAssistant = () => { window.isAssistantEnabled = true; try { recognition.start(); updateUI(true); } catch (e) {} };
+        
+        window.startAssistant = () => { 
+            window.isAssistantEnabled = true; 
+            try { recognition.start(); updateUI(true); } catch (e) {} 
+        };
+        
         function updateUI(isActive) {
             const txt = document.getElementById('ai-status-text'); const wave = document.getElementById('ai-wave');
-            if(isActive) { if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; } if(wave) wave.classList.remove('hidden'); } 
-            else { if(txt) txt.innerText = "Paused..."; }
+            if(isActive) { 
+                if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; } 
+                if(wave) wave.classList.remove('hidden'); 
+            } else { 
+                if(txt) txt.innerText = "Paused..."; 
+            }
         }
+        
         recognition.onresult = (event) => {
             const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            if(command.includes("profile")) { window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
-            else if(command.includes("home") || command.includes("portal")) { window.switchTab('home', document.querySelectorAll('.nav-item')[0]); }
-            else if(command.includes("desk") || command.includes("academics")) { window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
-            else if(command.includes("logout")) { window.logout(); }
-            else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
-            else if(command.includes("dashboard")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; }
-            else if(command.includes("id card")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; }
-            else if(command.includes("pdf") || command.includes("notes")) { location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html'; }
-            else if(command.includes("exam") || command.includes("quiz")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'; }
-            else if(command.includes("result")) { location.href = './result-history.html'; }
-            else if(command.includes("notification")) { window.openNotifications(); }
-            else if(command.includes("info")) { window.openInfo(); }
-            else if(command.includes("show commands")) { document.getElementById('voice-guide-modal').style.display = 'flex'; }
-            else if(command.includes("snt qr")) { window.openPaymentQR('snt'); }
-            else if(command.includes("fees qr")) { window.openPaymentQR('fees'); }
-            else if(command.includes("my qr") || command.includes("support qr")) { window.openPaymentQR('support'); }
-            else if(command.includes("sleep")) { window.isAssistantEnabled = false; recognition.stop(); updateUI(false); }
-            else if(command.includes("close")) { window.closeInfo(); window.closeNotifications(); window.closeArcadeZone(); document.getElementById('payment-modal').style.display = "none"; document.getElementById('voice-guide-modal').style.display = 'none'; }
+            if(command.includes("profile")) { 
+                window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); 
+            }
+            else if(command.includes("home") || command.includes("portal")) { 
+                window.switchTab('home', document.querySelectorAll('.nav-item')[0]); 
+            }
+            else if(command.includes("desk") || command.includes("academics")) { 
+                window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); 
+            }
+            else if(command.includes("logout")) { 
+                window.logout(); 
+            }
+            else if(command.includes("attendance")) { 
+                location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; 
+            }
+            else if(command.includes("dashboard")) { 
+                location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; 
+            }
+            else if(command.includes("id card")) { 
+                location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; 
+            }
+            else if(command.includes("notification")) { 
+                window.openNotifications(); 
+            }
+            else if(command.includes("arcade") || command.includes("game")) {
+                window.openArcadeZone();
+            }
+            else if(command.includes("close")) { 
+                window.closeInfo(); window.closeNotifications(); window.closeArcadeZone(); 
+                document.getElementById('payment-modal').style.display = "none"; 
+                document.getElementById('voice-guide-modal').style.display = 'none'; 
+            }
         };
+        
         recognition.onend = () => { if (window.isAssistantEnabled) { setTimeout(() => { try { recognition.start(); updateUI(true); } catch (e) {} }, 1000); } };
-        recognition.onerror = (event) => { if(event.error === 'not-allowed') { window.isAssistantEnabled = false; alert("Please grant Microphone permission."); } };
     </script>
 
-    <!-- Native Service Worker Setup Hook -->
+    <!-- Native Service Worker Shield Hook -->
     <script>
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Fault:", e)); }); }
-        window.enableNotifications = () => { Notification.requestPermission().then(p => { if (p === "granted") { alert("Notifications Active!"); } }); };
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW offline configuration notice: SW skipped. Run locally via browser caching.")); }); }
     </script>
 
-    <!-- Code Integrity Protective Shields -->
+    <!-- Source Security Shields -->
     <script>
         (function(){
             document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('dragstart', e => e.preventDefault()); document.onselectstart = () => false;
             document.onkeydown = function(e){
-                const k = e.keyCode; const c = e.ctrlKey; const s = e.shiftKey; const a = e.altKey;
-                if(k==123 || (c&&s&&(k==73||k==74||k==67||k==75||k==77)) || (c&&k==85) || (c&&k==83) || (c&&k==80) || (c&&k==65) || (c&&k==70) || (c&&k==71) || (a&&c&&k==73) || (c&&k==117) || (s&&k==121)){ e.preventDefault(); return false; }
+                const k = e.keyCode; const c = e.ctrlKey; const s = e.shiftKey;
+                if(k==123 || (c&&s&&k==73) || (c&&k==85) || (c&&k==83)){ e.preventDefault(); return false; }
             };
-            setInterval(() => { const d = new Date(); debugger; if(new Date() - d > 100){ document.body.innerHTML = '<div style="background:#000;color:red;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-weight:900;text-align:center;padding:20px;"><h1>SECURITY BREACH: SNT PROTECTED MODE ACTIVE</h1></div>'; } }, 500);
         })();
     </script>
 </body>
