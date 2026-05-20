@@ -289,10 +289,19 @@
                         </div>
                         <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
                     </div>
-                    <div onclick="switchGameTab('wheel-snake')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                    <!-- Separated Spinwheel Option -->
+                    <div onclick="switchGameTab('spinwheel')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            <p class="text-[12px] font-black uppercase text-white tracking-wide">4. Spinwheel & Snake</p>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">4. Lucky Spin Wheel</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                    <!-- Separated Snake Option -->
+                    <div onclick="switchGameTab('snake')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">5. Retro Snake Game</p>
                         </div>
                         <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
                     </div>
@@ -358,29 +367,30 @@
                 <button onclick="resetRPS()" class="w-full mt-4 bg-slate-800 text-slate-300 p-2 rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 border border-white/5">Reset Score</button>
             </div>
 
-            <!-- TAB 4: SPINWHEEL & SNAKE -->
-            <div id="tab-wheel-snake" class="game-sub-tab hidden mt-2">
+            <!-- TAB 4: LUCKY SPIN WHEEL (ALAG TAB) -->
+            <div id="tab-spinwheel" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-amber-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
-                <!-- Spinwheel Area -->
-                <div class="border-b border-white/10 pb-4 mb-4">
-                    <h3 class="text-amber-400 font-black italic text-sm tracking-tighter uppercase mb-2"><i class="fas fa-circle-notch mr-1"></i> Lucky Spin Wheel</h3>
-                    <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
-                        <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[14px] border-t-red-500 z-50"></div>
-                        <canvas id="wheelCanvas" width="160" height="160" class="rounded-full shadow-2xl transition-transform cubic-bezier(0.1, 0.8, 0.1, 1)"></canvas>
-                    </div>
-                    <div id="wheel-result" class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mt-2 h-4"></div>
-                    <button id="spin-btn" onclick="spinTheWheel()" class="w-full mt-2 bg-amber-500 text-slate-950 p-2 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95">Spin</button>
+                <h3 class="text-amber-400 font-black italic text-base tracking-tighter uppercase mb-4"><i class="fas fa-circle-notch mr-1"></i> Lucky Spin Wheel</h3>
+                <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
+                    <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[14px] border-t-red-500 z-50"></div>
+                    <canvas id="wheelCanvas" width="160" height="160" class="rounded-full shadow-2xl transition-transform cubic-bezier(0.1, 0.8, 0.1, 1)"></canvas>
                 </div>
-                <!-- Classic Snake Area -->
-                <div>
-                    <h3 class="text-emerald-400 font-black italic text-sm tracking-tighter uppercase mb-2"><i class="fas fa-vial mr-1"></i> Retro Snake Game</h3>
-                    <canvas id="snakeCanvas" width="200" height="160" class="bg-slate-950 border border-white/10 mx-auto rounded-xl"></canvas>
-                    <div class="flex justify-center gap-4 text-[9px] font-black uppercase tracking-widest mt-2 text-slate-400">Score: <span id="snake-score" class="text-white">0</span></div>
-                    <div class="grid grid-cols-3 gap-1 max-w-[120px] mx-auto mt-2">
-                        <div></div><button onclick="changeSnakeDir('UP')" class="bg-slate-800 p-2 rounded text-xs"><i class="fas fa-chevron-up"></i></button><div></div>
-                        <button onclick="changeSnakeDir('LEFT')" class="bg-slate-800 p-2 rounded text-xs"><i class="fas fa-chevron-left"></i></button><button onclick="startSnakeGame()" class="bg-emerald-600 text-white p-2 rounded text-[8px] font-bold">GO</button><button onclick="changeSnakeDir('RIGHT')" class="bg-slate-800 p-2 rounded text-xs"><i class="fas fa-chevron-right"></i></button>
-                        <div></div><button onclick="changeSnakeDir('DOWN')" class="bg-slate-800 p-2 rounded text-xs"><i class="fas fa-chevron-down"></i></button><div></div>
-                    </div>
+                <div id="wheel-result" class="text-[11px] font-black text-emerald-400 uppercase tracking-widest mt-4 h-4"></div>
+                <button id="spin-btn" onclick="spinTheWheel()" class="w-full mt-4 bg-amber-500 text-slate-950 p-3 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-lg shadow-amber-500/20">Spin Wheel</button>
+            </div>
+
+            <!-- TAB 5: RETRO SNAKE GAME (ALAG TAB) -->
+            <div id="tab-snake" class="game-sub-tab hidden mt-2">
+                <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-emerald-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
+                <h3 class="text-emerald-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-vial mr-1"></i> Retro Snake Game</h3>
+                <canvas id="snakeCanvas" width="220" height="180" class="bg-slate-950 border border-white/10 mx-auto rounded-xl shadow-inner"></canvas>
+                <div class="flex justify-center gap-4 text-[10px] font-black uppercase tracking-widest mt-3 text-slate-400">Score: <span id="snake-score" class="text-white text-sm">0</span></div>
+                <div class="grid grid-cols-3 gap-1 max-w-[140px] mx-auto mt-3">
+                    <div></div><button onclick="changeSnakeDir('UP')" class="bg-slate-800 p-2.5 rounded-xl text-xs active:bg-slate-700 text-sky-400"><i class="fas fa-chevron-up"></i></button><div></div>
+                    <button onclick="changeSnakeDir('LEFT')" class="bg-slate-800 p-2.5 rounded-xl text-xs active:bg-slate-700 text-sky-400"><i class="fas fa-chevron-left"></i></button>
+                    <button onclick="startSnakeGame()" class="bg-emerald-600 text-white p-2.5 rounded-xl text-[9px] font-black uppercase tracking-tighter active:scale-90">START</button>
+                    <button onclick="changeSnakeDir('RIGHT')" class="bg-slate-800 p-2.5 rounded-xl text-xs active:bg-slate-700 text-sky-400"><i class="fas fa-chevron-right"></i></button>
+                    <div></div><button onclick="changeSnakeDir('DOWN')" class="bg-slate-800 p-2.5 rounded-xl text-xs active:bg-slate-700 text-sky-400"><i class="fas fa-chevron-down"></i></button><div></div>
                 </div>
             </div>
         </div>
@@ -633,9 +643,12 @@
                 window.resetTTTFriend();
             } else if(game === 'rps') {
                 document.getElementById('tab-rps').classList.remove('hidden');
-            } else if(game === 'wheel-snake') {
-                document.getElementById('tab-wheel-snake').classList.remove('hidden');
-                setTimeout(() => { window.drawWheel(); window.initSnakeGame(); }, 100);
+            } else if(game === 'spinwheel') {
+                document.getElementById('tab-spinwheel').classList.remove('hidden');
+                setTimeout(() => { window.drawWheel(); }, 100);
+            } else if(game === 'snake') {
+                document.getElementById('tab-snake').classList.remove('hidden');
+                setTimeout(() => { window.initSnakeGame(); }, 100);
             }
         };
 
@@ -787,22 +800,10 @@
     </script>
 
     <!-- Native Service Worker Setup Hook -->
- <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-            .then(reg => {
-                console.log("SNT SW Registered Successfully!");
-                // Notification permission ke liye proactively request krna
-                if (Notification.permission === "default") {
-                    Notification.requestPermission();
-                }
-            })
-            .catch(e => console.log("SW Fault:", e));
-        });
-    }
-</script>
-
+    <script>
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Fault:", e)); }); }
+        window.enableNotifications = () => { Notification.requestPermission().then(p => { if (p === "granted") { alert("Notifications Active!"); } }); };
+    </script>
 
     <!-- Code Integrity Protective Shields -->
     <script>
