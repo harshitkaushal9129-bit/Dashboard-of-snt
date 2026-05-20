@@ -38,6 +38,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-row-last { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: none; }
         .info-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .info-value { color: #f8fafc; font-size: 12px; font-weight: 600; }
         .search-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); width: 100%; }
@@ -66,16 +67,16 @@
         .memory-card-back { background: #38bdf8; color: #0f172a; transform: rotateY(180deg); font-weight: bold; font-size: 1.25rem; }
     </style>
 </head>
-<body oncontextmenu="return false;" class="view-laptop" id="main-body">
+<body class="view-laptop" id="main-body">
 
     <!-- Auth Section -->
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
         <div class="glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
-            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce">
+            <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce" alt="SNT Logo">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
             <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Official Student Portal</p>
             <button onclick="loginWithGoogle()" class="w-full bg-white text-slate-900 p-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-200 transition-all active:scale-95 shadow-lg">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">LOGIN WITH GOOGLE
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6" alt="Google icon">LOGIN WITH GOOGLE
             </button>
         </div>
     </div>
@@ -116,7 +117,7 @@
         <div id="home-tab" class="tab-content">
             <div id="profile-summary" class="glass p-6 rounded-[32px] mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
                 <div class="relative">
-                    <img id="user-img-home" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800 shadow-lg">
+                    <img id="user-img-home" src="./SNT.jpg" class="w-20 h-20 rounded-full border-2 border-sky-500 object-cover bg-slate-800 shadow-lg" alt="Profile avatar">
                     <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-[#1e293b] rounded-full"></div>
                 </div>
                 <div class="flex-1">
@@ -227,7 +228,7 @@
         <!-- Profile View Tab Contents -->
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
-                <img id="user-img-profile" src="./SNT.jpg" class="w-32 h-32 rounded-full border-4 border-sky-500 mx-auto mb-4 object-cover shadow-2xl shadow-sky-500/20">
+                <img id="user-img-profile" src="./SNT.jpg" class="w-32 h-32 rounded-full border-4 border-sky-500 mx-auto mb-4 object-cover shadow-2xl shadow-sky-500/20" alt="Detailed avatar">
                 <h2 id="user-name-profile" class="text-2xl font-black italic">---</h2>
                 <div id="user-roll-profile" class="text-sky-400 text-[11px] font-black tracking-[0.2em] uppercase mt-1">ID: ---</div>
                 <div id="user-status-profile" class="mt-4 inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase border tracking-widest">---</div>
@@ -438,14 +439,14 @@
                 <div class="info-row">
                     <span class="info-label">Connectivity</span>
                     <div class="flex gap-4 items-center">
-                        <a href="https://wa.me/919129191898" target="_blank" class="text-green-500 text-xl"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/919129191898" target="_blank" rel="noopener" class="text-green-500 text-xl"><i class="fab fa-whatsapp"></i></a>
                         <a href="tel:919129191898" class="text-sky-400 text-xl"><i class="fas fa-phone"></i></a>
-                        <a href="https://www.instagram.com/kaushalji.011" target="_blank" class="text-pink-600 text-xl"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.youtube.com/@computer-skills9129" target="_blank" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.instagram.com/kaushalji.011" target="_blank" rel="noopener" class="text-pink-600 text-xl"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/@computer-skills9129" target="_blank" rel="noopener" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-                <!-- Support QR Button Replaced Here -->
-                <div class="info-row border-none">
+                <!-- Support QR Button -->
+                <div class="info-row-last">
                     <span class="info-label">Support Us</span>
                     <button onclick="closeInfo(); openPaymentQR('support')" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-transform">
                         <i class="fas fa-qrcode mr-1"></i> QR Support
@@ -490,6 +491,17 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
+
+        // Register Service Worker for Web Push Actions
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('SNT Engine Service Worker running safely.', reg.scope);
+                }).catch(err => {
+                    console.error('Service Worker registration failed:', err);
+                });
+            });
+        }
 
         onValue(ref(db, 'live_signal'), (snapshot) => {
             const data = snapshot.val();
@@ -596,6 +608,12 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if(el) el.classList.add('active');
+            else {
+                // Fallback indicator highlighter logic if clicked via macro command pipeline
+                const targets = {"home": 0, "academics": 1, "profile": 2};
+                const idx = targets[tab];
+                if (idx !== undefined) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+            }
         };
         
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
@@ -654,11 +672,11 @@
                 document.getElementById('tab-rps').classList.remove('hidden');
             } else if(game === 'brickbreaker') {
                 document.getElementById('tab-brickbreaker').classList.remove('hidden');
-                brickLevel = 1;
+                window.brickLevel = 1;
                 window.initBrickBreaker();
             } else if(game === 'memory') {
                 document.getElementById('tab-memory').classList.remove('hidden');
-                memoryCurrentLevel = 1;
+                window.memoryCurrentLevel = 1;
                 window.initMemoryGame();
             }
         };
@@ -725,7 +743,8 @@
         window.resetRPS = () => { pScore = 0; aScore = 0; document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0; document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-"; document.getElementById('rps-match-result').innerText = ""; };
 
         // --- RETRO BRICK BREAKER ENGINE (LEVELWISE) ---
-        let bCanvas, bCtx, paddleX, ballX, ballY, dx, dy, bricks, bScoreNum, bLives, brickLevel = 1;
+        let bCanvas, bCtx, paddleX, ballX, ballY, dx, dy, bricks, bScoreNum, bLives;
+        window.brickLevel = 1;
         const bPaddleWidth = 60, bPaddleHeight = 8, bBallRadius = 5, bRowCount = 3, bColCount = 5, bBrickWidth = 52, bBrickHeight = 12, bBrickPadding = 6, bOffsetTop = 15, bOffsetLeft = 15;
         let leftPressed = false, rightPressed = false;
 
@@ -733,13 +752,12 @@
             bCanvas = document.getElementById("brickCanvas"); if(!bCanvas) return; bCtx = bCanvas.getContext("2d");
             paddleX = (bCanvas.width - bPaddleWidth) / 2; ballX = bCanvas.width / 2; ballY = bCanvas.height - 30;
             
-            // Adjust speed multiplier by level
-            let speedMultiplier = 1 + (brickLevel - 1) * 0.4;
+            let speedMultiplier = 1 + (window.brickLevel - 1) * 0.4;
             dx = 2 * speedMultiplier; dy = -2 * speedMultiplier;
             bScoreNum = 0; bLives = 3;
             
             document.getElementById("brick-score").innerText = bScoreNum;
-            document.getElementById("brick-level").innerText = brickLevel;
+            document.getElementById("brick-level").innerText = window.brickLevel;
             document.getElementById("brick-lives").innerText = bLives;
             
             bricks = [];
@@ -783,7 +801,7 @@
                     if(bricks[c][r].status === 1) {
                         let brickX = (c*(bBrickWidth+bBrickPadding))+bOffsetLeft; let brickY = (r*(bBrickHeight+bBrickPadding))+bOffsetTop;
                         bricks[c][r].x = brickX; bricks[c][r].y = brickY; 
-                        bCtx.fillStyle = brickLevel === 1 ? "#38bdf8" : brickLevel === 2 ? "#a855f7" : "#f43f5e";
+                        bCtx.fillStyle = window.brickLevel === 1 ? "#38bdf8" : window.brickLevel === 2 ? "#a855f7" : "#f43f5e";
                         bCtx.fillRect(brickX, brickY, bBrickWidth, bBrickHeight);
                     }
                 }
@@ -799,13 +817,13 @@
                             dy = -dy; b.status = 0; bScoreNum++; document.getElementById("brick-score").innerText = bScoreNum;
                             if(bScoreNum === bRowCount*bColCount) { 
                                 clearInterval(window.brickInterval); 
-                                if(brickLevel < 3) {
-                                    alert(`🎉 Level ${brickLevel} Cleared! Ready for Level ${brickLevel + 1}?`);
-                                    brickLevel++;
+                                if(window.brickLevel < 3) {
+                                    alert(`🎉 Level ${window.brickLevel} Cleared! Ready for Level ${window.brickLevel + 1}?`);
+                                    window.brickLevel++;
                                     window.startBrickGame();
                                 } else {
                                     alert("🏆 ULTIMATE CHAMPION! You cleared all Brick Breaker Levels!");
-                                    brickLevel = 1;
+                                    window.brickLevel = 1;
                                     window.initBrickBreaker();
                                 }
                                 return; 
@@ -822,7 +840,7 @@
                 else if(ballY + dy > bCanvas.height - bBallRadius) {
                     bLives--; document.getElementById("brick-lives").innerText = bLives;
                     if(!bLives) { clearInterval(window.brickInterval); alert("GAME OVER! Better Luck Next Time."); return; } 
-                    else { ballX = bCanvas.width/2; ballY = bCanvas.height-30; let speedMultiplier = 1 + (brickLevel - 1) * 0.4; dx = 2 * speedMultiplier; dy = -2 * speedMultiplier; paddleX = (bCanvas.width-bPaddleWidth)/2; }
+                    else { ballX = bCanvas.width/2; ballY = bCanvas.height-30; let speedMultiplier = 1 + (window.brickLevel - 1) * 0.4; dx = 2 * speedMultiplier; dy = -2 * speedMultiplier; paddleX = (bCanvas.width-bPaddleWidth)/2; }
                 }
             }
 
@@ -833,12 +851,12 @@
         }
 
         // --- MEMORY MATCH CARDS ENGINE (LEVELWISE + PREVIEW) ---
-        let level1Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡']; // 8 Cards
-        let level2Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓']; // 12 Cards
-        let level3Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓', '📱', '📱', '🔥', '🔥']; // 16 Cards
+        let level1Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡']; 
+        let level2Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓']; 
+        let level3Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓', '📱', '📱', '🔥', '🔥']; 
         
         let currentLevelItems = [];
-        let memoryCurrentLevel = 1;
+        window.memoryCurrentLevel = 1;
         let chosenCards = [], chosenCardsId = [], matchedCards = [], flipCounter = 0;
         let isPeeking = false;
 
@@ -846,24 +864,23 @@
             const grid = document.getElementById("memory-grid"); if(!grid) return;
             grid.innerHTML = ""; flipCounter = 0; chosenCards = []; chosenCardsId = []; matchedCards = []; isPeeking = true;
             document.getElementById("memory-flips").innerText = flipCounter;
-            document.getElementById("memory-level").innerText = memoryCurrentLevel;
+            document.getElementById("memory-level").innerText = window.memoryCurrentLevel;
 
-            if(memoryCurrentLevel === 1) { currentLevelItems = [...level1Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
-            else if(memoryCurrentLevel === 2) { currentLevelItems = [...level2Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
+            if(window.memoryCurrentLevel === 1) { currentLevelItems = [...level1Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
+            else if(window.memoryCurrentLevel === 2) { currentLevelItems = [...level2Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
             else { currentLevelItems = [...level3Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
 
             currentLevelItems.sort(() => 0.5 - Math.random());
 
             for (let i = 0; i < currentLevelItems.length; i++) {
                 let card = document.createElement('div');
-                card.setAttribute('class', 'memory-card flipped'); // Started as flipped to show icons
+                card.setAttribute('class', 'memory-card flipped'); 
                 card.setAttribute('data-id', i);
                 card.addEventListener('click', flipMemoryCard);
                 card.innerHTML = `<div class="memory-card-front"><i class="fas fa-question text-xs"></i></div><div class="memory-card-back">${currentLevelItems[i]}</div>`;
                 grid.appendChild(card);
             }
 
-            // InFirst Peek Engine (Displays icons for 1.5 Seconds)
             setTimeout(() => {
                 document.querySelectorAll('.memory-card').forEach(card => {
                     card.classList.remove('flipped');
@@ -894,13 +911,13 @@
             if (chosenCards[0] === chosenCards[1]) {
                 matchedCards.push(firstId, secondId);
                 if (matchedCards.length === currentLevelItems.length) { 
-                    if(memoryCurrentLevel < 3) {
-                        alert(`🎉 Level ${memoryCurrentLevel} Cleared! Moving to Level ${memoryCurrentLevel + 1}`);
-                        memoryCurrentLevel++;
+                    if(window.memoryCurrentLevel < 3) {
+                        alert(`🎉 Level ${window.memoryCurrentLevel} Cleared! Moving to Level ${window.memoryCurrentLevel + 1}`);
+                        window.memoryCurrentLevel++;
                         window.initMemoryGame();
                     } else {
                         alert(`🏆 BRAVO! You defeated the entire Memory Game Grid in grand style.`);
-                        memoryCurrentLevel = 1;
+                        window.memoryCurrentLevel = 1;
                         window.initMemoryGame();
                     }
                 }
@@ -912,60 +929,41 @@
         }
 
         window.resetMemoryWholeGame = () => {
-            memoryCurrentLevel = 1;
+            window.memoryCurrentLevel = 1;
             window.initMemoryGame();
         };
 
         // Voice Command Parsing Infrastructure Engine
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'en-US'; recognition.continuous = true; recognition.interimResults = false;
-        window.startAssistant = () => { window.isAssistantEnabled = true; try { recognition.start(); updateUI(true); } catch (e) {} };
-        function updateUI(isActive) {
-            const txt = document.getElementById('ai-status-text'); const wave = document.getElementById('ai-wave');
-            if(isActive) { if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; } if(wave) wave.classList.remove('hidden'); } 
-            else { if(txt) txt.innerText = "Paused..."; }
-        }
-        recognition.onresult = (event) => {
-            const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            if(command.includes("profile")) { window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
-            else if(command.includes("home") || command.includes("portal")) { window.switchTab('home', document.querySelectorAll('.nav-item')[0]); }
-            else if(command.includes("desk") || command.includes("academics")) { window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
-            else if(command.includes("logout")) { window.logout(); }
-            else if(command.includes("attendance")) { location.href = 'https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/attendence.html'; }
-            else if(command.includes("dashboard")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html'; }
-            else if(command.includes("id card")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/id-card.html'; }
-            else if(command.includes("pdf") || command.includes("notes")) { location.href = 'https://harshitkaushal9129-bit.github.io/Pdf-reader/index.html'; }
-            else if(command.includes("exam") || command.includes("quiz")) { location.href = 'https://harshitkaushal9129-bit.github.io/snt-institute/quiz.html'; }
-            else if(command.includes("result")) { location.href = './result-history.html'; }
-            else if(command.includes("notification")) { window.openNotifications(); }
-            else if(command.includes("info")) { window.openInfo(); }
-            else if(command.includes("show commands")) { document.getElementById('voice-guide-modal').style.display = 'flex'; }
-            else if(command.includes("snt qr")) { window.openPaymentQR('snt'); }
-            else if(command.includes("fees qr")) { window.openPaymentQR('fees'); }
-            else if(command.includes("my qr") || command.includes("support qr")) { window.openPaymentQR('support'); }
-            else if(command.includes("sleep")) { window.isAssistantEnabled = false; recognition.stop(); updateUI(false); }
-            else if(command.includes("close")) { window.closeInfo(); window.closeNotifications(); window.closeArcadeZone(); document.getElementById('payment-modal').style.display = "none"; document.getElementById('voice-guide-modal').style.display = 'none'; }
-        };
-        recognition.onend = () => { if (window.isAssistantEnabled) { setTimeout(() => { try { recognition.start(); updateUI(true); } catch (e) {} }, 1000); } };
-        recognition.onerror = (event) => { if(event.error === 'not-allowed') { window.isAssistantEnabled = false; alert("Please grant Microphone permission."); } };
-    </script>
-
-    <!-- Native Service Worker Setup Hook -->
-    <script>
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Fault:", e)); }); }
-        window.enableNotifications = () => { Notification.requestPermission().then(p => { if (p === "granted") { alert("Notifications Active!"); } }); };
-    </script>
-
-    <!-- Code Integrity Protective Shields -->
-    <script>
-        (function(){
-            document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('dragstart', e => e.preventDefault()); document.onselectstart = () => false;
-            document.onkeydown = function(e){
-                const k = e.keyCode; const c = e.ctrlKey; const s = e.shiftKey; const a = e.altKey;
-                if(k==123 || (c&&s&&(k==73||k==74||k==67||k==75||k==77)) || (c&&k==85) || (c&&k==83) || (c&&k==80) || (c&&k==65) || (c&&k==70) || (c&&k==71) || (a&&c&&k==73) || (c&&k==117) || (s&&k==121)){ e.preventDefault(); return false; }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; recognition.continuous = true; recognition.interimResults = false;
+            
+            window.startAssistant = () => { 
+                window.isAssistantEnabled = true; 
+                try { recognition.start(); updateUI(true); } catch (e) { console.log('Speech pipeline already hot.'); } 
             };
-            setInterval(() => { const d = new Date(); debugger; if(new Date() - d > 100){ document.body.innerHTML = '<div style="background:#000;color:red;height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-weight:900;text-align:center;padding:20px;"><h1>SECURITY BREACH: SNT PROTECTED MODE ACTIVE</h1></div>'; } }, 500);
-        })();
+            
+            function updateUI(isActive) {
+                const txt = document.getElementById('ai-status-text'); const wave = document.getElementById('ai-wave');
+                if(isActive) { if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; } if(wave) wave.classList.remove('hidden'); } 
+                else { if(txt) txt.innerText = "Paused..."; }
+            }
+            
+            recognition.onresult = (event) => {
+                const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                if(command.includes("profile")) { window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
+                else if(command.includes("home") || command.includes("portal")) { window.switchTab('home', document.querySelectorAll('.nav-item')[0]); }
+                else if(command.includes("desk") || command.includes("academic")) { window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
+                else if(command.includes("logout") || command.includes("exit")) { window.logout(); }
+            };
+            
+            recognition.onerror = (err) => { console.error('Voice pipeline exception caught:', err); updateUI(false); };
+            recognition.onend = () => { if(window.isAssistantEnabled) try { recognition.start(); } catch(e){} };
+        } else {
+            console.log("Voice control feature is unsupported on this specific web application runtime host environment.");
+            window.startAssistant = () => alert("Voice API is not supported in this browser version container.");
+        }
     </script>
 </body>
 </html>
