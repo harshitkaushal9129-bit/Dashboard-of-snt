@@ -65,8 +65,6 @@
         .memory-card-front, .memory-card-back { position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; }
         .memory-card-front { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #38bdf8; }
         .memory-card-back { background: #38bdf8; color: #0f172a; transform: rotateY(180deg); font-weight: bold; font-size: 1.25rem; }
-
-        /* --- INTEGRATED CALCULATOR MODAL STYLING --- */
         .calc-box { background: #111111; padding: 20px; border-radius: 24px; width: 310px; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.8); text-align: center; position: relative; }
         .calc-screen { width: 100%; height: 60px; background: #1a1a1a; color: #00ff00; font-family: monospace; font-size: 24px; text-align: right; padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 15px; overflow-x: auto; outline: none; }
         .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -76,8 +74,6 @@
         .calc-btn.operator { background: #f39c12; color: #000; }
         .calc-btn.operator:hover { background: #e67e22; }
         .close-calc { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-
-        /* --- CUSTOM FILE CARD DESIGN FROM PORTAL --- */
         .file-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #f1f5f9; font-size: 13px; transition: all 0.2s; }
         .file-card:hover { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; }
         .file-pdf { color: #ef4444; }
@@ -87,7 +83,6 @@
     </style>
 </head>
 <body class="view-laptop" id="main-body">
-
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
         <div class="glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
             <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce" alt="SNT Logo">
@@ -98,7 +93,6 @@
             </button>
         </div>
     </div>
-
     <div id="ai-assistant-ui" class="fixed bottom-24 right-6 z-[5000] flex flex-col items-center gap-3 hidden">
         <div id="ai-status-text" class="text-[9px] font-black text-sky-400 uppercase tracking-widest opacity-0 transition-opacity">Listening...</div>
         <div onclick="startAssistant()" id="ai-circle" class="w-14 h-14 bg-slate-900 border-2 border-sky-500 rounded-full flex items-center justify-center cursor-pointer overflow-hidden relative">
@@ -106,7 +100,6 @@
             <div id="ai-wave" class="absolute inset-0 bg-sky-500/20 scale-0 rounded-full animate-ping hidden"></div>
         </div>
     </div>
-
     <div id="dashboard" class="hidden w-full max-w-6xl mx-auto p-4 md:p-8 animate-fade-in">
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
@@ -119,12 +112,10 @@
                     <option value="view-android">📱 ANDROID VIEW</option>
                 </select>
             </div>
-            
             <div class="flex items-center gap-1 relative">
                 <h1 class="text-xl font-black text-white tracking-tighter italic">SNT <span class="text-sky-500 font-black">OFFICIAL</span></h1>
                 <div onclick="openAdminTrigger()" class="w-8 h-8 absolute right-0 top-0 cursor-default opacity-0 z-50" title="System Node"></div>
             </div>
-
             <div class="flex gap-2">
                 <button onclick="openNotifications()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-yellow-400 relative active:scale-90">
                     <i class="fas fa-bell"></i>
@@ -133,7 +124,6 @@
                 <button onclick="openInfo()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-sky-400 active:scale-90"><i class="fas fa-circle-info"></i></button>
             </div>
         </header>
-
         <div id="home-tab" class="tab-content">
             <div id="profile-summary" class="glass p-6 rounded-[32px] mb-6 flex items-center gap-5 border-l-4 border-sky-500 shadow-2xl">
                 <div class="relative">
@@ -146,7 +136,6 @@
                     <p id="user-email-home" class="text-slate-400 text-[10px] font-mono italic opacity-60"></p>
                 </div>
             </div>
-
             <div id="admin-custom-panel" onclick="handleAdminNavigation('links-hub')" class="glass p-5 rounded-[32px] mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-l-4 border-red-500 shadow-2xl cursor-pointer hover:bg-slate-800/40 transition-all active:scale-95">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center text-red-500 text-xl">
@@ -162,7 +151,6 @@
                     <i class="fas fa-lock text-red-500 text-xs"></i>
                 </div>
             </div>
-
             <div id="admin-links-container" class="glass p-6 rounded-[32px] mb-6 hidden border border-red-500/30 shadow-2xl animate-fade-in">
                 <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
                     <h4 class="text-sm font-black uppercase tracking-wider text-red-400"><i class="fas fa-folder-open mr-2"></i>Admin Core Console</h4>
@@ -183,7 +171,6 @@
                     </a>
                 </div>
             </div>
-
             <div id="secret-admin-panel" class="glass p-6 rounded-[32px] mb-6 hidden border-2 border-dashed border-yellow-500 shadow-2xl animate-fade-in">
                 <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
                     <h4 class="text-sm font-black uppercase tracking-wider text-yellow-500 flex items-center gap-2"><i class="fas fa-unlock"></i> Admin Core Console</h4>
@@ -210,7 +197,6 @@
                     </a>
                 </div>
             </div>
-
             <div id="fees-summary-card" class="glass p-5 rounded-[32px] mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-l-4 border-orange-500 shadow-2xl animate-fade-in">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-500 text-xl">
@@ -226,7 +212,6 @@
                     <span id="user-pending-fees" class="text-2xl font-black text-orange-500 tracking-tight">₹---</span>
                 </div>
             </div>
-
             <div class="mb-6 relative">
                 <div class="search-box flex items-center px-5 py-4 rounded-2xl">
                     <i class="fas fa-search text-sky-500 mr-4 text-sm"></i>
@@ -235,7 +220,6 @@
             </div>
             <div id="app-grid" class="grid pb-24"></div>
         </div>
-
         <div id="academics-tab" class="tab-content hidden pb-24 animate-fade-in">
             <span class="section-tag">Student Desk & Examination</span>
             <div class="flex flex-col gap-3">
@@ -290,7 +274,6 @@
                     <i class="fas fa-chevron-right text-slate-600 text-xs mr-2"></i>
                 </div>
             </div>
-
             <span class="section-tag">Entertainment & Arcade</span>
             <div class="flex flex-col gap-3">
                 <div onclick="openArcadeZone()" class="academic-item flex items-center justify-between p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
@@ -304,8 +287,33 @@
                     <div class="bg-amber-500 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Play</div>
                 </div>
             </div>
+            <span class="section-tag">Administrative Security Controls</span>
+            <div class="flex flex-col gap-3">
+                <div onclick="openAdminPortalCalcTrigger()" class="academic-item flex items-center justify-between p-4 rounded-2xl border border-red-500/20 bg-red-500/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-red-500/20 text-red-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-user-lock"></i></div>
+                        <div>
+                            <p class="text-[12px] font-black uppercase text-red-400 tracking-wide">SNT Admin Core Login</p>
+                            <span class="text-[9px] text-red-500/60 font-bold uppercase tracking-wider">Requires Secret Calculator Passcode Authentication</span>
+                        </div>
+                    </div>
+                    <div class="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Verify</div>
+                </div>
+            </div>
+            <div id="calculator-verified-admin-links" class="glass p-5 rounded-[32px] mt-4 hidden border-l-4 border-emerald-500 shadow-2xl animate-fade-in">
+                <p class="text-emerald-400 text-[9px] font-black uppercase tracking-widest mb-3">Clearance Level Verified</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-emerald-500/40 transition-all">
+                        <i class="fas fa-user-shield text-emerald-400 text-lg"></i>
+                        <div><p class="text-[11px] font-black text-white uppercase">Admin Portal</p><span class="text-[8px] text-slate-500 uppercase">System Core</span></div>
+                    </a>
+                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin_timer.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-emerald-500/40 transition-all">
+                        <i class="fas fa-clock text-cyan-400 text-lg"></i>
+                        <div><p class="text-[11px] font-black text-white uppercase">Admin Timer</p><span class="text-[8px] text-slate-500 uppercase">Schedules Control</span></div>
+                    </a>
+                </div>
+            </div>
         </div>
-
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
                 <img id="user-img-profile" src="./SNT.jpg" class="w-32 h-32 rounded-full border-4 border-sky-500 mx-auto mb-4 object-cover shadow-2xl shadow-sky-500/20" alt="Detailed avatar">
@@ -340,39 +348,32 @@
             <button onclick="logout()" class="w-full mt-10 bg-red-500/10 text-red-500 p-4 rounded-2xl border border-red-500/20 font-black text-[11px] uppercase tracking-widest">Sign Out Account</button>
         </div>
     </div>
-
     <div id="calc-modal" class="modal-overlay" style="display: none;">
         <div class="calc-box">
             <button class="close-calc" onclick="closeCalcModal()">X</button>
             <input type="text" id="calc-display" class="calc-screen" readonly value="">
-            
             <div class="calc-buttons">
                 <button class="calc-btn operator" onclick="clearCalc()">C</button>
                 <button class="calc-btn operator" onclick="pressKey('/')">/</button>
                 <button class="calc-btn operator" onclick="pressKey('*')">*</button>
                 <button class="calc-btn operator" onclick="backspace()">⌫</button>
-
                 <button class="calc-btn" onclick="pressKey('7')">7</button>
                 <button class="calc-btn" onclick="pressKey('8')">8</button>
                 <button class="calc-btn" onclick="pressKey('9')">9</button>
                 <button class="calc-btn operator" onclick="pressKey('-')">-</button>
-
                 <button class="calc-btn" onclick="pressKey('4')">4</button>
                 <button class="calc-btn" onclick="pressKey('5')">5</button>
                 <button class="calc-btn" onclick="pressKey('6')">6</button>
                 <button class="calc-btn operator" onclick="pressKey('+')">+</button>
-
                 <button class="calc-btn" onclick="pressKey('1')">1</button>
                 <button class="calc-btn" onclick="pressKey('2')">2</button>
                 <button class="calc-btn" onclick="pressKey('3')">3</button>
                 <button class="calc-btn operator" style="grid-row: span 2; height: 100%;" onclick="calculateResult()">=</button>
-
                 <button class="calc-btn" style="grid-column: span 2;" onclick="pressKey('0')">0</button>
                 <button class="calc-btn" onclick="pressKey('.')">.</button>
             </div>
         </div>
     </div>
-
     <div id="admin-auth-modal" class="modal-overlay" style="display: none;">
         <div class="glass p-6 rounded-[35px] w-full max-w-[340px] text-center border border-white/10 shadow-2xl animate-fade-in relative">
             <button onclick="closeAdminAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm">
@@ -383,26 +384,21 @@
             </div>
             <h3 class="text-white font-black italic text-lg mb-1 uppercase tracking-tight">Admin Authentication</h3>
             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-5">Restricted Access Zone</p>
-            
             <div class="mb-4">
                 <input type="password" id="adminPasswordInput" placeholder="ENTER ADMIN PASSWORD" class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-center text-[11px] font-bold uppercase tracking-widest text-white outline-none focus:border-red-500/50">
                 <p id="admin-auth-error" class="text-red-500 text-[9px] font-black uppercase tracking-wider mt-2 hidden">Galat Password! Access Denied.</p>
             </div>
-            
             <button onclick="verifyAdminPassword()" class="w-full bg-red-600 text-white p-3 rounded-xl font-black text-[11px] uppercase tracking-widest active:scale-95 transition-transform">Verify & Open</button>
         </div>
     </div>
-
     <div id="game-modal" class="modal-overlay" style="display: none;">
         <div class="glass p-6 rounded-[35px] w-full max-w-[380px] text-center border border-white/10 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onclick="closeArcadeZone()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm z-50">
                 <i class="fas fa-times"></i>
             </button>
-            
             <div id="arcade-main-menu">
                 <h2 class="text-2xl font-black italic tracking-tighter text-amber-400 mb-2 uppercase">SNT ARCADE ZONE</h2>
                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-6">Select a Game to Start Playing</p>
-                
                 <div class="space-y-3 text-left">
                     <div onclick="switchGameTab('ttt-ai')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -441,7 +437,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="tab-ttt-ai" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-purple-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-purple-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-robot mr-1"></i> TTT: AI vs Me</h3>
@@ -460,7 +455,6 @@
                 <div id="ttt-ai-match-result" class="text-[11px] font-black uppercase tracking-widest mt-4 h-4 text-emerald-400"></div>
                 <button onclick="resetTTTAI()" class="w-full mt-4 bg-purple-600 text-white p-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Restart AI Match</button>
             </div>
-
             <div id="tab-ttt-friend" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-indigo-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-indigo-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-users mr-1"></i> TTT: Me vs Friend</h3>
@@ -479,7 +473,6 @@
                 <div id="ttt-friend-match-result" class="text-[11px] font-black uppercase tracking-widest mt-4 h-4 text-emerald-400"></div>
                 <button onclick="resetTTTFriend()" class="w-full mt-4 bg-indigo-600 text-white p-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Reset Board</button>
             </div>
-
             <div id="tab-rps" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-sky-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-sky-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-hand-rock mr-1"></i> Stone Paper Scissors</h3>
@@ -497,7 +490,6 @@
                 <div id="rps-match-result" class="text-[11px] font-black uppercase tracking-widest mt-4 h-4"></div>
                 <button onclick="resetRPS()" class="w-full mt-4 bg-slate-800 text-slate-300 p-2 rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 border border-white/5">Reset Score</button>
             </div>
-
             <div id="tab-brickbreaker" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-amber-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-amber-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-cubes mr-1"></i> Brick Breaker</h3>
@@ -513,7 +505,6 @@
                     <button onmousedown="movePaddleRight(true)" onmouseup="movePaddleRight(false)" ontouchstart="movePaddleRight(true)" ontouchend="movePaddleRight(false)" class="bg-slate-800 w-16 p-3 rounded-xl text-xl active:bg-slate-700 text-amber-400"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
-
             <div id="tab-memory" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-emerald-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-emerald-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-clone mr-1"></i> Memory Match</h3>
@@ -526,7 +517,6 @@
             </div>
         </div>
     </div>
-
     <div id="voice-guide-modal" class="modal-overlay hidden">
         <div class="glass p-6 rounded-[35px] w-full max-w-[380px] border border-white/10 shadow-2xl animate-fade-in">
             <div class="text-center mb-6">
@@ -544,13 +534,11 @@
             <button onclick="document.getElementById('voice-guide-modal').style.display='none'" class="w-full mt-6 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Got it!</button>
         </div>
     </div>
-    
     <nav id="navbar" class="bottom-nav hidden">
         <div class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-th-large"></i><span>Portal</span></div>
         <div class="nav-item" onclick="switchTab('academics', this)"><i class="fas fa-graduation-cap"></i><span>Desk</span></div>
         <div class="nav-item" onclick="switchTab('profile', this)"><i class="fas fa-user-circle"></i><span>My Profile</span></div>
     </nav>
-
     <div id="info-modal" class="modal-overlay">
         <div class="glass p-8 rounded-[40px] w-[340px] border border-white/10 shadow-2xl relative animate-fade-in">
             <h2 class="text-2xl font-black text-center mb-8 uppercase tracking-widest text-white italic">System Info</h2>
@@ -577,7 +565,6 @@
             <button onclick="closeInfo()" class="w-full mt-8 bg-sky-500 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95">Close Panel</button>
         </div>
     </div>
-
     <div id="payment-modal" class="modal-overlay">
         <div class="glass p-6 rounded-[35px] w-[300px] text-center border border-white/10 shadow-2xl animate-fade-in">
             <h3 class="text-white font-black italic text-lg mb-4 tracking-tighter">SCAN TO PAY</h3>
@@ -587,7 +574,6 @@
             <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Closing in 5 seconds</p>
         </div>
     </div>
-
     <div id="notif-modal" class="modal-overlay">
         <div class="glass p-6 rounded-[35px] w-full max-w-[400px] h-[70vh] flex flex-col border border-white/10 shadow-2xl animate-fade-in">
             <div class="flex justify-between items-center mb-6">
@@ -598,31 +584,26 @@
             <button onclick="closeNotifications()" class="w-full mt-4 bg-slate-800 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Close Alerts</button>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
         const firebaseConfig = { apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA", authDomain: "snt-computer-institute.firebaseapp.com", projectId: "snt-computer-institute", databaseURL: "https://snt-computer-institute-default-rtdb.firebaseio.com", appId: "1:117580784781:web:73ba19d2d008beb3a5eec4" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
-
         window.toggleTheme = () => {
             document.body.classList.toggle('light-mode');
             const icon = document.querySelector('#theme-toggle i');
             if(document.body.classList.contains('light-mode')) { icon.className = 'fas fa-sun'; localStorage.setItem('snt-theme', 'light'); }
             else { icon.className = 'fas fa-moon'; localStorage.setItem('snt-theme', 'dark'); }
         };
-
         const savedTheme = localStorage.getItem('snt-theme');
         if (savedTheme === 'light') {
             document.body.classList.add('light-mode');
             setTimeout(() => { const icon = document.querySelector('#theme-toggle i'); if(icon) icon.className = 'fas fa-sun'; }, 100);
         }
-
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('auth-container').classList.add('hidden');
@@ -656,7 +637,6 @@
                         }
                     }
                 });
-
                 onValue(ref(db, 'notifications'), (snapshot) => {
                     const list = document.getElementById('notif-list');
                     const badge = document.getElementById('notif-badge');
@@ -666,7 +646,6 @@
                         list.innerHTML = notifs.map(n => `<div class="notif-item"><p class="text-white text-[12px] font-bold mb-1">${n.title || 'Official Update'}</p><p class="text-slate-400 text-[10px] leading-relaxed">${n.message || ''}</p><p class="text-sky-500 text-[8px] font-black mt-2 uppercase tracking-widest">${n.date || ''}</p></div>`).join('');
                     } else { badge.classList.add('hidden'); list.innerHTML = `<p class="text-slate-500 text-center text-[11px] font-bold py-10">No recent announcements.</p>`; }
                 });
-
                 onValue(ref(db, 'live_signal'), (snapshot) => {
                     const data = snapshot.val();
                     if (data && data.timestamp) {
@@ -681,22 +660,18 @@
                         }
                     }
                 });
-
                 renderMenu();
             }
         });
-
         window.handleAdminNavigation = (url) => {
             window.targetAdminUrl = url;
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('admin-auth-error').classList.add('hidden');
             document.getElementById('admin-auth-modal').style.display = 'flex';
         };
-
         window.closeAdminAuth = () => {
             document.getElementById('admin-auth-modal').style.display = 'none';
         };
-
         window.verifyAdminPassword = () => {
             const enteredPassword = document.getElementById('adminPasswordInput').value;
             if (enteredPassword === "Gauriji") {
@@ -711,7 +686,6 @@
                 document.getElementById('admin-auth-error').classList.remove('hidden');
             }
         };
-
         window.renderMenu = () => {
             const menuItems = [
                 { name: 'Dashboard', url: 'https://harshitkaushal9129-bit.github.io/snt-institute/Index.html', icon: 'fa-chart-pie', color: 'text-sky-400', isProtected: false },
@@ -731,16 +705,13 @@
                 const clickHandler = item.isProtected ? `handleAdminNavigation('${item.url}')` : `location.href='${item.url}'`;
                 return `<div class="app-card p-4" onclick="${clickHandler}"><i class="fas ${item.icon} text-3xl mb-3 ${item.color}"></i><p class="text-[9px] font-black uppercase text-slate-300 text-center">${item.name}</p></div>`;
             }).join('');
-            
             document.getElementById('appSearch').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('.app-card').forEach(card => card.style.display = card.querySelector('p').innerText.toLowerCase().includes(term) ? 'flex' : 'none');
             });
         };
-
         window.loginWithGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (err) { console.error(err); } };
         window.logout = () => signOut(auth).then(() => location.reload());
-        
         window.switchTab = (tab, el) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -752,13 +723,11 @@
                 if (idx !== undefined) document.querySelectorAll('.nav-item')[idx].classList.add('active');
             }
         };
-        
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
         window.openInfo = async () => { document.getElementById('info-modal').style.display = "flex"; if (navigator.getBattery) { const b = await navigator.getBattery(); document.getElementById('info-battery').innerText = Math.round(b.level * 100) + "%"; } };
         window.closeInfo = () => document.getElementById('info-modal').style.display = "none";
         window.openNotifications = () => { document.getElementById('notif-modal').style.display = "flex"; document.getElementById('notif-badge').classList.add('hidden'); };
         window.closeNotifications = () => { document.getElementById('notif-modal').style.display = "none"; };
-
         window.openPaymentQR = (type) => {
             const modal = document.getElementById('payment-modal');
             const progress = document.getElementById('qr-progress');
@@ -775,34 +744,34 @@
             setTimeout(() => { progress.style.width = "0%"; }, 100);
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
-
-        // --- SNT RETRO CALCULATOR INFRASTRUCTURE ENGINE ---
         let display = document.getElementById('calc-display');
         const SECRET_KEY = "6306017020";
-
+        const ADMIN_PORTAL_KEY = "7896";
+        window.isCheckingForPortal = false;
         window.openAdminTrigger = () => {
+            window.isCheckingForPortal = false;
             document.getElementById('calc-modal').style.display = 'flex';
             window.clearCalc();
         };
-
+        window.openAdminPortalCalcTrigger = () => {
+            window.isCheckingForPortal = true;
+            document.getElementById('calc-modal').style.display = 'flex';
+            window.clearCalc();
+        };
         window.closeCalcModal = () => {
             document.getElementById('calc-modal').style.display = 'none';
         };
-
         window.pressKey = (num) => {
             display.value += num;
             window.checkSecretCode();
         };
-
         window.clearCalc = () => {
             display.value = "";
         };
-
         window.backspace = () => {
             display.value = display.value.slice(0, -1);
             window.checkSecretCode();
         };
-
         window.calculateResult = () => {
             try {
                 if(display.value) {
@@ -812,40 +781,38 @@
                 display.value = "Error";
             }
         };
-
         window.checkSecretCode = () => {
-            if (display.value === SECRET_KEY) {
+            if (!window.isCheckingForPortal && display.value === SECRET_KEY) {
                 window.closeCalcModal();
                 document.getElementById('secret-admin-panel').classList.remove('hidden');
                 document.getElementById('secret-admin-panel').scrollIntoView({ behavior: 'smooth' });
                 alert("Access Granted! Admin Panel Unlocked.");
                 window.clearCalc();
+            } else if (window.isCheckingForPortal && display.value === ADMIN_PORTAL_KEY) {
+                window.closeCalcModal();
+                document.getElementById('calculator-verified-admin-links').classList.remove('hidden');
+                document.getElementById('calculator-verified-admin-links').scrollIntoView({ behavior: 'smooth' });
+                alert("Admin Access Verified! Portals Unlocked.");
+                window.clearCalc();
             }
         };
-
-        // --- SNT ARCADE ENGINE ---
         let pScore = 0, aScore = 0;
-
         window.openArcadeZone = () => {
             document.getElementById('game-modal').style.display = "flex";
             window.showArcadeMainMenu();
         };
-
         window.closeArcadeZone = () => {
             document.getElementById('game-modal').style.display = "none";
             if(window.brickInterval) clearInterval(window.brickInterval);
         };
-
         window.showArcadeMainMenu = () => {
             if(window.brickInterval) clearInterval(window.brickInterval);
             document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
             document.getElementById('arcade-main-menu').classList.remove('hidden');
         };
-
         window.switchGameTab = (game) => {
             document.getElementById('arcade-main-menu').classList.add('hidden');
             document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
-            
             if(game === 'ttt-ai') {
                 document.getElementById('tab-ttt-ai').classList.remove('hidden');
                 window.resetTTTAI();
@@ -864,12 +831,9 @@
                 window.initMemoryGame();
             }
         };
-
-        // --- TTT AI ENGINE ---
         let tttAIBoard = ["", "", "", "", "", "", "", "", ""];
         let isTttAIActive = true;
         const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
-
         window.playTTTAI = (index) => {
             if (tttAIBoard[index] !== "" || !isTttAIActive) return;
             tttAIBoard[index] = "X"; updateTTTAIBoard();
@@ -883,21 +847,17 @@
                 else { isTttAIActive = true; document.getElementById('ttt-ai-status').innerText = "Your Turn (X)"; }
             }, 500);
         };
-
         function getBestTTTMove() {
             for (let p of winPatterns) { let c = p.filter(i => tttAIBoard[i] === "O").length; let e = p.find(i => tttAIBoard[i] === ""); if (c === 2 && e !== undefined) return e; }
             for (let p of winPatterns) { let c = p.filter(i => tttAIBoard[i] === "X").length; let e = p.find(i => tttAIBoard[i] === ""); if (c === 2 && e !== undefined) return e; }
             if (tttAIBoard[4] === "") return 4;
             let em = tttAIBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null); return em.length > 0 ? em[Math.floor(Math.random() * em.length)] : null;
         }
-
         function checkTTTWin(b, p) { return winPatterns.some(pat => pat.every(i => b[i] === p)); }
-        function updateTTTAIBoard() {
+        window.updateTTTAIBoard = () => {
             document.querySelectorAll('.ttt-ai-cell').forEach((c, i) => { c.innerText = tttAIBoard[i]; c.className = `ttt-ai-cell bg-slate-800/80 border border-white/5 aspect-square rounded-xl text-2xl font-black flex items-center justify-center h-16 active:scale-90 transition-all ${tttAIBoard[i] === 'X' ? 'text-sky-400' : 'text-amber-400'}`; });
-        }
-        window.resetTTTAI = () => { tttAIBoard = ["", "", "", "", "", "", "", "", ""]; isTttAIActive = true; document.getElementById('ttt-ai-status').innerText = "Your Turn (X)"; document.getElementById('ttt-ai-match-result').innerText = ""; updateTTTAIBoard(); };
-
-        // --- TTT ME VS FRIEND ENGINE ---
+        };
+        window.resetTTTAI = () => { tttAIBoard = ["", "", "", "", "", "", "", "", ""]; isTttAIActive = true; document.getElementById('ttt-ai-status').innerText = "Your Turn (X)"; document.getElementById('ttt-ai-match-result').innerText = ""; window.updateTTTAIBoard(); };
         let tttFriendBoard = ["", "", "", "", "", "", "", "", ""];
         let friendTurn = "X"; let isTttFriendActive = true;
         window.playTTTFriend = (index) => {
@@ -911,8 +871,6 @@
             document.querySelectorAll('.ttt-friend-cell').forEach((c, i) => { c.innerText = tttFriendBoard[i]; c.className = `ttt-friend-cell bg-slate-800/80 border border-white/5 aspect-square rounded-xl text-2xl font-black flex items-center justify-center h-16 active:scale-90 transition-all ${tttFriendBoard[i] === 'X' ? 'text-sky-400' : 'text-amber-400'}`; });
         }
         window.resetTTTFriend = () => { tttFriendBoard = ["", "", "", "", "", "", "", "", ""]; friendTurn = "X"; isTttFriendActive = true; document.getElementById('ttt-friend-status').innerText = "Player 1 Turn (X)"; document.getElementById('ttt-friend-match-result').innerText = ""; updateTTTFriendBoard(); };
-
-        // --- ROCK PAPER SCISSORS ---
         const rpsIcons = { stone: '👊 Stone', paper: '✋ Paper', scissors: '✌️ Scissors' };
         window.playRPS = (playerPick) => {
             const options = ['stone', 'paper', 'scissors']; const aiPick = options[Math.floor(Math.random() * 3)];
@@ -925,25 +883,19 @@
             const res = document.getElementById('rps-match-result'); res.innerText = msg; res.className = `text-[11px] font-black uppercase tracking-widest mt-4 h-4 ${col}`;
         };
         window.resetRPS = () => { pScore = 0; aScore = 0; document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0; document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-"; document.getElementById('rps-match-result').innerText = ""; };
-
-        // --- RETRO BRICK BREAKER ENGINE (LEVELWISE) ---
         let bCanvas, bCtx, paddleX, ballX, ballY, dx, dy, bricks, bScoreNum, bLives;
         window.brickLevel = 1;
         const bPaddleWidth = 60, bPaddleHeight = 8, bBallRadius = 5, bRowCount = 3, bColCount = 5, bBrickWidth = 52, bBrickHeight = 12, bBrickPadding = 6, bOffsetTop = 15, bOffsetLeft = 15;
         let leftPressed = false, rightPressed = false;
-
         window.initBrickBreaker = () => {
             bCanvas = document.getElementById("brickCanvas"); if(!bCanvas) return; bCtx = bCanvas.getContext("2d");
             paddleX = (bCanvas.width - bPaddleWidth) / 2; ballX = bCanvas.width / 2; ballY = bCanvas.height - 30;
-            
             let speedMultiplier = 1 + (window.brickLevel - 1) * 0.4;
             dx = 2 * speedMultiplier; dy = -2 * speedMultiplier;
             bScoreNum = 0; bLives = 3;
-            
             document.getElementById("brick-score").innerText = bScoreNum;
             document.getElementById("brick-level").innerText = window.brickLevel;
             document.getElementById("brick-lives").innerText = bLives;
-            
             bricks = [];
             for(let c=0; c<bColCount; c++) {
                 bricks[c] = [];
@@ -951,16 +903,13 @@
             }
             drawBrickFrameStatic();
         };
-
         window.startBrickGame = () => {
             if(window.brickInterval) clearInterval(window.brickInterval);
             window.initBrickBreaker();
             window.brickInterval = setInterval(drawBrickEngine, 16);
         };
-
         window.movePaddleLeft = (isPressed) => { leftPressed = isPressed; };
         window.movePaddleRight = (isPressed) => { rightPressed = isPressed; };
-
         function drawBrickFrameStatic() {
             bCtx.clearRect(0,0,bCanvas.width,bCanvas.height);
             bCtx.fillStyle = "#0f172a"; bCtx.fillRect(0,0,bCanvas.width,bCanvas.height);
@@ -975,11 +924,9 @@
                 }
             }
         }
-
         function drawBrickEngine() {
             bCtx.clearRect(0,0,bCanvas.width,bCanvas.height);
             bCtx.fillStyle = "#090d16"; bCtx.fillRect(0,0,bCanvas.width,bCanvas.height);
-            
             for(let c=0; c<bColCount; c++) {
                 for(let r=0; r<bRowCount; r++) {
                     if(bricks[c][r].status === 1) {
@@ -992,7 +939,6 @@
             }
             bCtx.fillStyle = "#fbbf24"; bCtx.fillRect(paddleX, bCanvas.height - bPaddleHeight - 5, bPaddleWidth, bPaddleHeight);
             bCtx.beginPath(); bCtx.arc(ballX, ballY, bBallRadius, 0, Math.PI*2); bCtx.fillStyle = "#ffffff"; bCtx.fill(); bCtx.closePath();
-
             for(let c=0; c<bColCount; c++) {
                 for(let r=0; r<bRowCount; r++) {
                     let b = bricks[c][r];
@@ -1016,7 +962,6 @@
                     }
                 }
             }
-
             if(ballX + dx > bCanvas.width-bBallRadius || ballX + dx < bBallRadius) { dx = -dx; }
             if(ballY + dy < bBallRadius) { dy = -dy; } 
             else if(ballY + dy > bCanvas.height - bBallRadius - 5 - bPaddleHeight) {
@@ -1027,35 +972,26 @@
                     else { ballX = bCanvas.width/2; ballY = bCanvas.height-30; let speedMultiplier = 1 + (window.brickLevel - 1) * 0.4; dx = 2 * speedMultiplier; dy = -2 * speedMultiplier; paddleX = (bCanvas.width-bPaddleWidth)/2; }
                 }
             }
-
             if(rightPressed && paddleX < bCanvas.width-bPaddleWidth) { paddleX += 4; }
             else if(leftPressed && paddleX > 0) { paddleX -= 4; }
-
             ballX += dx; ballY += dy;
         }
-
-        // --- MEMORY MATCH CARDS ENGINE (LEVELWISE + PREVIEW) ---
         let level1Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡']; 
         let level2Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓']; 
         let level3Items = ['💻', '💻', '🚀', '🚀', '🧠', '🧠', '⚡', '⚡', '🤖', '🤖', '🎓', '🎓', '📱', '📱', '🔥', '🔥']; 
-        
         let currentLevelItems = [];
         window.memoryCurrentLevel = 1;
         let chosenCards = [], chosenCardsId = [], matchedCards = [], flipCounter = 0;
         let isPeeking = false;
-
         window.initMemoryGame = () => {
             const grid = document.getElementById("memory-grid"); if(!grid) return;
             grid.innerHTML = ""; flipCounter = 0; chosenCards = []; chosenCardsId = []; matchedCards = []; isPeeking = true;
             document.getElementById("memory-flips").innerText = flipCounter;
             document.getElementById("memory-level").innerText = window.memoryCurrentLevel;
-
             if(window.memoryCurrentLevel === 1) { currentLevelItems = [...level1Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
             else if(window.memoryCurrentLevel === 2) { currentLevelItems = [...level2Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
             else { currentLevelItems = [...level3Items]; grid.className = "grid grid-cols-4 gap-2 max-w-[280px] mx-auto my-2"; }
-
             currentLevelItems.sort(() => 0.5 - Math.random());
-
             for (let i = 0; i < currentLevelItems.length; i++) {
                 let card = document.createElement('div');
                 card.setAttribute('class', 'memory-card flipped'); 
@@ -1064,7 +1000,6 @@
                 card.innerHTML = `<div class="memory-card-front"><i class="fas fa-question text-xs"></i></div><div class="memory-card-back">${currentLevelItems[i]}</div>`;
                 grid.appendChild(card);
             }
-
             setTimeout(() => {
                 document.querySelectorAll('.memory-card').forEach(card => {
                     card.classList.remove('flipped');
@@ -1072,26 +1007,21 @@
                 isPeeking = false;
             }, 1500);
         };
-
         function flipMemoryCard() {
             if(isPeeking) return;
             let cardId = this.getAttribute('data-id');
             if (chosenCardsId.length === 2 || chosenCardsId.includes(cardId) || matchedCards.includes(cardId)) return;
-
             this.classList.add('flipped');
             chosenCards.push(currentLevelItems[cardId]);
             chosenCardsId.push(cardId);
-
             if (chosenCards.length === 2) {
                 flipCounter++; document.getElementById("memory-flips").innerText = flipCounter;
                 setTimeout(checkMemoryMatch, 600);
             }
         }
-
         function checkMemoryMatch() {
             let cards = document.querySelectorAll('.memory-card');
             let firstId = chosenCardsId[0]; let secondId = chosenCardsId[1];
-
             if (chosenCards[0] === chosenCards[1]) {
                 matchedCards.push(firstId, secondId);
                 if (matchedCards.length === currentLevelItems.length) { 
@@ -1111,28 +1041,23 @@
             }
             chosenCards = []; chosenCardsId = [];
         }
-
         window.resetMemoryWholeGame = () => {
             window.memoryCurrentLevel = 1;
             window.initMemoryGame();
         };
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US'; recognition.continuous = true; recognition.interimResults = false;
-            
             window.startAssistant = () => { 
                 window.isAssistantEnabled = true; 
-                try { recognition.start(); updateUI(true); } catch (e) { console.log('Speech pipeline already hot.'); } 
+                try { recognition.start(); updateUI(true); } catch (e) { console.log('Speech pipeline hot.'); } 
             };
-            
             function updateUI(isActive) {
                 const txt = document.getElementById('ai-status-text'); const wave = document.getElementById('ai-wave');
                 if(isActive) { if(txt) { txt.classList.remove('opacity-0'); txt.innerText = "Listening..."; } if(wave) wave.classList.remove('hidden'); } 
                 else { if(txt) txt.innerText = "Paused..."; }
             }
-            
             recognition.onresult = (event) => {
                 const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
                 if(command.includes("profile")) { window.switchTab('profile', document.querySelectorAll('.nav-item')[2]); }
@@ -1140,11 +1065,9 @@
                 else if(command.includes("desk") || command.includes("academic")) { window.switchTab('academics', document.querySelectorAll('.nav-item')[1]); }
                 else if(command.includes("logout") || command.includes("exit")) { window.logout(); }
             };
-            
-            recognition.onerror = (err) => { console.error('Voice pipeline exception caught:', err); updateUI(false); };
+            recognition.onerror = (err) => { console.error(err); updateUI(false); };
             recognition.onend = () => { if(window.isAssistantEnabled) try { recognition.start(); } catch(e){} };
         } else {
-            console.log("Voice control feature is unsupported on this specific web application runtime host environment.");
             window.startAssistant = () => alert("Voice API is not supported in this browser version container.");
         }
     </script>
@@ -1152,9 +1075,9 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('SNT Engine Service Worker running safely.', reg.scope);
+                    console.log('SNT Engine Service Worker running.', reg.scope);
                 }).catch(err => {
-                    console.error('Service Worker registration failed:', err);
+                    console.error(err);
                 });
             });
         }
