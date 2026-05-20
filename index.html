@@ -787,10 +787,22 @@
     </script>
 
     <!-- Native Service Worker Setup Hook -->
-    <script>
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => console.log("SW Fault:", e)); }); }
-        window.enableNotifications = () => { Notification.requestPermission().then(p => { if (p === "granted") { alert("Notifications Active!"); } }); };
-    </script>
+ <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log("SNT SW Registered Successfully!");
+                // Notification permission ke liye proactively request krna
+                if (Notification.permission === "default") {
+                    Notification.requestPermission();
+                }
+            })
+            .catch(e => console.log("SW Fault:", e));
+        });
+    }
+</script>
+
 
     <!-- Code Integrity Protective Shields -->
     <script>
