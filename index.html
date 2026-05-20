@@ -14,7 +14,7 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .app-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); color: white; }
         body.light-mode { background-color: #f1f5f9 !important; color: #1e293b; }
-        body.light-mode .app-card, body.light-mode .glass, body.light-mode #profile-summary, body.light-mode .profile-data-card, body.light-mode .search-box, body.light-mode .info-value, body.light-mode .academic-item { background: #ffffff !important; backdrop-filter: none; border: 2px solid #FF8C00 !important; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.15) !important; color: #1e293b !important; }
+        body.light-mode .app-card, body.light-mode .glass, body.light-mode #profile-summary, body.light-mode .profile-data-card, body.light-mode .search-box, body.light-mode .info-value, body.light-mode .academic-item, body.light-mode .file-card { background: #ffffff !important; backdrop-filter: none; border: 2px solid #FF8C00 !important; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.15) !important; color: #1e293b !important; }
         body.light-mode #profile-summary { border-left: 10px solid #FF8C00 !important; }
         body.light-mode .app-card p { color: #1e293b !important; font-weight: 800; text-transform: uppercase; }
         body.light-mode .academic-item p { color: #1e293b !important; }
@@ -76,6 +76,14 @@
         .calc-btn.operator { background: #f39c12; color: #000; }
         .calc-btn.operator:hover { background: #e67e22; }
         .close-calc { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* --- CUSTOM FILE CARD DESIGN FROM PORTAL --- */
+        .file-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #f1f5f9; font-size: 13px; transition: all 0.2s; }
+        .file-card:hover { background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; }
+        .file-pdf { color: #ef4444; }
+        .file-word { color: #3b82f6; }
+        .file-excel { color: #10b981; }
+        .file-code { color: #a855f7; }
     </style>
 </head>
 <body class="view-laptop" id="main-body">
@@ -172,6 +180,33 @@
                     <a href="https://harshitkaushal9129-bit.github.io/snt-institute/Admin_timer.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-red-500/40 transition-all">
                         <i class="fas fa-stopwatch text-yellow-400 text-lg"></i>
                         <div><p class="text-[11px] font-black text-white uppercase">Admin Timer</p><span class="text-[8px] text-slate-500 uppercase">Schedules</span></div>
+                    </a>
+                </div>
+            </div>
+
+            <div id="secret-admin-panel" class="glass p-6 rounded-[32px] mb-6 hidden border-2 border-dashed border-yellow-500 shadow-2xl animate-fade-in">
+                <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                    <h4 class="text-sm font-black uppercase tracking-wider text-yellow-500 flex items-center gap-2"><i class="fas fa-unlock"></i> Admin Core Console</h4>
+                    <button onclick="document.getElementById('secret-admin-panel').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs"><i class="fas fa-times"></i></button>
+                </div>
+                <p class="text-[11px] text-slate-400 uppercase tracking-widest mb-4 font-bold">Security clearance verified. Access granted to hidden institutional resources.</p>
+                <span class="section-tag !my-2 !text-xs">Secure Files (4)</span>
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <a href="#" class="file-card">
+                        <i class="fas fa-file-pdf file-pdf text-xl"></i>
+                        <span class="font-bold uppercase text-[10px] tracking-wider">File 1 (Notes)</span>
+                    </a>
+                    <a href="#" class="file-card">
+                        <i class="fas fa-file-word file-word text-xl"></i>
+                        <span class="font-bold uppercase text-[10px] tracking-wider">File 2 (Doc)</span>
+                    </a>
+                    <a href="#" class="file-card">
+                        <i class="fas fa-file-excel file-excel text-xl"></i>
+                        <span class="font-bold uppercase text-[10px] tracking-wider">File 3 (Data)</span>
+                    </a>
+                    <a href="#" class="file-card">
+                        <i class="fas fa-file-code file-code text-xl"></i>
+                        <span class="font-bold uppercase text-[10px] tracking-wider">File 4 (Code)</span>
                     </a>
                 </div>
             </div>
@@ -781,8 +816,8 @@
         window.checkSecretCode = () => {
             if (display.value === SECRET_KEY) {
                 window.closeCalcModal();
-                document.getElementById('admin-links-container').classList.remove('hidden');
-                document.getElementById('admin-links-container').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('secret-admin-panel').classList.remove('hidden');
+                document.getElementById('secret-admin-panel').scrollIntoView({ behavior: 'smooth' });
                 alert("Access Granted! Admin Panel Unlocked.");
                 window.clearCalc();
             }
