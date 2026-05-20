@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT Institute - Official Portal</title>
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#0f172a">
     <link class="rounded-full" rel="apple-touch-icon" href="./SNT.jpg">
     <link rel="icon" type="image/jpeg" href="SNT.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,6 +57,8 @@
         #wheelCanvas, #snakeCanvas { max-width: 100%; height: auto; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .arcade-point-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: 0.2s; cursor: pointer; }
+        .arcade-point-item:active { background: rgba(56,189,248,0.1); transform: scale(0.97); }
     </style>
 </head>
 <body oncontextmenu="return false;" class="view-laptop" id="main-body">
@@ -255,23 +255,55 @@
         </div>
     </div>
 
-    <!-- SNT Multi-Game Arcade Zone Modal (4 LISTS / TABS AS REQUESTED) -->
+    <!-- SNT ARCADE ZONE MAIN MODAL (MAIN HEADING + 4 POINTS SYSTEM) -->
     <div id="game-modal" class="modal-overlay" style="display: none;">
-        <div class="glass p-5 rounded-[35px] w-full max-w-[380px] text-center border border-white/10 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="glass p-6 rounded-[35px] w-full max-w-[380px] text-center border border-white/10 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onclick="closeArcadeZone()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm z-50">
                 <i class="fas fa-times"></i>
             </button>
             
-            <!-- Tab Selector 4 Icons/Buttons List -->
-            <div class="flex justify-center gap-1.5 mb-4 mt-2 flex-wrap">
-                <button onclick="switchGameTab('ttt-ai')" id="btn-tab-ttt-ai" class="bg-purple-600 text-white px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight">TTT (vs AI)</button>
-                <button onclick="switchGameTab('ttt-friend')" id="btn-tab-ttt-friend" class="bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight">TTT (vs Friend)</button>
-                <button onclick="switchGameTab('rps')" id="btn-tab-rps" class="bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight">RPS Game</button>
-                <button onclick="switchGameTab('wheel-snake')" id="btn-tab-wheel-snake" class="bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight">Wheel & Snake</button>
+            <!-- MAIN MENU VIEW -->
+            <div id="arcade-main-menu">
+                <h2 class="text-2xl font-black italic tracking-tighter text-amber-400 mb-2 uppercase">SNT ARCADE ZONE</h2>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-6">Select a Point to Start Playing</p>
+                
+                <!-- 4 Interactive Points/Lists -->
+                <div class="space-y-3 text-left">
+                    <div onclick="switchGameTab('ttt-ai')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">1. Tic-Tac-Toe (vs AI)</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                    <div onclick="switchGameTab('ttt-friend')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">2. Tic-Tac-Toe (vs Friend)</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                    <div onclick="switchGameTab('rps')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">3. Stone Paper Scissors</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                    <div onclick="switchGameTab('wheel-snake')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <p class="text-[12px] font-black uppercase text-white tracking-wide">4. Spinwheel & Snake</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                    </div>
+                </div>
             </div>
 
+            <!-- GAME INTERFACES (HIDDEN BY DEFAULT) -->
             <!-- TAB 1: TIC TAC TOE (AI VS ME) -->
-            <div id="tab-ttt-ai" class="game-sub-tab">
+            <div id="tab-ttt-ai" class="game-sub-tab hidden mt-2">
+                <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-purple-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-purple-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-robot mr-1"></i> TTT: AI vs Me</h3>
                 <p id="ttt-ai-status" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-4">Your Turn (X)</p>
                 <div class="grid grid-cols-3 gap-2 max-w-[240px] mx-auto my-4">
@@ -290,7 +322,8 @@
             </div>
 
             <!-- TAB 2: TIC TAC TOE (ME VS MY FRIEND) -->
-            <div id="tab-ttt-friend" class="game-sub-tab hidden">
+            <div id="tab-ttt-friend" class="game-sub-tab hidden mt-2">
+                <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-indigo-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-indigo-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-users mr-1"></i> TTT: Me vs Friend</h3>
                 <p id="ttt-friend-status" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-4">Player 1 Turn (X)</p>
                 <div class="grid grid-cols-3 gap-2 max-w-[240px] mx-auto my-4">
@@ -309,7 +342,8 @@
             </div>
 
             <!-- TAB 3: STONE PAPER SCISSORS -->
-            <div id="tab-rps" class="game-sub-tab hidden">
+            <div id="tab-rps" class="game-sub-tab hidden mt-2">
+                <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-sky-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <h3 class="text-sky-400 font-black italic text-base tracking-tighter uppercase mb-2"><i class="fas fa-hand-rock mr-1"></i> Stone Paper Scissors</h3>
                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-4">Score - You: <span id="player-score" class="text-white">0</span> | AI: <span id="ai-score" class="text-white">0</span></p>
                 <div class="grid grid-cols-3 gap-3 my-6">
@@ -327,7 +361,8 @@
             </div>
 
             <!-- TAB 4: SPINWHEEL & SNAKE -->
-            <div id="tab-wheel-snake" class="game-sub-tab hidden">
+            <div id="tab-wheel-snake" class="game-sub-tab hidden mt-2">
+                <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-amber-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
                 <!-- Spinwheel Area -->
                 <div class="border-b border-white/10 pb-4 mb-4">
                     <h3 class="text-amber-400 font-black italic text-sm tracking-tighter uppercase mb-2"><i class="fas fa-circle-notch mr-1"></i> Lucky Spin Wheel</h3>
@@ -542,7 +577,6 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if(el) el.classList.add('active');
-            if(tab === 'academics') setTimeout(window.drawWheel, 100);
         };
         
         window.switchView = (mode) => { document.getElementById('main-body').className = mode; };
@@ -567,7 +601,7 @@
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
 
-        // --- ARCADE MULTI-GAME 4 LIST SYSTEM CONTROLLERS ---
+        // --- SNT ARCADE 4 POINTS NAVIGATION ENGINE ---
         let isSpinning = false;
         let pScore = 0, aScore = 0;
         const rewards = ["Free PDF", "+5 Bonus", "Next Time", "Stickers", "Try Again", "Lab Access"];
@@ -575,7 +609,7 @@
 
         window.openArcadeZone = () => {
             document.getElementById('game-modal').style.display = "flex";
-            window.switchGameTab('ttt-ai');
+            window.showArcadeMainMenu();
         };
 
         window.closeArcadeZone = () => {
@@ -583,34 +617,31 @@
             if(window.snakeInterval) clearInterval(window.snakeInterval);
         };
 
-        window.switchGameTab = (game) => {
-            document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
-            document.getElementById('btn-tab-ttt-ai').className = "bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
-            document.getElementById('btn-tab-ttt-friend').className = "bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
-            document.getElementById('btn-tab-rps').className = "bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
-            document.getElementById('btn-tab-wheel-snake').className = "bg-slate-800 text-slate-400 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
-            
+        window.showArcadeMainMenu = () => {
             if(window.snakeInterval) clearInterval(window.snakeInterval);
+            document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('arcade-main-menu').classList.remove('hidden');
+        };
 
+        window.switchGameTab = (game) => {
+            document.getElementById('arcade-main-menu').classList.add('hidden');
+            document.querySelectorAll('.game-sub-tab').forEach(t => t.classList.add('hidden'));
+            
             if(game === 'ttt-ai') {
                 document.getElementById('tab-ttt-ai').classList.remove('hidden');
-                document.getElementById('btn-tab-ttt-ai').className = "bg-purple-600 text-white px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
                 window.resetTTTAI();
             } else if(game === 'ttt-friend') {
                 document.getElementById('tab-ttt-friend').classList.remove('hidden');
-                document.getElementById('btn-tab-ttt-friend').className = "bg-indigo-600 text-white px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
                 window.resetTTTFriend();
             } else if(game === 'rps') {
                 document.getElementById('tab-rps').classList.remove('hidden');
-                document.getElementById('btn-tab-rps').className = "bg-sky-500 text-slate-950 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
             } else if(game === 'wheel-snake') {
                 document.getElementById('tab-wheel-snake').classList.remove('hidden');
-                document.getElementById('btn-tab-wheel-snake').className = "bg-amber-500 text-slate-950 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-tight";
                 setTimeout(() => { window.drawWheel(); window.initSnakeGame(); }, 100);
             }
         };
 
-        // --- LIST 1: TTT AI ENGINE ---
+        // --- POINT 1: TTT AI ENGINE ---
         let tttAIBoard = ["", "", "", "", "", "", "", "", ""];
         let isTttAIActive = true;
         const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
@@ -642,7 +673,7 @@
         }
         window.resetTTTAI = () => { tttAIBoard = ["", "", "", "", "", "", "", "", ""]; isTttAIActive = true; document.getElementById('ttt-ai-status').innerText = "Your Turn (X)"; document.getElementById('ttt-ai-match-result').innerText = ""; updateTTTAIBoard(); };
 
-        // --- LIST 2: TTT ME VS FRIEND ENGINE ---
+        // --- POINT 2: TTT ME VS FRIEND ENGINE ---
         let tttFriendBoard = ["", "", "", "", "", "", "", "", ""];
         let friendTurn = "X"; let isTttFriendActive = true;
         window.playTTTFriend = (index) => {
@@ -657,7 +688,7 @@
         }
         window.resetTTTFriend = () => { tttFriendBoard = ["", "", "", "", "", "", "", "", ""]; friendTurn = "X"; isTttFriendActive = true; document.getElementById('ttt-friend-status').innerText = "Player 1 Turn (X)"; document.getElementById('ttt-friend-match-result').innerText = ""; updateTTTFriendBoard(); };
 
-        // --- LIST 3: ROCK PAPER SCISSORS ---
+        // --- POINT 3: ROCK PAPER SCISSORS ---
         const rpsIcons = { stone: '👊 Stone', paper: '✋ Paper', scissors: '✌️ Scissors' };
         window.playRPS = (playerPick) => {
             const options = ['stone', 'paper', 'scissors']; const aiPick = options[Math.floor(Math.random() * 3)];
@@ -671,7 +702,7 @@
         };
         window.resetRPS = () => { pScore = 0; aScore = 0; document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0; document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-"; document.getElementById('rps-match-result').innerText = ""; };
 
-        // --- LIST 4: WHEEL ENGINE ---
+        // --- POINT 4: WHEEL ENGINE ---
         window.drawWheel = () => {
             const canvas = document.getElementById("wheelCanvas"); if(!canvas) return; const ctx = canvas.getContext("2d");
             const num = rewards.length; const seg = (2 * Math.PI) / num; ctx.clearRect(0,0, canvas.width, canvas.height);
@@ -695,7 +726,7 @@
             }, 4000);
         };
 
-        // --- LIST 4: RETRO SNAKE GAME ENGINE ---
+        // --- POINT 4: RETRO SNAKE GAME ENGINE ---
         let snake, food, snakeDir, snakeScore; const box = 10;
         window.initSnakeGame = () => {
             const cvs = document.getElementById("snakeCanvas"); if(!cvs) return; const ctx = cvs.getContext("2d");
