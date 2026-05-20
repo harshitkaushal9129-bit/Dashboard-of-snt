@@ -255,7 +255,7 @@
         </div>
     </div>
 
-    <!-- SNT ARCADE ZONE MAIN MODAL (MAIN HEADING + 4 POINTS SYSTEM) -->
+    <!-- SNT ARCADE ZONE MAIN MODAL -->
     <div id="game-modal" class="modal-overlay" style="display: none;">
         <div class="glass p-6 rounded-[35px] w-full max-w-[380px] text-center border border-white/10 shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onclick="closeArcadeZone()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm z-50">
@@ -267,7 +267,6 @@
                 <h2 class="text-2xl font-black italic tracking-tighter text-amber-400 mb-2 uppercase">SNT ARCADE ZONE</h2>
                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-6">Select a Point to Start Playing</p>
                 
-                <!-- 4 Interactive Points/Lists -->
                 <div class="space-y-3 text-left">
                     <div onclick="switchGameTab('ttt-ai')" class="arcade-point-item p-4 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -300,7 +299,6 @@
                 </div>
             </div>
 
-            <!-- GAME INTERFACES (HIDDEN BY DEFAULT) -->
             <!-- TAB 1: TIC TAC TOE (AI VS ME) -->
             <div id="tab-ttt-ai" class="game-sub-tab hidden mt-2">
                 <button onclick="showArcadeMainMenu()" class="text-left text-[9px] text-purple-400 font-black uppercase tracking-wider mb-4 block"><i class="fas fa-arrow-left mr-1"></i> Back to Menu</button>
@@ -601,7 +599,7 @@
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
 
-        // --- SNT ARCADE 4 POINTS NAVIGATION ENGINE ---
+        // --- SNT ARCADE ENGINE ---
         let isSpinning = false;
         let pScore = 0, aScore = 0;
         const rewards = ["Free PDF", "+5 Bonus", "Next Time", "Stickers", "Try Again", "Lab Access"];
@@ -641,7 +639,7 @@
             }
         };
 
-        // --- POINT 1: TTT AI ENGINE ---
+        // --- TTT AI ENGINE ---
         let tttAIBoard = ["", "", "", "", "", "", "", "", ""];
         let isTttAIActive = true;
         const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
@@ -673,7 +671,7 @@
         }
         window.resetTTTAI = () => { tttAIBoard = ["", "", "", "", "", "", "", "", ""]; isTttAIActive = true; document.getElementById('ttt-ai-status').innerText = "Your Turn (X)"; document.getElementById('ttt-ai-match-result').innerText = ""; updateTTTAIBoard(); };
 
-        // --- POINT 2: TTT ME VS FRIEND ENGINE ---
+        // --- TTT ME VS FRIEND ENGINE ---
         let tttFriendBoard = ["", "", "", "", "", "", "", "", ""];
         let friendTurn = "X"; let isTttFriendActive = true;
         window.playTTTFriend = (index) => {
@@ -688,7 +686,7 @@
         }
         window.resetTTTFriend = () => { tttFriendBoard = ["", "", "", "", "", "", "", "", ""]; friendTurn = "X"; isTttFriendActive = true; document.getElementById('ttt-friend-status').innerText = "Player 1 Turn (X)"; document.getElementById('ttt-friend-match-result').innerText = ""; updateTTTFriendBoard(); };
 
-        // --- POINT 3: ROCK PAPER SCISSORS ---
+        // --- ROCK PAPER SCISSORS ---
         const rpsIcons = { stone: '👊 Stone', paper: '✋ Paper', scissors: '✌️ Scissors' };
         window.playRPS = (playerPick) => {
             const options = ['stone', 'paper', 'scissors']; const aiPick = options[Math.floor(Math.random() * 3)];
@@ -702,7 +700,7 @@
         };
         window.resetRPS = () => { pScore = 0; aScore = 0; document.getElementById('player-score').innerText = 0; document.getElementById('ai-score').innerText = 0; document.getElementById('rps-player-pick').innerText = "-"; document.getElementById('rps-ai-pick').innerText = "-"; document.getElementById('rps-match-result').innerText = ""; };
 
-        // --- POINT 4: WHEEL ENGINE ---
+        // --- WHEEL ENGINE ---
         window.drawWheel = () => {
             const canvas = document.getElementById("wheelCanvas"); if(!canvas) return; const ctx = canvas.getContext("2d");
             const num = rewards.length; const seg = (2 * Math.PI) / num; ctx.clearRect(0,0, canvas.width, canvas.height);
@@ -721,12 +719,11 @@
                 isSpinning = false; const act = deg % 360; const norm = (360 - act + 90) % 360;
                 const idx = Math.floor(norm / (360 / rewards.length)) % rewards.length;
                 document.getElementById('wheel-result').innerText = `🎉 WON: ${rewards[idx]}`;
-                canvas.style.transition = 'none'; canvas.style.transform = `rotate(${act}deg)`;
-                setTimeout(() => { canvas.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)'; }, 50);
+                canvas.style.transform = `rotate(${act}deg)`;
             }, 4000);
         };
 
-        // --- POINT 4: RETRO SNAKE GAME ENGINE ---
+        // --- RETRO SNAKE GAME ENGINE ---
         let snake, food, snakeDir, snakeScore; const box = 10;
         window.initSnakeGame = () => {
             const cvs = document.getElementById("snakeCanvas"); if(!cvs) return; const ctx = cvs.getContext("2d");
