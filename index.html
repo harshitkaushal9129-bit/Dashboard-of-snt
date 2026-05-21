@@ -161,11 +161,11 @@
                         <i class="fas fa-envelope-open-text text-red-400 text-lg"></i>
                         <div><p class="text-[11px] font-black text-white uppercase">Admin Inbox</p><span class="text-[8px] text-slate-500 uppercase">Queries</span></div>
                     </a>
-                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/Admin.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-red-500/40 transition-all">
+                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-red-500/40 transition-all">
                         <i class="fas fa-tools text-orange-400 text-lg"></i>
                         <div><p class="text-[11px] font-black text-white uppercase">Admin Portal</p><span class="text-[8px] text-slate-500 uppercase">Management</span></div>
                     </a>
-                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/Admin_timer.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-red-500/40 transition-all">
+                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin_timer.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-red-500/40 transition-all">
                         <i class="fas fa-stopwatch text-yellow-400 text-lg"></i>
                         <div><p class="text-[11px] font-black text-white uppercase">Admin Timer</p><span class="text-[8px] text-slate-500 uppercase">Schedules</span></div>
                     </a>
@@ -697,9 +697,8 @@
                 { name: 'Results', url: './result-history.html', icon: 'fa-history', color: 'text-orange-400', isProtected: false },
                 { name: 'Help Desk', url: './Query-box.html', icon: 'fa-headset', color: 'text-pink-400', isProtected: false },
                 { name: 'Fee Status', url: './Fee-history.html', icon: 'fa-receipt', color: 'text-emerald-400', isProtected: false },
-                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400', isProtected: false },
-                { name: 'Admin Inbox', url: './admin-queries.html', icon: 'fa-user-cog', color: 'text-red-500', isProtected: true }
-            ];
+                { name: 'Rankings', url: './ranking.html', icon: 'fa-trophy', color: 'text-yellow-400', isProtected: false }
+              ];
             const grid = document.getElementById('app-grid');
             grid.innerHTML = menuItems.map(item => {
                 const clickHandler = item.isProtected ? `handleAdminNavigation('${item.url}')` : `location.href='${item.url}'`;
