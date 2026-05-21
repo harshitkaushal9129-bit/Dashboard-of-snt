@@ -287,32 +287,9 @@
                     <div class="bg-amber-500 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Play</div>
                 </div>
             </div>
-            <span class="section-tag">Administrative Security Controls</span>
-            <div class="flex flex-col gap-3">
-                <div onclick="openAdminPortalCalcTrigger()" class="academic-item flex items-center justify-between p-4 rounded-2xl border border-red-500/20 bg-red-500/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-red-500/20 text-red-400 rounded-xl flex items-center justify-center text-lg"><i class="fas fa-user-lock"></i></div>
-                        <div>
-                            <p class="text-[12px] font-black uppercase text-red-400 tracking-wide">SNT Admin Core Login</p>
-                            <span class="text-[9px] text-red-500/60 font-bold uppercase tracking-wider">Requires Secret Calculator Passcode Authentication</span>
-                        </div>
-                    </div>
-                    <div class="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Verify</div>
-                </div>
-            </div>
-            <div id="calculator-verified-admin-links" class="glass p-5 rounded-[32px] mt-4 hidden border-l-4 border-emerald-500 shadow-2xl animate-fade-in">
-                <p class="text-emerald-400 text-[9px] font-black uppercase tracking-widest mb-3">Clearance Level Verified</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-emerald-500/40 transition-all">
-                        <i class="fas fa-user-shield text-emerald-400 text-lg"></i>
-                        <div><p class="text-[11px] font-black text-white uppercase">Admin Portal</p><span class="text-[8px] text-slate-500 uppercase">System Core</span></div>
-                    </a>
-                    <a href="https://harshitkaushal9129-bit.github.io/snt-institute/admin_timer.html" class="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center gap-3 hover:border-emerald-500/40 transition-all">
-                        <i class="fas fa-clock text-cyan-400 text-lg"></i>
-                        <div><p class="text-[11px] font-black text-white uppercase">Admin Timer</p><span class="text-[8px] text-slate-500 uppercase">Schedules Control</span></div>
-                    </a>
-                </div>
-            </div>
+          
+            
+                
         </div>
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
@@ -348,32 +325,7 @@
             <button onclick="logout()" class="w-full mt-10 bg-red-500/10 text-red-500 p-4 rounded-2xl border border-red-500/20 font-black text-[11px] uppercase tracking-widest">Sign Out Account</button>
         </div>
     </div>
-    <div id="calc-modal" class="modal-overlay" style="display: none;">
-        <div class="calc-box">
-            <button class="close-calc" onclick="closeCalcModal()">X</button>
-            <input type="text" id="calc-display" class="calc-screen" readonly value="">
-            <div class="calc-buttons">
-                <button class="calc-btn operator" onclick="clearCalc()">C</button>
-                <button class="calc-btn operator" onclick="pressKey('/')">/</button>
-                <button class="calc-btn operator" onclick="pressKey('*')">*</button>
-                <button class="calc-btn operator" onclick="backspace()">⌫</button>
-                <button class="calc-btn" onclick="pressKey('7')">7</button>
-                <button class="calc-btn" onclick="pressKey('8')">8</button>
-                <button class="calc-btn" onclick="pressKey('9')">9</button>
-                <button class="calc-btn operator" onclick="pressKey('-')">-</button>
-                <button class="calc-btn" onclick="pressKey('4')">4</button>
-                <button class="calc-btn" onclick="pressKey('5')">5</button>
-                <button class="calc-btn" onclick="pressKey('6')">6</button>
-                <button class="calc-btn operator" onclick="pressKey('+')">+</button>
-                <button class="calc-btn" onclick="pressKey('1')">1</button>
-                <button class="calc-btn" onclick="pressKey('2')">2</button>
-                <button class="calc-btn" onclick="pressKey('3')">3</button>
-                <button class="calc-btn operator" style="grid-row: span 2; height: 100%;" onclick="calculateResult()">=</button>
-                <button class="calc-btn" style="grid-column: span 2;" onclick="pressKey('0')">0</button>
-                <button class="calc-btn" onclick="pressKey('.')">.</button>
-            </div>
-        </div>
-    </div>
+        
     <div id="admin-auth-modal" class="modal-overlay" style="display: none;">
         <div class="glass p-6 rounded-[35px] w-full max-w-[340px] text-center border border-white/10 shadow-2xl animate-fade-in relative">
             <button onclick="closeAdminAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm">
@@ -743,58 +695,7 @@
             setTimeout(() => { progress.style.width = "0%"; }, 100);
             setTimeout(() => { modal.style.display = "none"; }, 5000);
         };
-        let display = document.getElementById('calc-display');
-        const SECRET_KEY = "6306017020";
-        const ADMIN_PORTAL_KEY = "7896";
-        window.isCheckingForPortal = false;
-        window.openAdminTrigger = () => {
-            window.isCheckingForPortal = false;
-            document.getElementById('calc-modal').style.display = 'flex';
-            window.clearCalc();
-        };
-        window.openAdminPortalCalcTrigger = () => {
-            window.isCheckingForPortal = true;
-            document.getElementById('calc-modal').style.display = 'flex';
-            window.clearCalc();
-        };
-        window.closeCalcModal = () => {
-            document.getElementById('calc-modal').style.display = 'none';
-        };
-        window.pressKey = (num) => {
-            display.value += num;
-            window.checkSecretCode();
-        };
-        window.clearCalc = () => {
-            display.value = "";
-        };
-        window.backspace = () => {
-            display.value = display.value.slice(0, -1);
-            window.checkSecretCode();
-        };
-        window.calculateResult = () => {
-            try {
-                if(display.value) {
-                    display.value = eval(display.value);
-                }
-            } catch (error) {
-                display.value = "Error";
-            }
-        };
-        window.checkSecretCode = () => {
-            if (!window.isCheckingForPortal && display.value === SECRET_KEY) {
-                window.closeCalcModal();
-                document.getElementById('secret-admin-panel').classList.remove('hidden');
-                document.getElementById('secret-admin-panel').scrollIntoView({ behavior: 'smooth' });
-                alert("Access Granted! Admin Panel Unlocked.");
-                window.clearCalc();
-            } else if (window.isCheckingForPortal && display.value === ADMIN_PORTAL_KEY) {
-                window.closeCalcModal();
-                document.getElementById('calculator-verified-admin-links').classList.remove('hidden');
-                document.getElementById('calculator-verified-admin-links').scrollIntoView({ behavior: 'smooth' });
-                alert("Admin Access Verified! Portals Unlocked.");
-                window.clearCalc();
-            }
-        };
+            
         let pScore = 0, aScore = 0;
         window.openArcadeZone = () => {
             document.getElementById('game-modal').style.display = "flex";
