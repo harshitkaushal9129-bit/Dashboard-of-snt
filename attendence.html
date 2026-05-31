@@ -37,7 +37,6 @@
 </head>
 <body class="pb-10">
 
-    <!-- Top Header -->
     <div class="p-4 max-w-2xl mx-auto flex items-center justify-between sticky top-0 bg-[#0f172a] z-40">
         <button onclick="history.back()" class="text-sky-400 text-xl w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
         <h1 class="text-lg font-black tracking-tighter italic text-center uppercase">SNT <span class="text-sky-500">Smart Grid</span></h1>
@@ -50,7 +49,6 @@
         </div>
     </div>
 
-    <!-- Admin Panel Holiday Setter -->
     <div id="admin-panel" class="px-4 max-w-2xl mx-auto mb-6">
         <div id="admin-controls" class="glass p-5 rounded-[2rem] border-l-4 border-amber-500 shadow-xl">
             <h3 class="text-[10px] font-black uppercase text-amber-500 mb-3 tracking-widest"><i class="fas fa-calendar-plus mr-1"></i> Admin: Holiday Details</h3>
@@ -62,7 +60,6 @@
         </div>
     </div>
 
-    <!-- Attendance Action Card -->
     <div class="px-4 max-w-2xl mx-auto mb-4">
         <div class="glass p-6 rounded-[2.5rem] border-t-4 border-sky-500 shadow-2xl relative">
             <p id="today-date-display" class="text-sky-400 font-black text-xs uppercase tracking-widest mb-1"></p>
@@ -78,7 +75,6 @@
         </div>
     </div>
 
-    <!-- Month Navigation Controls -->
     <div class="px-4 max-w-2xl mx-auto mb-4 flex justify-between items-center glass p-3 rounded-2xl border border-slate-800">
         <button id="prev-month-btn" onclick="navigateMonth(-1)" class="px-4 py-2 bg-slate-800 text-sky-400 font-black text-[10px] uppercase rounded-xl active:scale-95 transition-all disabled:opacity-20 disabled:cursor-not-allowed">
             <i class="fas fa-chevron-left mr-1"></i> Prev
@@ -89,7 +85,6 @@
         </button>
     </div>
 
-    <!-- Graphical Month Calendar Layout Block -->
     <div class="px-4 max-w-2xl mx-auto mb-6">
         <div class="glass p-4 rounded-[2rem] border border-slate-800 shadow-2xl">
             <div class="grid grid-cols-7 text-center text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 py-1 border-b border-white/5">
@@ -99,7 +94,6 @@
         </div>
     </div>
 
-    <!-- Attendance Sheet/Register Log -->
     <div class="px-4 max-w-2xl mx-auto">
         <div class="glass rounded-[2rem] overflow-hidden border border-slate-800">
             <div class="row-item bg-slate-800/50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -111,18 +105,15 @@
         </div>
     </div>
 
-    <!-- POPUP PROFILE DATA CARD MODAL -->
     <div id="profile-card-modal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
         <div class="glass w-full max-w-sm rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl transform scale-95 transition-transform duration-300 relative p-6 text-center">
             
-            <!-- Close Cross Trigger -->
             <button onclick="closeProfileCard()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors w-8 h-8 rounded-full bg-slate-900/50 flex items-center justify-center border border-white/5">
                 <i class="fas fa-times text-sm"></i>
             </button>
 
-            <!-- Card Structure Details -->
             <div class="mt-4 flex flex-col items-center">
-                <div class="w-24 height-24 w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-sky-500 to-emerald-500 shadow-xl mb-4 relative">
+                <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-sky-500 to-emerald-500 shadow-xl mb-4 relative">
                     <img id="card-student-pic" src="https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png" class="w-full h-full object-cover rounded-full border-2 border-slate-900 bg-slate-800" alt="Student Profile Pic">
                     <div id="card-status-dot" class="w-5 h-5 rounded-full absolute bottom-0 right-0 border-4 border-slate-900 flex items-center justify-center text-[8px] font-black"></div>
                 </div>
@@ -168,7 +159,7 @@
         let currentUser = null;
         let adminHolidays = {};
         let attendanceData = {};
-        let studentProfile = {}; // Store raw object details dynamically
+        let studentProfile = {}; 
         
         const realToday = new Date();
         let currentSelectedDate = new Date(realToday.getFullYear(), realToday.getMonth(), 1);
@@ -225,10 +216,51 @@
                     adminHolidays = holSnapshot.val() || {};
                     onValue(ref(db, 'attendance'), (attSnapshot) => {
                         attendanceData = attSnapshot.val() || {};
+                        
+                        // --- BACKGROUND CRON: AUTO MARK ABSENT FOR MISSED DAYS ---
+                        checkAndMarkPastAbsents();
+                        
                         renderUI();
                     });
                 });
             });
+        }
+
+        function checkAndMarkPastAbsents() {
+            if (!admissionDate || !currentUser) return;
+
+            // Loop parameters logic: Admission Date se lekar kal tak ka track checking
+            let checkDate = new Date(admissionDate.getFullYear(), admissionDate.getMonth(), admissionDate.getDate());
+            const yesterday = new Date(realToday);
+            yesterday.setDate(realToday.getDate() - 1);
+
+            while (checkDate <= yesterday) {
+                const loopYear = checkDate.getFullYear();
+                const loopMonth = String(checkDate.getMonth() + 1).padStart(2, '0');
+                const loopDay = String(checkDate.getDate()).padStart(2, '0');
+                const dateStrLoop = `${loopYear}-${loopMonth}-${loopDay}`;
+
+                const isSun = checkDate.getDay() === 0;
+                const isHoliday = adminHolidays[dateStrLoop];
+                
+                const hasRecord = Object.values(attendanceData).find(
+                    r => r.email === currentUser.email && r.date === dateStrLoop
+                );
+
+                // Agar na Sunday hai, na Holiday hai aur koi record bhi saved nahi mila -> Dynamic Auto Absent save karo
+                if (!isSun && !isHoliday && !hasRecord) {
+                    const attID = currentUser.uid + "_" + dateStrLoop;
+                    set(ref(db, 'attendance/' + attID), {
+                        email: currentUser.email,
+                        name: studentProfile.name || currentUser.displayName || "Student",
+                        date: dateStrLoop,
+                        status: "Absent",
+                        timestamp: Date.now(),
+                        autoMarked: true
+                    });
+                }
+                checkDate.setDate(checkDate.getDate() + 1);
+            }
         }
 
         window.navigateMonth = (direction) => {
@@ -256,7 +288,6 @@
             });
         };
 
-        // --- TRIGGER OPEN DATA CARD DIALOG BOX ---
         window.openProfileCard = (dateStr, statusType, description) => {
             const modal = document.getElementById('profile-card-modal');
             const cardInner = modal.querySelector('.glass');
@@ -266,7 +297,6 @@
             document.getElementById('card-attendance-date').innerText = new Date(dateStr).toDateString();
             document.getElementById('card-attendance-desc').innerText = description;
             
-            // Map Dynamic Custom Image path safely
             if(studentProfile.profilePic) {
                 document.getElementById('card-student-pic').src = studentProfile.profilePic;
             } else {
@@ -276,7 +306,6 @@
             const dot = document.getElementById('card-status-dot');
             const statusLabel = document.getElementById('card-attendance-status');
 
-            // Setup Badge Layouts
             if(statusType === 'Present') {
                 statusLabel.innerText = "Present"; statusLabel.className = "font-black uppercase text-green-400";
                 dot.className = "w-5 h-5 rounded-full absolute bottom-0 right-0 border-4 border-slate-900 bg-green-500";
@@ -294,7 +323,6 @@
                 dot.className = "w-5 h-5 rounded-full absolute bottom-0 right-0 border-4 border-slate-900 bg-slate-600";
             }
 
-            // CSS Animation parameters trigger
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -356,7 +384,6 @@
                     </div>`;
             }
 
-            // --- 1. DYNAMIC GRID CALENDAR MATRIX SYSTEM ---
             let calHtml = '';
             const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay(); 
             const totalDaysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -365,7 +392,6 @@
                 calHtml += `<div class="opacity-0 pointer-events-none"></div>`;
             }
 
-            // Comparison clean instance generator
             const admissionCompareTime = new Date(admissionDate.getFullYear(), admissionDate.getMonth(), admissionDate.getDate()).getTime();
 
             for (let d = 1; d <= totalDaysInMonth; d++) {
@@ -385,7 +411,6 @@
                     boxClass += " btn-lock text-slate-600";
                     clickActionHtml = `onclick="alert('Aapka Admission is date ke baad hua hai!')"`;
                 } else {
-                    // Highlight/Active Zone for days equal or post admission parameters
                     if (hasRecord) {
                         if (hasRecord.status === 'Present') { boxClass += " status-p font-black text-emerald-400"; dotHtml = '<div class="cal-dot bg-green-400"></div>'; }
                         else if (hasRecord.status === 'Absent') { boxClass += " status-a font-black text-red-400"; dotHtml = '<div class="cal-dot bg-red-400"></div>'; }
@@ -416,7 +441,6 @@
             }
             calGrid.innerHTML = calHtml;
 
-            // --- 2. LIST REGISTER LOGIC ---
             let listHtml = '';
             let startDay = (viewYear === realToday.getFullYear() && viewMonth === realToday.getMonth()) ? realToday.getDate() : totalDaysInMonth;
 
@@ -457,10 +481,19 @@
         }
 
         window.markAttendance = (status) => {
+            const isSunToday = realToday.getDay() === 0;
+            const holToday = adminHolidays[todayStr];
+
+            // --- STRIKT ATTENDANCE BLOCK VALIDATION FOR SUNDAYS & HOLIDAYS ---
+            if (isSunToday || holToday) {
+                alert("Aaj chhutti hai! Attendance lagana allowed nahi hai.");
+                return;
+            }
+
             const attID = currentUser.uid + "_" + todayStr;
             set(ref(db, 'attendance/' + attID), {
                 email: currentUser.email,
-                name: currentUser.displayName || "Student",
+                name: studentProfile.name || currentUser.displayName || "Student",
                 date: todayStr,
                 status: status,
                 timestamp: Date.now()
