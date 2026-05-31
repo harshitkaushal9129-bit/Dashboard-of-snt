@@ -142,7 +142,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOQtM_XYLqPgxMK1XBdfl0m7KoAseZRCA",
@@ -217,7 +217,7 @@
                     onValue(ref(db, 'attendance'), (attSnapshot) => {
                         attendanceData = attSnapshot.val() || {};
                         
-                        // --- BACKGROUND CRON: AUTO MARK ABSENT FOR MISSED DAYS ---
+                        // BACKGROUND CRON: AUTO MARK ABSENT FOR MISSED DAYS
                         checkAndMarkPastAbsents();
                         
                         renderUI();
@@ -229,7 +229,6 @@
         function checkAndMarkPastAbsents() {
             if (!admissionDate || !currentUser) return;
 
-            // Loop parameters logic: Admission Date se lekar kal tak ka track checking
             let checkDate = new Date(admissionDate.getFullYear(), admissionDate.getMonth(), admissionDate.getDate());
             const yesterday = new Date(realToday);
             yesterday.setDate(realToday.getDate() - 1);
@@ -247,7 +246,6 @@
                     r => r.email === currentUser.email && r.date === dateStrLoop
                 );
 
-                // Agar na Sunday hai, na Holiday hai aur koi record bhi saved nahi mila -> Dynamic Auto Absent save karo
                 if (!isSun && !isHoliday && !hasRecord) {
                     const attID = currentUser.uid + "_" + dateStrLoop;
                     set(ref(db, 'attendance/' + attID), {
@@ -297,10 +295,14 @@
             document.getElementById('card-attendance-date').innerText = new Date(dateStr).toDateString();
             document.getElementById('card-attendance-desc').innerText = description;
             
-            if(studentProfile.profilePic) {
-                document.getElementById('card-student-pic').src = studentProfile.profilePic;
+            // --- FIX 2: LOGO KI JAGAH STUDENT PROFILE IMAGE DYNAMICALLY LOAD HO ---
+            const profilePicField = document.getElementById('card-student-pic');
+            if(studentProfile && studentProfile.profilePic) {
+                profilePicField.src = studentProfile.profilePic;
+            } else if (currentUser && currentUser.photoURL) {
+                profilePicField.src = currentUser.photoURL;
             } else {
-                document.getElementById('card-student-pic').src = "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png";
+                profilePicField.src = "https://harshitkaushal9129-bit.github.io/Dashboard-of-snt/SNT.png";
             }
 
             const dot = document.getElementById('card-status-dot');
@@ -368,6 +370,12 @@
             const holToday = adminHolidays[todayStr];
             const attID = currentUser.uid + "_" + todayStr;
 
+            // --- FIX 1 (A): IF PRESENT WAS WRONGLY MARKED ON TODAY'S HOLIDAY/SUNDAY -> AUTO FORCE REMOVE IT ---
+            if ((isSunToday || holToday) && attendanceData[attID]) {
+                remove(ref(db, 'attendance/' + attID));
+                delete attendanceData[attID];
+            }
+
             if (isSunToday || holToday) {
                 const r = holToday ? holToday.reason : "SUNDAY (WEEKLY OFF)";
                 actionArea.innerHTML = `<h2 class="text-xl font-bold mb-4 italic">Aaj Chhutti Hai:</h2><div class="w-full py-4 glass text-amber-500 font-black text-center rounded-2xl border border-amber-500/20 italic uppercase tracking-tighter">${r}</div>`;
@@ -405,7 +413,14 @@
                 
                 const isSun = loopDateObj.getDay() === 0;
                 const isHoliday = adminHolidays[dayStrLoop];
-                const hasRecord = Object.values(attendanceData).find(r => r.email === currentUser.email && r.date === dayStrLoop);
+                let hasRecord = Object.values(attendanceData).find(r => r.email === currentUser.email && r.date === dayStrLoop);
+
+                // --- FIX 1 (B): CONVERT PAST WRONGLY MARKED PRESENT/ABSENT ON SUNDAYS/HOLIDAYS TO RESET MODE ---
+                if ((isSun || isHoliday) && hasRecord) {
+                    const loopAttID = currentUser.uid + "_" + dayStrLoop;
+                    remove(ref(db, 'attendance/' + loopAttID));
+                    hasRecord = null; // Instantly clean internal pointer
+                }
 
                 if (loopTime < admissionCompareTime) {
                     boxClass += " btn-lock text-slate-600";
@@ -457,16 +472,16 @@
                 let badge = '<span class="status-badge btn-lock">No Data</span>';
                 let reasonText = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
 
-                if (record) {
-                    if (record.status === 'Present') badge = '<span class="status-badge btn-p">Present</span>';
-                    else if (record.status === 'Absent') badge = '<span class="status-badge btn-a">Absent</span>';
-                    else if (record.status === 'Leave') badge = '<span class="status-badge btn-l">Leave</span>';
-                } else if (sun) {
+                if (sun) {
                     badge = '<span class="status-badge btn-h text-xs">Sunday</span>';
                     reasonText = "Weekly Off";
                 } else if (hol) {
                     badge = '<span class="status-badge btn-h text-xs">Holiday</span>';
                     reasonText = hol.reason;
+                } else if (record) {
+                    if (record.status === 'Present') badge = '<span class="status-badge btn-p">Present</span>';
+                    else if (record.status === 'Absent') badge = '<span class="status-badge btn-a">Absent</span>';
+                    else if (record.status === 'Leave') badge = '<span class="status-badge btn-l">Leave</span>';
                 }
 
                 listHtml += `
@@ -484,7 +499,6 @@
             const isSunToday = realToday.getDay() === 0;
             const holToday = adminHolidays[todayStr];
 
-            // --- STRIKT ATTENDANCE BLOCK VALIDATION FOR SUNDAYS & HOLIDAYS ---
             if (isSunToday || holToday) {
                 alert("Aaj chhutti hai! Attendance lagana allowed nahi hai.");
                 return;
