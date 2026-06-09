@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT Institute - Official Portal</title>
+        <link rel="manifest" href="./manifest.json">
     <link class="rounded-full" rel="apple-touch-icon" href="./SNT.jpg">
     <link rel="icon" type="image/jpeg" href="SNT.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -972,15 +973,12 @@
         }
     </script>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('SNT Engine Service Worker running.', reg.scope);
-                }).catch(err => {
-                    console.error(err);
-                });
-            });
-        }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('SNT Service Worker Registered!', reg))
+    .catch(err => console.error('Registration failed:', err));
+}
+
     </script>
 </body>
 </html>
