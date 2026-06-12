@@ -1,89 +1,93 @@
-/**
- * SNT Institute Official Portal - Service Worker Engine
- * Core Features: Advanced Assets Caching, Offline Support, & Live Notifications
- */
+const CACHE_NAME = 'snt-institute-cache-v1';
 
-const CACHE_NAME = 'snt-portal-cache-v3';
-
-// Wo files jinhe bina internet ke bhi sahi se chalna chahiye
+// Jin assets ko offline pehle se save rakhna hai unki list
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
   './SNT.jpg',
+  './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  // Agar aapke folder me ye files hain toh inhe bhi cache me daal dega:
+  './result-history.html',
+  './Query-box.html',
+  './Fee-history.html',
+  './ranking.html',
+  './notifications_view.html'
 ];
 
-// 1. INSTALL EVENT: App ke initial launch par static resources ko cache mein save karna
+// 1. Install Event: Saare static assets ko cache me store karna
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SNT Engine] Core Shell Caching Completed.');
+      console.log('SNT Cache Opened & Pre-caching Assets...');
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => {
-      return self.skipWaiting(); // Naye service worker ko turant activate karne ke liye
-    })
+    }).then(() => self.skipWaiting())
   );
 });
 
-// 2. ACTIVATE EVENT: Purane cache files ko delete karna jab app update ho
+// 2. Activate Event: Purane caches ko delete karna agar version update ho
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[SNT Engine] Purging Legacy Cache:', cache);
+            console.log('SNT Clearing Old Cache:', cache);
             return caches.delete(cache);
           }
         })
       );
-    }).then(() => {
-      return self.clients.claim(); // Sारे open tabs ko turant control mein lene ke liye
+    }).then(() => self.clients.claim())
+  );
+});
+
+// 3. Fetch Event: Offline hone par cache se response dena (Cache-First, then Network fallback)
+self.addEventListener('fetch', (event) => {
+  // Firebase Database requests (WebSockets/REST) ko cache nahi karna hai, unhe bypass karein
+  if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com/v1')) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Background me latest version check karein (Stale-While-Revalidate pattern)
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+          }
+        }).catch(() => {/* Offline mode me network error catch karein */});
+
+        return cachedResponse; // Pehle instant cache response dein
+      }
+
+      // Agar asset cache me nahi hai, toh network se fetch karein
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+
+        // Naye fetched assets ko dynamic cache me daalein
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
+        return networkResponse;
+      }).catch(() => {
+        // Agar bilkul offline hai aur page nahi mila
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
     })
   );
 });
 
-// 3. FETCH EVENT: Network-First falling back to Cache strategy
-// Isse data hamesha fresh load hoga, aur network na hone par cache se khulega
-self.addEventListener('fetch', (event) => {
-  // Sirf GET requests ko intercept karein (Firebase write/post operations ko chhod kar)
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        // Agar network response sahi hai, toh uski copy cache mein save karein
-        if (networkResponse && networkResponse.status === 200) {
-          const cacheCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, cacheCopy);
-          });
-        }
-        return networkResponse;
-      })
-      .catch(() => {
-        // Agar internet nahi chal raha, toh cache se file return karein
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Agar file cache mein bhi nahi hai (Jaise koi naya webpage ya image)
-          return new Response('Offline: SNT Portal core network connectivity lost.', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: new Headers({ 'Content-Type': 'text/plain' })
-          });
-        });
-      })
-  );
-});
-
-// 4. PUSH NOTIFICATION EVENT: Firebase live_signal se notifications generate karna
+// 4. Push Notifications handle karne ke liye (SNT Live Signals)
 self.addEventListener('push', (event) => {
-  let data = { title: 'SNT Portal Alert', body: 'New update from SNT Institute!', icon: './SNT.jpg' };
-
+  let data = { title: 'SNT Official Update', body: 'New notification received.' };
   if (event.data) {
     try {
       data = event.data.json();
@@ -94,16 +98,10 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: data.icon || './SNT.jpg',
-    badge: data.icon || './SNT.jpg',
-    vibrate: [200, 100, 200],
-    data: {
-      url: data.url || './index.html'
-    },
-    actions: [
-      { action: 'open', title: 'Open Portal' },
-      { action: 'close', title: 'Dismiss' }
-    ]
+    icon: './SNT.jpg',
+    badge: './SNT.jpg',
+    vibrate: [300, 100, 300],
+    data: { url: data.url || './index.html' }
   };
 
   event.waitUntil(
@@ -111,26 +109,10 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// 5. NOTIFICATION CLICK EVENT: User jab notification par click kare
+// Notification click par handle karein
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close(); // Notification drawer ko close karein
-
-  if (event.action === 'close') return;
-
-  const targetUrl = event.notification.data?.url || './index.html';
-
+  event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // Agar pehle se app khula hai toh us par focus karein
-      for (let client of windowClients) {
-        if (client.url === targetUrl && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      // Agar app nahi khula hai toh naya window/tab open karein
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
+    clients.openWindow(event.notification.data.url)
   );
 });
