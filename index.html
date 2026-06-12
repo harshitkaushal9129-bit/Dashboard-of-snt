@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SNT Institute - Official Portal</title>
-        <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <link class="rounded-full" rel="apple-touch-icon" href="./SNT.jpg">
     <link rel="icon" type="image/jpeg" href="SNT.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,7 +85,7 @@
 </head>
 <body class="view-laptop" id="main-body">
     <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center border-t-4 border-sky-500">
+        <div class="glass p-10 rounded-[40px] w-full max-w-[md] shadow-2xl text-center border-t-4 border-sky-500">
             <img src="./SNT.jpg" class="w-28 h-28 mx-auto rounded-full border-4 border-sky-500 mb-6 shadow-2xl animate-bounce" alt="SNT Logo">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">SNT INSTITUTE</h2>
             <p class="text-sky-400 text-[10px] mb-8 uppercase tracking-[0.4em] font-bold opacity-80">Official Student Portal</p>
@@ -288,9 +288,6 @@
                     <div class="bg-amber-500 text-slate-950 text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider mr-1">Play</div>
                 </div>
             </div>
-          
-            
-                
         </div>
         <div id="profile-tab" class="tab-content hidden pb-24 animate-fade-in">
             <div class="text-center mb-8">
@@ -546,6 +543,9 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
+
+        const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
         window.toggleTheme = () => {
             document.body.classList.toggle('light-mode');
             const icon = document.querySelector('#theme-toggle i');
@@ -572,8 +572,30 @@
                             document.getElementById('user-name-home').innerText = sData.name;
                             document.getElementById('user-email-home').innerText = user.email;
                             document.getElementById('user-img-home').src = sData.profilePic || sData.profilePicture || user.photoURL;
-                            const pendingAmount = sData.pendingFees || sData.dueFees || "0";
-                            if (document.getElementById('user-pending-fees')) { document.getElementById('user-pending-fees').innerText = "₹" + pendingAmount; }
+                            
+                            // Real-time Dynamic Bakaya Fees Calculation Logic Embedded Here
+                            const history = sData.paymentHistory || [];
+                            let totalPending = 0;
+                            let regDateStr = sData.admissionDate || sData.registrationDate || sData.date;
+                            let regDate = regDateStr ? new Date(regDateStr) : new Date();
+                            if(isNaN(regDate.getTime())) regDate = new Date();
+
+                            let checkDate = new Date(regDate.getFullYear(), regDate.getMonth(), 1);
+                            let currentDate = new Date();
+
+                            while(checkDate <= currentDate) {
+                                let mName = MONTHS[checkDate.getMonth()];
+                                let isPaid = history.find(p => p.month === mName);
+                                if(!isPaid) {
+                                    totalPending += 500; // Agar paid nahi hai toh ₹500 add hoga
+                                }
+                                checkDate.setMonth(checkDate.getMonth() + 1);
+                            }
+
+                            if (document.getElementById('user-pending-fees')) { 
+                                document.getElementById('user-pending-fees').innerText = "₹" + totalPending; 
+                            }
+
                             document.getElementById('user-name-profile').innerText = sData.name;
                             document.getElementById('user-img-profile').src = sData.profilePic || sData.profilePicture || user.photoURL;
                             document.getElementById('user-roll-profile').innerText = "ID: " + (sData.studentId || "NEW");
@@ -973,12 +995,11 @@
         }
     </script>
     <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log('SNT Service Worker Registered!', reg))
-    .catch(err => console.error('Registration failed:', err));
-}
-
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SNT Service Worker Registered!', reg))
+            .catch(err => console.error('Registration failed:', err));
+        }
     </script>
 </body>
 </html>
