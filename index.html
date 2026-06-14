@@ -504,6 +504,12 @@
                         <a href="https://www.instagram.com/kaushalji.011" target="_blank" rel="noopener" class="text-pink-600 text-xl"><i class="fab fa-instagram"></i></a>
                         <a href="https://www.youtube.com/@computer-skills9129" target="_blank" rel="noopener" class="text-red-600 text-xl"><i class="fab fa-youtube"></i></a>
                     </div>
+                        <div class="mb-6">
+    <button onclick="shareApp()" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
+        <i class="fas fa-share-nodes text-sm animate-pulse"></i> Share SNT Portal App
+    </button>
+</div>
+
                 </div>
                 <div class="info-row-last">
                     <span class="info-label">Support Us</span>
@@ -993,6 +999,30 @@
         } else {
             window.startAssistant = () => alert("Voice API is not supported in this browser version container.");
         }
+
+    window.shareApp = async () => {
+    const shareData = {
+        title: 'SNT Institute - Official Student Portal',
+        text: 'Hey! SNT Institute ka official student portal check karo. Yahan se aap Attendance, Fees, ID Card, aur CBT Exams directly access kar sakte hain!',
+        url: window.location.href // Yeh automatically aapki live website ka current URL le lega
+    };
+
+    try {
+        // Agar browser native sharing support karta hai (mostly mobile browsers mein)
+        if (navigator.share) {
+            await navigator.share(shareData);
+            console.log('App shared successfully!');
+        } else {
+            // Agar browser support nahi karta (jaise desktop Chrome), to link clipboard par copy ho jayegi
+            await navigator.clipboard.writeText(window.location.href);
+            alert('Share link clipboard par copy ho gayi hai! Aap ise kisi ko bhi send kar sakte hain.');
+        }
+    } catch (err) {
+        console.error('Error sharing:', err);
+    }
+};
+
+    
     </script>
     <script>
         if ('serviceWorker' in navigator) {
