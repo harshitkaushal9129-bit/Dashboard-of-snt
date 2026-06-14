@@ -111,7 +111,6 @@
     </div>
   </div>
 
-  <!-- UPDATED PAYMENT MODAL WITH UTR + SCREENSHOT -->
   <div id="pay-modal">
     <div class="modal-content">
       <h3 style="margin-top:0; color:#0f172a; font-weight:900;">FEES PAYMENT</h3>
@@ -129,16 +128,9 @@
       <div id="qrcode-box" style="margin: 15px auto; display:flex; justify-content:center; border: 5px solid #f1f5f9; padding:10px; border-radius:10px; min-height:170px;"></div>
       <p id="qr-status" style="font-size:11px; color:#475569; font-weight:bold;"></p>
 
-      <!-- UTR Field Added -->
       <div class="form-group">
         <label>Transaction UTR / Ref No. <span style="color:red;">*</span></label>
         <input type="text" id="pay-utr" placeholder="12-digit UPI Ref/UTR No." maxlength="12">
-      </div>
-
-      <!-- Screenshot Field Added -->
-      <div class="form-group">
-        <label>Upload Payment Screenshot <span style="color:red;">*</span></label>
-        <input type="file" id="pay-screenshot" accept="image/*">
       </div>
 
       <button id="gen-qr-btn" class="btn-action" style="background: #0f172a; color:#fff;" onclick="generatePayQR()">GENERATE QR</button>
@@ -263,7 +255,6 @@
       document.getElementById('conf-pay-btn').style.display = 'none';
       document.getElementById('gen-qr-btn').style.display = 'block';
       document.getElementById('pay-utr').value = '';
-      document.getElementById('pay-screenshot').value = '';
       document.getElementById('qr-status').innerText = '';
     }
 
@@ -283,53 +274,35 @@
       document.getElementById('conf-pay-btn').style.display = 'block';
     }
 
-    // UPDATED: Now with UTR + Screenshot validation
+    // UPDATED: image processing section removed completely
     function confirmStudentPayment() {
       const amt = document.getElementById('pay-amount').value;
       const month = document.getElementById('pay-month').value;
       const utrVal = document.getElementById('pay-utr').value.trim();
-      const screenshotFile = document.getElementById('pay-screenshot').files[0];
 
       if(!amt || amt < 1) return alert("Please enter amount");
       if(!utrVal) return alert("कृपया Transaction UTR संख्या दर्ज करें!");
-      if(!screenshotFile) return alert("कृपया पेमेंट का स्क्रीनशॉट अपलोड करें!");
 
       const btn = document.getElementById('conf-pay-btn');
-      btn.innerText = "Uploading...";
+      btn.innerText = "Submitting...";
       btn.disabled = true;
 
-      // Convert screenshot to base64
-      const reader = new FileReader();
-      reader.onload = function() {
-        const screenshotBase64 = reader.result;
-
-        // Check size - Firebase Realtime DB limit 1MB per node
-        if (screenshotBase64.length > 1048576) {
-          alert("Screenshot size too large! Please upload under 1MB");
-          btn.innerText = "I HAVE PAID SUCCESSFULLY";
-          btn.disabled = false;
-          return;
-        }
-
-        db.ref('paymentRequests').push({
-          studentName: studentData.name,
-          studentId: studentData.studentId,
-          amount: amt,
-          month: month,
-          utrNumber: utrVal,
-          paymentScreenshot: screenshotBase64,
-          timestamp: new Date().toISOString(),
-          status: "Review Required"
-        }).then(() => {
-          alert("SUCCESS! Payment details submitted. Admin will verify soon.");
-          closeModal();
-        }).catch(err => {
-          alert("Error: " + err.message);
-          btn.disabled = false;
-          btn.innerText = "I HAVE PAID SUCCESSFULLY";
-        });
-      };
-      reader.readAsDataURL(screenshotFile);
+      db.ref('paymentRequests').push({
+        studentName: studentData.name,
+        studentId: studentData.studentId,
+        amount: amt,
+        month: month,
+        utrNumber: utrVal,
+        timestamp: new Date().toISOString(),
+        status: "Review Required"
+      }).then(() => {
+        alert("SUCCESS! Payment details submitted. Admin will verify soon.");
+        closeModal();
+      }).catch(err => {
+        alert("Error: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "I HAVE PAID SUCCESSFULLY";
+      });
     }
 
     function closeModal() { document.getElementById('pay-modal').style.display = 'none'; }
