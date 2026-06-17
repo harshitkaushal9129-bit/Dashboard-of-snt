@@ -132,32 +132,33 @@
     const auth = firebase.auth();
 
     let studentData = null;
-    let allStudentsList = {}; // Sabhi students ka data store karne ke liye
+    let allStudentsList = {}; 
     let displayDate = new Date();
     const today = new Date();
 
     const holidays = { "2026-01-26": "Republic Day", "2026-08-15": "Independence Day", "2026-10-02": "Gandhi Jayanti" };
     const fixedFestivals = { "2026": { "01-01": "नया साल", "14-01": "मकर संक्रांति", "26-01": "गणतंत्र दिवस", "15-02": "महाशिवरात्रि", "04-03": "होली", "15-08": "स्वतंत्रता दिवस", "25-12": "क्रिसमस" } };
 
-    // Dashboard Match Logic: Email se student dhundna + Sabhi students load karna
+    // Auth state check और डेटा लोडिंग
     auth.onAuthStateChanged((user) => {
         if (user) {
-            // Step 1: Pehle sabhi students load karke dropdown me daalein
+            // 1. सभी छात्रों की लिस्ट लोड करें
             db.ref('students').on('value', (allSnap) => {
                 if (allSnap.exists()) {
                     allStudentsList = allSnap.val();
                     populateStudentDropdown(user.email);
-                }
-            });
-
-            // Step 2: Login user ka default data set karein
-            db.ref('students').orderByChild('email').equalTo(user.email).on('value', (snap) => {
-                if (snap.exists() && !studentData) { // Only set first time if not manually changed
-                    const keys = Object.keys(snap.val());
-                    studentData = snap.val()[keys[0]];
-                    updateProfileAndCalendar();
-                } else if (!snap.exists() && Object.keys(allStudentsList).length === 0) {
-                    alert("No record found!");
+                    
+                    // अगर अभी तक कोई छात्र सेलेक्ट नहीं हुआ है, तो लॉगिन यूजर का डेटा डिफ़ॉल्ट रखें
+                    if (!studentData) {
+                        const keys = Object.keys(allStudentsList);
+                        const loggedInStudentKey = keys.find(k => allStudentsList[k].email === user.email);
+                        if (loggedInStudentKey) {
+                            studentData = allStudentsList[loggedInStudentKey];
+                        } else {
+                            studentData = allStudentsList[keys[0]]; // fallback: पहला छात्र
+                        }
+                        updateProfileAndCalendar();
+                    }
                 }
             });
         } else {
@@ -165,10 +166,11 @@
         }
     });
 
-    // Dropdown me sabhi students ke naam add karne ka function
+    // ड्रॉपडाउन में नाम भरना
     function populateStudentDropdown(loggedInEmail) {
         const dropdown = document.getElementById('student-dropdown');
-        dropdown.innerHTML = ""; // Clear existing
+        const currentSelection = dropdown.value; // पुरानी सिलेक्शन याद रखें
+        dropdown.innerHTML = ""; 
 
         Object.keys(allStudentsList).forEach(key => {
             const st = allStudentsList[key];
@@ -176,22 +178,21 @@
             option.value = key;
             option.text = `${st.name || '---'} (${st.studentId || 'N/A'})`;
             
-            // Logged in student ko default selected rkhein
-            if(st.email === loggedInEmail && !studentData) {
+            if (currentSelection === key || (!currentSelection && st.email === loggedInEmail)) {
                 option.selected = true;
             }
             dropdown.appendChild(option);
         });
     }
 
-    // Dropdown se student change karne pr trigger hone wala function
+    // ड्रॉपडाउन बदलने पर
     function selectStudent(studentKey) {
         if(!studentKey || !allStudentsList[studentKey]) return;
         studentData = allStudentsList[studentKey];
         updateProfileAndCalendar();
     }
 
-    // Profile section aur calendar rendering handle karne ka common function
+    // प्रोफाइल अपडेट
     function updateProfileAndCalendar() {
         if(!studentData) return;
         
@@ -209,6 +210,7 @@
         renderCalendar();
     }
 
+    // कैलेंडर और सटीक अटेंडेंस रेंडरिंग लॉजिक
     function renderCalendar() {
         if(!studentData) return;
         const body = document.getElementById('calendar-body');
@@ -219,6 +221,9 @@
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+        // पुराना लिसनर हटाएं ताकि डेटा आपस में ओवरलैप न हो
+        db.ref('attendance').off(); 
+        
         db.ref('attendance').on('value', snap => {
             const allData = snap.val() || {};
             body.innerHTML = '';
@@ -230,12 +235,12 @@
                 const dayFmt = String(day).padStart(2, '0');
                 const dateKey = `${year}-${monthFmt}-${dayFmt}`; 
                 
+                // अब केवल वर्तमान में चुने गए छात्र की StudentID से मैच करेगा
                 const rollID = `${studentData.studentId}_${dateKey}`;
-                // UID fallback logic support ke liye context safe checking
-                let uidID = `_${dateKey}`;
-                if(auth.currentUser) {
-                    uidID = `${auth.currentUser.uid}_${dateKey}`;
-                }
+                
+                // UID बैकअप फ़ॉर्मेट सपोर्ट (यदि डेटाबेस में 'uid_date' से भी सेव हो)
+                const studentUID = studentData.uid || studentData.id || '';
+                const uidID = studentUID ? `${studentUID}_${dateKey}` : 'NO_UID_MATCH';
 
                 const attRecord = allData[rollID] || allData[uidID];
                 const fKey = `${dayFmt}-${monthFmt}`;
