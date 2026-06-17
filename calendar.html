@@ -21,13 +21,9 @@
             --holiday: #f57c00;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; padding: 10px; display: flex; justify-content: center; overflow-x: hidden; }
 
         #loader { position: fixed; inset: 0; background: white; z-index: 2500; display: flex; align-items: center; justify-content: center; flex-direction: column; font-weight: bold; color: var(--tp-header-red); }
-
-        /* Student Selector Dropdown Styling */
-        .selector-container { width: 100%; max-width: 450px; margin-bottom: 10px; box-sizing: border-box; }
-        .student-select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; font-weight: 600; color: #333; outline: none; background: white; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
         .calendar-card { background: white; width: 100%; max-width: 450px; border: 2px solid #ddd; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; position: relative; min-height: 600px; }
 
@@ -86,12 +82,6 @@
     <div id="fest-list-container"></div>
 </div>
 
-<div class="selector-container">
-    <select id="student-dropdown" class="student-select" onchange="selectStudent(this.value)">
-        <option value="">विद्यार्थी चुनें (Loading...)</option>
-    </select>
-</div>
-
 <div class="calendar-card">
     <div class="header">
         <div style="font-weight: 700; font-size: 1.1rem;">SNT ATTENDANCE PORTAL</div>
@@ -132,33 +122,35 @@
     const auth = firebase.auth();
 
     let studentData = null;
-    let allStudentsList = {}; 
     let displayDate = new Date();
     const today = new Date();
 
     const holidays = { "2026-01-26": "Republic Day", "2026-08-15": "Independence Day", "2026-10-02": "Gandhi Jayanti" };
     const fixedFestivals = { "2026": { "01-01": "नया साल", "14-01": "मकर संक्रांति", "26-01": "गणतंत्र दिवस", "15-02": "महाशिवरात्रि", "04-03": "होली", "15-08": "स्वतंत्रता दिवस", "25-12": "क्रिसमस" } };
 
-    // Auth state check और डेटा लोडिंग
+    // Dashboard Match Logic: Email se student dhundna
     auth.onAuthStateChanged((user) => {
         if (user) {
-            // 1. सभी छात्रों की लिस्ट लोड करें
-            db.ref('students').on('value', (allSnap) => {
-                if (allSnap.exists()) {
-                    allStudentsList = allSnap.val();
-                    populateStudentDropdown(user.email);
+            db.ref('students').orderByChild('email').equalTo(user.email).on('value', (snap) => {
+                if (snap.exists()) {
+                    const keys = Object.keys(snap.val());
+                    studentData = snap.val()[keys[0]];
+
+                    // Profile Section (Dashboard ki tarah)
+                    const imgUrl = studentData.profilePicture || studentData.profilePic || 'SNT.jpg';
+                    document.getElementById('profile-area').innerHTML = `
+                        <div class="st-profile-box">
+                            <img src="${imgUrl}" class="st-photo-circle" onerror="this.src='SNT.jpg'">
+                            <div>
+                                <b style="font-size: 1rem;">${studentData.name || '---'}</b><br>
+                                <small style="opacity: 0.8;">ID: ${studentData.studentId || 'N/A'}</small>
+                            </div>
+                        </div>`;
                     
-                    // अगर अभी तक कोई छात्र सेलेक्ट नहीं हुआ है, तो लॉगिन यूजर का डेटा डिफ़ॉल्ट रखें
-                    if (!studentData) {
-                        const keys = Object.keys(allStudentsList);
-                        const loggedInStudentKey = keys.find(k => allStudentsList[k].email === user.email);
-                        if (loggedInStudentKey) {
-                            studentData = allStudentsList[loggedInStudentKey];
-                        } else {
-                            studentData = allStudentsList[keys[0]]; // fallback: पहला छात्र
-                        }
-                        updateProfileAndCalendar();
-                    }
+                    document.getElementById('loader').style.display = 'none';
+                    renderCalendar();
+                } else {
+                    alert("No record found!");
                 }
             });
         } else {
@@ -166,51 +158,6 @@
         }
     });
 
-    // ड्रॉपडाउन में नाम भरना
-    function populateStudentDropdown(loggedInEmail) {
-        const dropdown = document.getElementById('student-dropdown');
-        const currentSelection = dropdown.value; // पुरानी सिलेक्शन याद रखें
-        dropdown.innerHTML = ""; 
-
-        Object.keys(allStudentsList).forEach(key => {
-            const st = allStudentsList[key];
-            const option = document.createElement('option');
-            option.value = key;
-            option.text = `${st.name || '---'} (${st.studentId || 'N/A'})`;
-            
-            if (currentSelection === key || (!currentSelection && st.email === loggedInEmail)) {
-                option.selected = true;
-            }
-            dropdown.appendChild(option);
-        });
-    }
-
-    // ड्रॉपडाउन बदलने पर
-    function selectStudent(studentKey) {
-        if(!studentKey || !allStudentsList[studentKey]) return;
-        studentData = allStudentsList[studentKey];
-        updateProfileAndCalendar();
-    }
-
-    // प्रोफाइल अपडेट
-    function updateProfileAndCalendar() {
-        if(!studentData) return;
-        
-        const imgUrl = studentData.profilePicture || studentData.profilePic || 'SNT.jpg';
-        document.getElementById('profile-area').innerHTML = `
-            <div class="st-profile-box">
-                <img src="${imgUrl}" class="st-photo-circle" onerror="this.src='SNT.jpg'">
-                <div>
-                    <b style="font-size: 1rem;">${studentData.name || '---'}</b><br>
-                    <small style="opacity: 0.8;">ID: ${studentData.studentId || 'N/A'}</small>
-                </div>
-            </div>`;
-        
-        document.getElementById('loader').style.display = 'none';
-        renderCalendar();
-    }
-
-    // कैलेंडर और सटीक अटेंडेंस रेंडरिंग लॉजिक
     function renderCalendar() {
         if(!studentData) return;
         const body = document.getElementById('calendar-body');
@@ -221,9 +168,6 @@
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // पुराना लिसनर हटाएं ताकि डेटा आपस में ओवरलैप न हो
-        db.ref('attendance').off(); 
-        
         db.ref('attendance').on('value', snap => {
             const allData = snap.val() || {};
             body.innerHTML = '';
@@ -235,12 +179,11 @@
                 const dayFmt = String(day).padStart(2, '0');
                 const dateKey = `${year}-${monthFmt}-${dayFmt}`; 
                 
-                // अब केवल वर्तमान में चुने गए छात्र की StudentID से मैच करेगा
+                // Attendance Match Logic: "RollNumber_YYYY-MM-DD" or "UID_YYYY-MM-DD"
+                // Pehle hum studentId se check karenge, fir UID se agar zaroorat padi
                 const rollID = `${studentData.studentId}_${dateKey}`;
-                
-                // UID बैकअप फ़ॉर्मेट सपोर्ट (यदि डेटाबेस में 'uid_date' से भी सेव हो)
-                const studentUID = studentData.uid || studentData.id || '';
-                const uidID = studentUID ? `${studentUID}_${dateKey}` : 'NO_UID_MATCH';
+                const userUID = auth.currentUser.uid;
+                const uidID = `${userUID}_${dateKey}`;
 
                 const attRecord = allData[rollID] || allData[uidID];
                 const fKey = `${dayFmt}-${monthFmt}`;
