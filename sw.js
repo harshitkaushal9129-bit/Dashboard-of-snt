@@ -1,32 +1,43 @@
 const CACHE_NAME = 'snt-institute-cache-v1';
 
-// Jin assets ko offline pehle se save rakhna hai unki list
+// Jin assets ko offline pehle se save rakhna hai unki optimized list
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './SNT.jpg',
   './manifest.json',
+  
+  // CDNs aur External CSS Stylesheets
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-  // Agar aapke folder me ye files hain toh inhe bhi cache me daal dega:
+  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+  
+  // HTML Core Sub-pages (Jo aapke system ka part hain)
   './result-history.html',
   './Query-box.html',
   './Fee-history.html',
   './ranking.html',
-  './notifications_view.html'
+  './notifications_view.html',
+  './admin-queries.html',
+
+  // Firebase Modular Scripts Caching (Offline loading crash se bachne ke liye)
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js'
 ];
 
-// 1. Install Event: Saare static assets ko cache me store karna
+// 1. Install Event: Static assets ko cache me store karna
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('SNT Cache Opened & Pre-caching Assets...');
+      // cdn ke requests cors mode me fetch ho sakte hain, isliye handleAll fail na ho
       return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
   );
 });
 
-// 2. Activate Event: Purane caches ko delete karna agar version update ho
+// 2. Activate Event: Purane caches ko clean karna
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -42,33 +53,38 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event: Offline hone par cache se response dena (Cache-First, then Network fallback)
+// 3. Fetch Event: Offline Engine (Stale-While-Revalidate + Dynamic Cache fallback)
 self.addEventListener('fetch', (event) => {
-  // Firebase Database requests (WebSockets/REST) ko cache nahi karna hai, unhe bypass karein
-  if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com/v1')) {
+  // Real-time Database REST calls aur dynamic auth apis ko cache se bypass karein
+  if (
+    event.request.url.includes('firebaseio.com') || 
+    event.request.url.includes('googleapis.com/v1') ||
+    event.request.url.includes('identitytoolkit')
+  ) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Background me latest version check karein (Stale-While-Revalidate pattern)
+        // Background update check (Stale-While-Revalidate)
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
           }
-        }).catch(() => {/* Offline mode me network error catch karein */});
+        }).catch(() => {/* Offline mode */});
 
-        return cachedResponse; // Pehle instant cache response dein
+        return cachedResponse; // Instant response data from cache
       }
 
-      // Agar asset cache me nahi hai, toh network se fetch karein
+      // Agar data pre-cache me nahi hai, toh network fetch karein
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+        // Bad responses ya opaque errors ko control karein (CORS requests bypass response check)
+        if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
 
-        // Naye fetched assets ko dynamic cache me daalein
+        // Naye dynamic assets (jaise user ki profile picture ya documents) cache me daalein
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
@@ -76,7 +92,7 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Agar bilkul offline hai aur page nahi mila
+        // Fallback agar page navigation down ho jaye offline me
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -85,9 +101,9 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// 4. Push Notifications handle karne ke liye (SNT Live Signals)
+// 4. Push Notifications Handle karna (SNT Live Signals)
 self.addEventListener('push', (event) => {
-  let data = { title: 'SNT Official Update', body: 'New notification received.' };
+  let data = { title: 'SNT Official Update', body: 'New notification received.', url: './index.html' };
   if (event.data) {
     try {
       data = event.data.json();
@@ -109,10 +125,23 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Notification click par handle karein
+// Smart Notification Click Handling (Pehle se khule tab me open karega)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const targetUrl = new URL(event.notification.data.url, self.location.origin).href;
+
   event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check karein agar portal ka koi tab pehle se open hai to use focus karein
+      for (let client of windowClients) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Agar pehle se open nahi hai, to naya window kholein
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
   );
 });
